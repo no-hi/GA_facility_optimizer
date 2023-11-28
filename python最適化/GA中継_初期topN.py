@@ -26,7 +26,7 @@ distance = np.array(distance).reshape(len(hokkaido), len(hokkaido))
 
 # パラメータ
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_MAX = 10              # 焼却施設数上限
+N_INC_MAX = 10             # 焼却施設数上限
 N_TRANS_MAX = 1            # 中継施設数上限
 TOP_N_CITIES = 20          #ごみ量順位下限
 N_IND = 150                # 個体数
@@ -48,7 +48,7 @@ def get_top_cities():
 # GA施設数ループ##################################################
 def GA_count(N_INC, N_TRANS):
     optimal_stdout = sys.stdout
-    with open(os.path.join(output_directory, f"output_{str(N_INC)+"&"+str(N_TRANS)}.txt"), 'a', encoding="utf-8") as f:  # 追記モードで開く
+    with open(os.path.join(output_directory, f"output_{N_INC}&{N_TRANS}.txt"), 'a', encoding="utf-8") as f:  # 追記モードで開く
         sys.stdout = f
         start_time_count = time.perf_counter()
         print("\n")
@@ -283,7 +283,7 @@ def GA_count(N_INC, N_TRANS):
         #情報表示###############################################################################################################
         best_individual = hof[0]
         output_content = []
-        output_file_path = f"output_{str(len(best_individual.inc_facility))+"&"+str(len(best_individual.trans_facility))}.txt"
+        output_file_path = f"output_{len(best_individual.inc_facility)}&{len(best_individual.trans_facility)}.txt"
 
 
         def write_to_file(filename, content):
@@ -366,13 +366,13 @@ for count_inc in range(1, N_INC_MAX + 1):
 
 optimal_count_inc = min(best_solutions, key=lambda x: best_solutions[x])[0]
 optimal_count_trans = min(best_solutions, key=lambda x: best_solutions[x])[1]
-optimal_file_name = f"output_{str(optimal_count_inc)+"&"+str(optimal_count_trans)}.txt"
-new_file_name = f"output_{str(optimal_count_inc)+"&"+str(optimal_count_trans)}_best.txt"
+optimal_file_name = f"output_{optimal_count_inc}&{optimal_count_trans}.txt"
+new_file_name = f"output_{optimal_count_inc}&{optimal_count_trans}_best.txt"
 optimal_file_path = os.path.join(output_directory, optimal_file_name)
 new_file_path = os.path.join(output_directory, new_file_name)
 os.rename(optimal_file_path, new_file_path)
 
-print(f"最適な焼却＆中継施設数: {str(optimal_count_inc)+"&"+str(optimal_count_trans)} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}")
+print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}")
 
 end_time = time.perf_counter()
 elapsed_time = end_time - start_time
