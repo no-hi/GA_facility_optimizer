@@ -27,13 +27,14 @@ distance = np.array(distance).reshape(len(hokkaido), len(hokkaido))
 # パラメータ
 N_CITIES = len(hokkaido)   # 市町村数
 N_INC_MAX = 10             # 焼却施設数上限
-N_TRANS_MAX = 1            # 中継施設数上限
+N_TRANS_MAX = 3            # 中継施設数上限
 TOP_N_CITIES = 20          #ごみ量順位下限
-N_IND = 300                # 個体数
-N_GEN = 70                 # 世代数
-CX_PROB = 0.8              # 一様交叉
+N_IND = 150                # 個体数
+N_GEN = 200                 # 世代数
+CX_PROB = 0.7              # 一様交叉
 MUT_PROB = 0.3             # 突然変異
-TOUR_SIZE = 4              # トーナメント
+TOUR_SIZE = 4             # トーナメント
+ELITE_SIZE = 0.1           # エリートサイズ
 toolbox.register("select", tools.selTournament, tournsize=TOUR_SIZE)
 
 # 最小化
@@ -74,53 +75,39 @@ def GA_count(N_INC, N_TRANS):
             return individual       
         toolbox.register("individual", create_individual)
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-
-        def repair(individual):
-            unused = individual.unused_cities
-            combined = individual.inc_facility + individual.trans_facility
-            
-            # 重複要素を置き換える
-            # 重複している要素ごとに、保持するインスタンスをランダムに選択
-            facility_count = collections.Counter(combined)
-            to_replace = {}
-            for facility in facility_count:
-                if facility_count[facility] > 1:
-                    # 重複しているインデックスを全て見つける
-                    indices = [i for i, x in enumerate(combined) if x == facility]
-                    # 一つをランダムに選んで保持し、他は置き換え対象とする
-                    keep = random.choice(indices)
-                    to_replace[facility] = [idx for idx in indices if idx != keep]
-            # 置き換え対象のインデックスに対して、unusedから要素を選んで置き換え
-            for facility, indices in to_replace.items():
-                for i in indices:
-                    if unused:  # unusedが空でないことを確認
-                        new_facility = random.choice(list(unused))
-                        unused.remove(new_facility)
-                        combined[i] = new_facility
-
-            new_unused = list(set(range(N_CITIES)) - set(combined))
-
-            individual.inc_facility = combined[:N_INC]
-            individual.trans_facility = combined[N_INC:N_INC + N_TRANS]
-            individual.unused_cities = new_unused
-            individual[:] = individual.inc_facility + individual.trans_facility
-            
-            return individual
-
+        
         def cxSet(ind1, ind2):
             # 処理施設の遺伝子リストでの一様交叉
-            for i in range(len(ind1.inc_facility)):
+            common_inc = set(ind1.inc_facility) & set(ind2.inc_facility)
+            unique_inc1 = [gene for gene in ind1.inc_facility if gene not in common_inc]
+            unique_inc2 = [gene for gene in ind2.inc_facility if gene not in common_inc]
+            # 非共通遺伝子のシャッフル
+            random.shuffle(unique_inc1)
+            random.shuffle(unique_inc2)
+            # 一様交叉
+            for i in range(len(unique_inc1)):
                 if random.random() < CX_PROB:
-                    ind1.inc_facility[i], ind2.inc_facility[i] = ind2.inc_facility[i], ind1.inc_facility[i]
+                    unique_inc1[i], unique_inc2[i] = unique_inc2[i], unique_inc1[i]
+                    
+            ind1.inc_facility = sorted(list(common_inc) + unique_inc1)
+            ind2.inc_facility = sorted(list(common_inc) + unique_inc2)
             
+                        
             # 中継施設の遺伝子リストでの一様交叉
-            for i in range(len(ind1.trans_facility)):
+            common_trans = set(ind1.trans_facility) & set(ind2.trans_facility)
+            unique_trans1 = [gene for gene in ind1.trans_facility if gene not in common_trans]
+            unique_trans2 = [gene for gene in ind2.trans_facility if gene not in common_trans]
+            # 非共通遺伝子のシャッフル
+            random.shuffle(unique_trans1)
+            random.shuffle(unique_trans2)
+            # 一様交叉
+            for i in range(len(unique_trans1)):
                 if random.random() < CX_PROB:
-                    ind1.trans_facility[i], ind2.trans_facility[i] = ind2.trans_facility[i], ind1.trans_facility[i]
+                    unique_trans1[i], unique_trans2[i] = unique_trans2[i], unique_trans1[i]
 
-            # 個体の修正
-            ind1 = repair(ind1)
-            ind2 = repair(ind2)
+            ind1.trans_facility = sorted(list(common_trans) + unique_trans1)
+            ind2.trans_facility = sorted(list(common_trans) + unique_trans2)
+            
             ind1[:] = ind1.inc_facility + ind1.trans_facility
             ind2[:] = ind2.inc_facility + ind2.trans_facility
 
@@ -154,6 +141,39 @@ def GA_count(N_INC, N_TRANS):
             return individual,
         toolbox.register("mutate", mutSet)
 
+        def repair(individual):
+            unused = individual.unused_cities
+            combined = individual.inc_facility + individual.trans_facility
+            
+            # 重複要素を置き換える
+            # 重複している要素ごとに、保持するインスタンスをランダムに選択
+            facility_count = collections.Counter(combined)
+            to_replace = {}
+            for facility in facility_count:
+                if facility_count[facility] > 1:
+                    # 重複しているインデックスを全て見つける
+                    indices = [i for i, x in enumerate(combined) if x == facility]
+                    # 一つをランダムに選んで保持し、他は置き換え対象とする
+                    keep = random.choice(indices)
+                    to_replace[facility] = [idx for idx in indices if idx != keep]
+            # 置き換え対象のインデックスに対して、unusedから要素を選んで置き換え
+            for facility, indices in to_replace.items():
+                for i in indices:
+                    if unused:  # unusedが空でないことを確認
+                        new_facility = random.choice(list(unused))
+                        unused.remove(new_facility)
+                        combined[i] = new_facility
+
+            new_unused = list(set(range(N_CITIES)) - set(combined))
+
+            individual.inc_facility = combined[:N_INC]
+            individual.trans_facility = combined[N_INC:N_INC + N_TRANS]
+            individual.unused_cities = new_unused
+            individual[:] = individual.inc_facility + individual.trans_facility
+            
+            return individual
+        toolbox.register("repair", repair)
+
         def total_cost(individual):            
             def TC(individual):
                 # 近い方の施設に輸送と仮定！！！　近い方と仮定すると本来の最適化ではない？ただし、これがないと計算量が大きくなるかと思われる
@@ -176,7 +196,8 @@ def GA_count(N_INC, N_TRANS):
                     # near_~_faci_i=individual.~_facilityのリスト長さ内での施設番号
                     near_inc_faci_i = min(range(len(inc_faci)), key=lambda x: distance[city_i][inc_faci[x]])
                     near_inc_distance = distance[city_i][inc_faci[near_inc_faci_i]]
-                    TC_direct = float(waste[city_i]) * near_inc_distance * 300 / 10000
+                    # TC_direct = float(waste[city_i]) * near_inc_distance * 300 / 10000
+                    TC_direct = float(waste[city_i]) * near_inc_distance * 1000 / 10000
 
                     # 中継輸送：最も近い中継施設経由で焼却施設へ
                     if N_TRANS > 0:
@@ -184,7 +205,8 @@ def GA_count(N_INC, N_TRANS):
                         near_trans_distance = distance[city_i][trans_faci[near_trans_faci_i]]
                         near_inc_from_trans_faci_i = min(range(len(inc_faci)), key=lambda x: distance[trans_faci[near_trans_faci_i]][inc_faci[x]])
                         near_inc_from_trans_distance = distance[trans_faci[near_trans_faci_i]][inc_faci[near_inc_from_trans_faci_i]]
-                        TC_indirect = (float(waste[city_i]) * near_trans_distance * 300 + float(waste[city_i]) * near_inc_from_trans_distance * 300 * (2/8)) / 10000
+                        # TC_indirect = (float(waste[city_i]) * near_trans_distance * 300 + float(waste[city_i]) * near_inc_from_trans_distance * 300 * (2/10)) / 10000
+                        TC_indirect = (float(waste[city_i]) * near_trans_distance * 1000 + float(waste[city_i]) * near_inc_from_trans_distance * 1000 * (2/10)) / 10000
 
                         # 最もコストが低い輸送経路を選択
                         if TC_direct <= TC_indirect:
@@ -272,6 +294,7 @@ def GA_count(N_INC, N_TRANS):
                             
                             else:
                                 CAR_trans = daily_trans_size / 10
+                                # CT＝建設費、CB＝車両購入費
                                 C_T = float(3*10**8 * (daily_trans_size / 100)**0.7 /20) /10000
                                 C_B = float((1+0.4)*10**7 *CAR_trans /7) /10000
                                 IC_TRANS = C_T+C_B
@@ -308,15 +331,90 @@ def GA_count(N_INC, N_TRANS):
                 return total_cost_,        
         toolbox.register("evaluate", evaluate)
 
+
+
+
         # GAループ実行
         population = toolbox.population(n=N_IND)
-        hof = tools.HallOfFame(1)  # To store the best individual
+        # hof = tools.HallOfFame(1)  # To store the best individual
+        hof = tools.HallOfFame(1, similar=np.array_equal)
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", np.mean)
         stats.register("min", np.min)
         stats.register("max", np.max)
 
-        algorithms.eaSimple(population, toolbox, cxpb=CX_PROB, mutpb=MUT_PROB, ngen=N_GEN, stats=stats, halloffame=hof)
+        # エリートサイズを設定（個体数の10%）
+        elite_size = int(ELITE_SIZE * len(population))
+        def elitism(population, elite_size):
+            sorted_population = sorted(population, key=lambda ind: ind.fitness)
+            return sorted_population[:elite_size]
+
+        #GAループ（世代min） after ver.####################################################################################################
+        prev_min = float('inf')
+        min_change_count = 0
+        sumgen = 0
+        for gen in range(N_GEN):
+            sumgen = gen + 1
+            
+            # エリート個体を選定
+            elites = elitism(population, elite_size)
+
+            # 次世代の個体を生成（エリート個体は除外して生成）
+            population.extend(elites)
+            population, logbook = algorithms.eaSimple(population, toolbox, cxpb=CX_PROB, mutpb=MUT_PROB, ngen=1, stats=stats, halloffame=hof, verbose=True)
+
+            # 現世代のminを取得
+            current_min = logbook.select("min")[-1]
+            
+            # 最小値が変わっていないかチェック
+            if current_min == prev_min:
+                min_change_count += 1
+            else:
+                prev_min = current_min
+                min_change_count = 0
+
+            # 一定数の世代にわたって最小値が変化しない場合はループを抜ける
+            # if best_in_generation_count >= 20*(1+(N_INC+N_TRANS)//3):
+            if min_change_count >= 10*(N_INC+N_TRANS):
+                break
+            
+        print("合計世代数＝" + str(sumgen))
+
+        ## GAループ(最適解) after ver.####################################################################################################
+        # sumgen = 0
+        # best_in_generation = None
+        # best_in_generation_count = 0
+        # for gen in range(N_GEN):
+        #     sumgen = gen + 1
+            
+        #     # エリート個体を選定
+        #     elites = elitism(population, elite_size)
+
+        #     # 次世代の個体を生成（エリート個体は除外して生成）
+        #     population.extend(elites)
+        #     population, logbook = algorithms.eaSimple(population, toolbox, cxpb=CX_PROB, mutpb=MUT_PROB, ngen=1, stats=stats, halloffame=hof, verbose=True)
+
+        #     # 現在の最適解を取得
+        #     current_best = hof[0]
+
+        #     # 最適解が前回と変わっていないかチェック
+        #     if np.array_equal(best_in_generation, current_best):
+        #         best_in_generation_count += 1
+        #     else:
+        #         best_in_generation = current_best
+        #         best_in_generation_count = 0
+
+        #     # 10世代変化がなければループを抜ける
+        #     # if best_in_generation_count >= 20*(1+(N_INC+N_TRANS)//3):
+        #     if best_in_generation_count >= 10*(1+(N_INC+N_TRANS)//1):
+        #         break
+            
+        # print("合計世代数＝" + str(sumgen))
+        
+        # #GAループ before ver.###################################################################################################
+        # elites = elitism(population, elite_size)
+        # population.extend(elites)
+        # algorithms.eaSimple(population, toolbox, cxpb=CX_PROB, mutpb=MUT_PROB, ngen=N_GEN, stats=stats, halloffame=hof)
         
         #情報表示###############################################################################################################
         best_individual = hof[0]
@@ -388,6 +486,18 @@ def GA_count(N_INC, N_TRANS):
         
     sys.stdout = optimal_stdout
 
+    with open(os.path.join(output_directory, f"GAPlot_{current_time}.txt"), 'a', encoding="utf-8") as file:  # 追記モードで開く
+        file.write(f"焼却 {len(best_individual.inc_facility)} + 中継 {len(best_individual.trans_facility)}\n")   
+        file.write(f"焼却施設＝")
+        for inc in best_individual.inc_facility:
+            file.write(f"{hokkaido[inc]}、")
+
+        file.write(f"中継施設＝")
+        for trans in best_individual.trans_facility:
+            file.write(f"{hokkaido[trans]}、")   
+        
+        file.write(f"\n")   
+        
     return hof[0]
 
 # ループ終了########################################################################################################################

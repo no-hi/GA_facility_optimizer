@@ -1,0 +1,261 @@
+
+実行時間= 142秒
+
+------------------------  前提  ------------------------
+
+ごみ量20位以内：
+札幌市 (349353), 函館市 (66649), 旭川市 (64890), 苫小牧市 (42288), 釧路市 (38335), 帯広市 (35291), 千歳市 (25770), 小樽市 (25049), 江別市 (24906), 北見市 (20809), 室蘭市 (20448), 岩見沢市 (12638), 登別市 (11426), 北広島市 (10822), 石狩市 (9341), 音更町 (7531), 稚内市 (7127), 恵庭市 (6987), 伊達市 (6907), 網走市 (6299)
+
+焼却施設数: 4
+中継施設数: 1
+
+----------------------  輸送情報  ----------------------
+
+direct 札幌市(532444)/580037 → receive from: 夕張市, 岩見沢市, 美唄市, 三笠市, 南幌町, 由仁町, 長沼町, 栗山町, 月形町, 札幌市, 江別市, 千歳市, 恵庭市, 北広島市, 石狩市, 当別町, 新篠津村, 小樽市, 蘭越町, ニセコ町, 真狩村, 留寿都村, 喜茂別町, 京極町, 俱知安町, 共和町, 岩内町, 泊村, 神恵内村, 積丹町, 古平町, 仁木町, 余市町, 赤井川村, 苫小牧市, 厚真町, 安平町, むかわ町, 日高町, 平取町, 新冠町, 新ひだか町
+indirect 札幌市(47593)/580037 → receive from: 中継施設＝ 室蘭市(47593) → receive from: 島牧村, 寿都町, 黒松内町, 室蘭市, 登別市, 伊達市, 豊浦町, 壮瞥町, 白老町, 洞爺湖町, 長万部町
+direct 本別町(157111)/157111 → receive from: 浦河町, 様似町, えりも町, 北見市, 網走市, 美幌町, 津別町, 清里町, 斜里町, 小清水町, 訓子府町, 置戸町, 佐呂間町, 大空町, 帯広市, 音更町, 士幌町, 上士幌町, 鹿追町, 新得町, 清水町, 芽室町, 中札内村, 更別村, 大樹町, 広尾町, 幕別町, 池田町, 豊頃町, 本別町, 足寄町, 陸別町, 浦幌町, 釧路市, 釧路町, 厚岸町, 浜中町, 標茶町, 弟子屈町, 鶴居村, 白糖町, 根室市, 別海町, 中標津町, 標津町, 羅臼町
+direct 旭川市(116226)/116226 → receive from: 芦別市, 赤平市, 滝川市, 砂川市, 歌志内市, 深川市, 奈井江町, 上砂川町, 浦臼町, 新十津川町, 妹背牛町, 秩父別町, 雨竜町, 北竜町, 沼田町, 旭川市, 士別市, 名寄市, 富良野市, 鷹栖町, 東神楽町, 当麻町, 比布町, 愛別町, 上川町, 東川町, 美瑛町, 上富良野町, 中富良野町, 南富良野町, 占冠村, 和寒町, 剣淵町, 下川町, 美深町, 音威子府村, 中川町, 幌加内町, 留萌市, 増毛町, 小平町, 苫前町, 羽幌町, 初山別村, 遠別町, 天塩町, 稚内市, 猿払村, 浜頓別町, 中頓別町, 枝幸町, 豊富町, 礼文町, 利尻町, 利尻富士町, 幌延町, 紋別市, 遠軽町, 湧別町, 滝上町, 興部町, 西興部村, 雄武町
+direct 函館市(89082)/89082 → receive from: 函館市, 北斗市, 松前町, 福島町, 知内町, 木古内町, 七飯町, 鹿部町, 森町, 八雲町, 江差町, 上ノ国町, 厚沢部町, 乙部町, 奥尻町, 今金町, せたな町
+
+---------------------  コスト情報  ---------------------
+
+TC_direct: {'札幌市': 856859.0756000001, '本別町': 1342226.8857000002, '旭川市': 507957.9791000002, '函館市': 116695.9597}
+IC_inc: {'札幌市': 203331.156215495, '本別町': 67659.15278429337, '旭川市': 54443.404499556615, '函館市': 44942.80374112252}
+OC_inc: {'札幌市': 85138.7998680847, '本別町': 51300.600817012986, '旭川市': 56910.1653007014, '函館市': 56442.255725112984}
+
+TC_indirect: {'室蘭市': 209898.96604000003}
+IC_trans: {'室蘭市': 4414.037998784197}
+OC_trans: {'室蘭市': 289647.5682804241}
+
+Total cost: 3947868.811370587
+
+----------------------  遺伝情報  ----------------------
+
+個体数＝150
+世代数＝200
+gen	nevals	avg        	min        	max        
+0  	165   	8.14068e+06	5.02704e+06	1.76416e+07
+1  	129   	7.11169e+06	4.92377e+06	1.53456e+07
+gen	nevals	avg       	min        	max        
+0  	0     	7.4222e+06	4.92377e+06	1.53456e+07
+1  	143   	inf       	4.88976e+06	inf        
+gen	nevals	avg	min        	max
+0  	0     	inf	4.88976e+06	inf
+1  	165   	inf	4.73315e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	4.73315e+06	inf
+1  	148   	inf	4.42904e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	4.42904e+06	inf
+1  	172   	inf	4.31778e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	4.31778e+06	inf
+1  	187   	5.24555e+06	4.0162e+06 	1.43538e+07
+gen	nevals	avg        	min       	max        
+0  	0     	5.49914e+06	4.0162e+06	1.43538e+07
+1  	197   	inf        	4.0162e+06	inf        
+gen	nevals	avg	min       	max
+0  	0     	inf	4.0162e+06	inf
+1  	217   	inf	4.01268e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	4.01268e+06	inf
+1  	225   	5.06091e+06	4.01268e+06	1.80903e+07
+gen	nevals	avg        	min        	max        
+0  	0     	5.39643e+06	4.01268e+06	1.80903e+07
+1  	231   	inf        	4.01268e+06	inf        
+gen	nevals	avg	min        	max
+0  	0     	inf	4.01268e+06	inf
+1  	244   	inf	4.01268e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	4.01268e+06	inf
+1  	266   	4.92397e+06	4.01268e+06	1.58946e+07
+gen	nevals	avg        	min        	max        
+0  	0     	5.28107e+06	4.01268e+06	1.58946e+07
+1  	281   	inf        	4.01268e+06	inf        
+gen	nevals	avg	min        	max
+0  	0     	inf	4.01268e+06	inf
+1  	280   	inf	4.01268e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	4.01268e+06	inf
+1  	309   	4.68038e+06	4.01268e+06	1.61298e+07
+gen	nevals	avg        	min        	max        
+0  	0     	4.95351e+06	4.01268e+06	1.61298e+07
+1  	326   	inf        	4.01268e+06	inf        
+gen	nevals	avg	min        	max
+0  	0     	inf	4.01268e+06	inf
+1  	338   	inf	4.01268e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	4.01268e+06	inf
+1  	329   	inf	4.01268e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	4.01268e+06	inf
+1  	343   	inf	4.01268e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	4.01268e+06	inf
+1  	364   	inf	4.01268e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	4.01268e+06	inf
+1  	374   	4.83013e+06	4.01268e+06	1.86444e+07
+gen	nevals	avg        	min        	max        
+0  	0     	5.09771e+06	4.01268e+06	1.86444e+07
+1  	375   	inf        	4.01268e+06	inf        
+gen	nevals	avg	min        	max
+0  	0     	inf	4.01268e+06	inf
+1  	398   	inf	3.97107e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.97107e+06	inf
+1  	401   	inf	3.97107e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.97107e+06	inf
+1  	398   	4.86444e+06	3.94787e+06	1.62833e+07
+gen	nevals	avg        	min        	max        
+0  	0     	5.08813e+06	3.94787e+06	1.62833e+07
+1  	417   	inf        	3.94787e+06	inf        
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	434   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	460   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	449   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	487   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	499   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	492   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	493   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	523   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	527   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	534   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	566   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	554   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	585   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	595   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	617   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	611   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	655   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	633   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	656   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	659   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	665   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	690   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	695   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	708   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	746   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	713   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	757   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	742   	4.67903e+06	3.94787e+06	1.98066e+07
+gen	nevals	avg        	min        	max        
+0  	0     	4.83584e+06	3.94787e+06	1.98066e+07
+1  	780   	inf        	3.94787e+06	inf        
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	787   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	780   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	803   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	801   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	837   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	836   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	850   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	864   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	856   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	870   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	887   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	930   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	926   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	930   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	937   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	958   	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	1015  	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	1018  	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	1024  	inf	3.94787e+06	inf
+gen	nevals	avg	min        	max
+0  	0     	inf	3.94787e+06	inf
+1  	1040  	inf	3.94787e+06	inf
+合計世代数＝75
