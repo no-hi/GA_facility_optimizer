@@ -12,8 +12,8 @@ hokkaido = data.name
 # パラメータ##########################################################
 waste_name = "sanpai"
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 21         # 焼却初期値
-N_INC_MAX = 23             # 焼却上限
+N_INC_INITIAL = 22         # 焼却初期値
+N_INC_MAX = 28             # 焼却上限
 # N_INC_MAX = N_INITIAL    # 焼却上限(施設数指定)
 N_TRANS_INITIAL = 0        # 中継初期値
 N_TRANS_MAX = 3            # 中継上限
@@ -94,10 +94,12 @@ def GA_count(N_INC, N_TRANS):
                 keep = random.choice(indices)
                 for idx in indices:
                     if idx != keep:
-                        if individual.unused_cities:
-                            new_facility = random.choice(list(individual.unused_cities))
-                            individual.unused_cities.remove(new_facility)
+                        new_facility = random.choice(list(individual.unused_cities))
+                        combined[i] = new_facility
+                        individual.unused_cities.remove(new_facility)
 
+        individual.inc_facility = combined[:len(N_INC)]
+        individual.trans_facility = combined[len(N_INC):]      
         individual[:] = individual.inc_facility + individual.trans_facility
         
         return individual
@@ -111,15 +113,27 @@ def GA_count(N_INC, N_TRANS):
         # 非共通遺伝子のシャッフル
         random.shuffle(unique_inc1)
         random.shuffle(unique_inc2)
-        # 一様交叉
+        
+        # try:
         for i in range(len(unique_inc1)):
             if random.random() < CX_PROB:
                 unique_inc1[i], unique_inc2[i] = unique_inc2[i], unique_inc1[i]
-                
+        # except IndexError as e:
+        #     print("エラーが発生しました: ", e)
+        #     print("ind1",f"長さ={len(ind1)}",ind1)
+        #     print("ind1.inc_facility",f"長さ={len(ind1.inc_facility)}",ind1.inc_facility)
+        #     print("ind2",f"長さ={len(ind2)}",ind2)
+        #     print("ind2.inc_facility",f"長さ={len(ind2.inc_facility)}",ind2.inc_facility)
+        #     print("common_inc",f"長さ={len(common_inc)}",common_inc)
+        #     print("unique_inc1",f"長さ={len(unique_inc1)}",unique_inc1)
+        #     print("unique_inc2",f"長さ={len(unique_inc2)}",unique_inc2)
+        #     print("現在のインデックス: ", i)
+        #     raise  # エラーを再度発生させる
+        
         ind1.inc_facility = sorted(list(common_inc) + unique_inc1)
         ind2.inc_facility = sorted(list(common_inc) + unique_inc2)
         
-                    
+        
         # 中継施設の遺伝子リストでの一様交叉
         common_trans = set(ind1.trans_facility) & set(ind2.trans_facility)
         unique_trans1 = [gene for gene in ind1.trans_facility if gene not in common_trans]
