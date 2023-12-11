@@ -12,12 +12,12 @@ hokkaido = data.name
 # パラメータ##########################################################
 waste_name = "sanpai"
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 15         # 焼却初期値
-N_INC_MAX = 20             # 焼却上限
+N_INC_INITIAL = 21         # 焼却初期値
+N_INC_MAX = 23             # 焼却上限
 # N_INC_MAX = N_INITIAL    # 焼却上限(施設数指定)
 N_TRANS_INITIAL = 0        # 中継初期値
 N_TRANS_MAX = 3            # 中継上限
-TOP_N_CITIES = 20          # ごみ量順位下限
+TOP_N_CITIES = 30          # ごみ量順位下限
 N_IND = 500                # 個体数
 N_GEN = 500                # 世代数
 CX_PROB = 0.7              # 一様交叉
@@ -29,7 +29,7 @@ toolbox.register("select", tools.selTournament, tournsize=TOUR_SIZE)
 #####################################################################
 waste = getattr(data, waste_name)
 distance = data.distance
-distance = np.array(distance).reshape(len(hokkaido), len(hokkaido))# 2次元距離リスト生成
+distance = np.array(distance).reshape(len(hokkaido), len(hokkaido)) #2次元距離リスト生成
 
 start_time = time.perf_counter()
 current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -55,9 +55,10 @@ def GA_count(N_INC, N_TRANS):
     start_time_count = time.perf_counter()
     top_cities = get_top_cities()
 
+    #（TOP_N_CITIES）が（N_INC）を超える場合にエラー
     def create_individual():
         inc_facility = random.sample(top_cities, N_INC)
-        trans_facility = random.sample(top_cities, N_TRANS) 
+        trans_facility = random.sample([top_cities_not_inc for top_cities_not_inc in top_cities if top_cities_not_inc not in inc_facility], N_TRANS) 
         individual = creator.Individual(inc_facility + trans_facility)
         # 処理施設の遺伝子：上位の都市からランダムに選ばれる
         individual.inc_facility = inc_facility
@@ -73,33 +74,30 @@ def GA_count(N_INC, N_TRANS):
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     
     def repair(individual):
-        unused = individual.unused_cities
-        combined = individual.inc_facility + individual.trans_facility
+        # 焼却施設と中継施設の重複を特定する
+        duplicates = set(individual.inc_facility) & set(individual.trans_facility)
         
-        # 重複要素を置き換える
-        # 重複している要素ごとに、保持するインスタンスをランダムに選択
-        facility_count = collections.Counter(combined)
-        to_replace = {}
-        for facility in facility_count:
-            if facility_count[facility] > 1:
-                # 重複しているインデックスを全て見つける
-                indices = [i for i, x in enumerate(combined) if x == facility]
-                # 一つをランダムに選んで保持し、他は置き換え対象とする
-                keep = random.choice(indices)
-                to_replace[facility] = [idx for idx in indices if idx != keep]
-        # 置き換え対象のインデックスに対して、unusedから要素を選んで置き換え
-        for facility, indices in to_replace.items():
+        # 中継施設での重複を置き換える
+        for facility in duplicates:
+            indices = [i for i, x in enumerate(individual.trans_facility) if x == facility]
             for i in indices:
-                if unused:  # unusedが空でないことを確認
-                    new_facility = random.choice(list(unused))
-                    unused.remove(new_facility)
-                    combined[i] = new_facility
+                new_facility = random.choice(list(individual.unused_cities))
+                individual.unused_cities.remove(new_facility)
+                individual.trans_facility[i] = new_facility
 
-        new_unused = list(set(range(N_CITIES)) - set(combined))
+        # その他の重複を処理する
+        combined = individual.inc_facility + individual.trans_facility
+        facility_count = collections.Counter(combined)
+        for facility, count in facility_count.items():
+            if count > 1:
+                indices = [i for i, x in enumerate(combined) if x == facility]
+                keep = random.choice(indices)
+                for idx in indices:
+                    if idx != keep:
+                        if individual.unused_cities:
+                            new_facility = random.choice(list(individual.unused_cities))
+                            individual.unused_cities.remove(new_facility)
 
-        individual.inc_facility = combined[:N_INC]
-        individual.trans_facility = combined[N_INC:N_INC + N_TRANS]
-        individual.unused_cities = new_unused
         individual[:] = individual.inc_facility + individual.trans_facility
         
         return individual
@@ -374,6 +372,7 @@ def GA_count(N_INC, N_TRANS):
             min_change_count = 0
 
         gen_info.append(f"{gen}: neval={neval}{record} best={hof[0].fitness.values[0]}")
+        print(f"焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
         
         # 最小値が一定世代変化しない場合、ループを抜ける
         # if best_in_generation_count >= 20*(1+(N_INC+N_TRANS)//3):
@@ -411,10 +410,10 @@ def GA_count(N_INC, N_TRANS):
                     "\n----------------------  輸送情報  ----------------------\n"]
 
     # 焼却施設の詳細情報
-    def format_inc(facility_key, inc_size, yearly_trans_size, best_individual, cities_to_inc, trans_to_inc):
-        direct_size = inc_size - sum(yearly_trans_size[best_individual.trans_facility.index(trans)] for trans in trans_to_inc[facility_key])
+    def format_inc(facility_key, yearly_inc_size, yearly_trans_size, best_individual, cities_to_inc, trans_to_inc):
+        direct_size = yearly_inc_size - sum(yearly_trans_size[best_individual.trans_facility.index(trans)] for trans in trans_to_inc[facility_key])
         city_to_inc_names = ', '.join(hokkaido[city] for city in cities_to_inc[facility_key])
-        formatted_output = [f"direct {hokkaido[facility_key]}({direct_size})/{inc_size} → receive from: {city_to_inc_names}"]
+        formatted_output = [f"direct {hokkaido[facility_key]}({round(direct_size/365)}/{round(yearly_inc_size/365)}) t/day → receive from: {city_to_inc_names}"]
 
         indirect_size = sum(yearly_trans_size[best_individual.trans_facility.index(trans)] for trans in trans_to_inc[facility_key])
         if indirect_size > 0:
@@ -424,13 +423,13 @@ def GA_count(N_INC, N_TRANS):
                 trans_to_inc_details.append(f"{hokkaido[trans]}({yearly_trans_size[best_individual.trans_facility.index(trans)]}) → receive from: {cities_to_trans_names}")
 
             trans_to_inc_details_str = '; '.join(trans_to_inc_details)
-            formatted_output.append(f"indirect {hokkaido[facility_key]}({indirect_size})/{inc_size} → receive from: 中継施設＝ {trans_to_inc_details_str}")
+            formatted_output.append(f"indirect {hokkaido[facility_key]}({round(indirect_size/365)}/{round(yearly_inc_size/365)}) t/day → receive from: 中継施設＝ {trans_to_inc_details_str}")
 
         return formatted_output
 
     sorted_inc_size = sorted(((i, inc_size) for i, inc_size in enumerate(yearly_inc_size)), key=lambda x: x[1], reverse=True)
     sorted_inc_i = [best_individual.inc_facility[i] for i, _ in sorted_inc_size]
-    output_content.extend(item for sublist in (format_inc(best_individual.inc_facility[i], inc_size, yearly_trans_size, best_individual, cities_to_inc, trans_to_inc) for i, inc_size in sorted_inc_size) for item in sublist)
+    output_content.extend(item for sublist in (format_inc(best_individual.inc_facility[i], yearly_inc_size, yearly_trans_size, best_individual, cities_to_inc, trans_to_inc) for i, yearly_inc_size in sorted_inc_size) for item in sublist)
 
     # コスト情報
     sorted_trans_size = sorted(((i, trans_size) for i, trans_size in enumerate(yearly_trans_size)), key=lambda x: x[1], reverse=True)
@@ -455,18 +454,24 @@ def GA_count(N_INC, N_TRANS):
     
     # ファイルに書き込む
     write_to_file(output_file_path, '\n'.join(output_content))
-    
-    with open(os.path.join(output_directory, f"GAPlot_{current_time}.txt"), 'a', encoding="utf-8") as file:  # 追記モードで開く
-        file.write(f"----焼却 {len(best_individual.inc_facility)} + 中継 {len(best_individual.trans_facility)}----\n")   
-        file.write(f"焼却施設＝")
-        for inc in best_individual.inc_facility:
-            file.write(f"{hokkaido[inc]}、")
+    sorted_inc_indices = sorted(range(len(yearly_inc_size)), key=lambda i: yearly_inc_size[i], reverse=True)
+    sorted_trans_indices = sorted(range(len(yearly_trans_size)), key=lambda i: yearly_trans_size[i], reverse=True)
 
-        file.write(f"\n"+"中継施設＝")
-        for trans in best_individual.trans_facility:
-            file.write(f"{hokkaido[trans]}、")   
+    with open(os.path.join(output_directory, f"GAPlot_{current_time}.txt"), 'a', encoding="utf-8") as file:
+        file.write(f"----焼却 {len(best_individual.inc_facility)} + 中継 {len(best_individual.trans_facility)}----\n")
         
-        file.write(f"\n")   
+        file.write("inc_size=" + str([yearly_inc_size[i] for i in sorted_inc_indices]) + "\n")
+        file.write(f"焼却施設＝")
+        for inc_index in sorted_inc_indices:
+            file.write(f"{hokkaido[best_individual.inc_facility[inc_index]]}, ")
+        
+        file.write("\n" + "trans_size=" + str([yearly_trans_size[i] for i in sorted_trans_indices]) + "\n")
+        file.write(f"中継施設＝")
+        for trans_index in sorted_trans_indices:
+            file.write(f"{hokkaido[best_individual.trans_facility[trans_index]]}, ")
+        
+        file.write("\n")
+
         
     return hof[0]
 
