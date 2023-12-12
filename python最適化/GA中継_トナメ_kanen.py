@@ -10,15 +10,15 @@ import data
 toolbox = base.Toolbox()
 hokkaido = data.name
 # パラメータ##########################################################
-waste_name = "sanpai"
+waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 21         # 焼却初期値
-N_INC_MAX = 28             # 焼却上限
+N_INC_INITIAL = 1         # 焼却初期値
+N_INC_MAX = 15             # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
 N_TRANS_MAX = 3            # 中継上限
 TOP_N_CITIES = 30          # ごみ量順位下限
-N_IND = 500                # 個体数
-N_GEN = 500                # 世代数
+N_IND_UNIT = 50            # 1施設当たり個体数
+N_GEN = 1000               # 世代数
 CX_PROB = 0.7              # 一様交叉
 MUT_PROB = 0.3             # 突然変異
 TOUR_SIZE = 4              # トーナメント
@@ -53,6 +53,7 @@ def get_top_cities():
 def GA_count(N_INC, N_TRANS):
     start_time_count = time.perf_counter()
     top_cities = get_top_cities()
+    N_IND = N_IND_UNIT * (N_INC+N_TRANS)
 
     #（TOP_N_CITIES）が（N_INC）を超える場合にエラー
     def create_individual():
@@ -346,8 +347,8 @@ def GA_count(N_INC, N_TRANS):
     gen_info = []
     for gen in range(N_GEN):
         sumgen = gen + 1
-        if set(individual)<N_INC+N_TRANS:
-            for individual in population:
+        for individual in population:
+            if len(set(individual)) < N_INC + N_TRANS :
                 individual = toolbox.repair(individual)
         # 次世代の個体を生成
         offspring = algorithms.varAnd(population, toolbox, cxpb=CX_PROB, mutpb=MUT_PROB)
@@ -398,6 +399,7 @@ def GA_count(N_INC, N_TRANS):
     end_time_count = time.perf_counter()
     elapsed_time_count = end_time_count - start_time_count
     output_content = ["\n"+f"実行時間＝{round(elapsed_time_count)}秒"]
+    output_content += [f"個体数＝{str(N_IND)}"]    
     output_content += [f"合計世代数＝{str(sumgen)}"]
     
     # total_costからの返り値を受け取る
@@ -412,9 +414,28 @@ def GA_count(N_INC, N_TRANS):
                     f"\n焼却施設数: {str(len(best_individual.inc_facility))}",
                     f"中継施設数: {str(len(best_individual.trans_facility))}\n",
                     f"輸送単価＝ {str(UNIT_TRANS)} 円/t/km",
-                    "\n----------------------  輸送情報  ----------------------\n"]
+                    ]
+    
+    # コスト情報
+    sorted_inc_size = sorted(((i, inc_size) for i, inc_size in enumerate(yearly_inc_size)), key=lambda x: x[1], reverse=True)
+    sorted_inc_i = [best_individual.inc_facility[i] for i, _ in sorted_inc_size]
+    sorted_trans_size = sorted(((i, trans_size) for i, trans_size in enumerate(yearly_trans_size)), key=lambda x: x[1], reverse=True)
+    sorted_trans_i = [best_individual.trans_facility[i] for i, _ in sorted_trans_size]
 
-    # 焼却施設の詳細情報
+    output_content += ["\n---------------------  コスト情報  ---------------------\n",                        
+                    "TC_direct: " + str({hokkaido[key]: TC_direct_values[key] for key in sorted_inc_i if key in TC_direct_values}),
+                    "IC_inc: " + str({hokkaido[key]: IC_inc_values[key] for key in sorted_inc_i if key in IC_inc_values}),
+                    "OC_inc: " + str({hokkaido[key]: OC_inc_values[key] for key in sorted_inc_i if key in OC_inc_values}),
+                    "\nTC_indirect: " + str({hokkaido[key]: TC_indirect_values[key] for key in sorted_trans_i if key in TC_indirect_values}),
+                    "IC_trans: " + str({hokkaido[key]: IC_trans_values[key] for key in sorted_trans_i if key in IC_trans_values}),
+                    "OC_trans: " + str({hokkaido[key]: OC_trans_values[key] for key in sorted_trans_i if key in OC_trans_values}) + "\n",
+                    "="*len(str("Total cost: ") + str(total_cost_)),
+                    "Total cost: " + str(total_cost_),
+                    "="*len(str("Total cost: ") + str(total_cost_))
+                    ]
+    
+    # 輸送情報
+    output_content += ["\n----------------------  輸送情報  ----------------------\n"]
     def format_inc(facility_key, yearly_inc_size, yearly_trans_size, best_individual, cities_to_inc, trans_to_inc):
         direct_size = yearly_inc_size - sum(yearly_trans_size[best_individual.trans_facility.index(trans)] for trans in trans_to_inc[facility_key])
         city_to_inc_names = ', '.join(hokkaido[city] for city in cities_to_inc[facility_key])
@@ -432,29 +453,13 @@ def GA_count(N_INC, N_TRANS):
 
         return formatted_output
 
-    sorted_inc_size = sorted(((i, inc_size) for i, inc_size in enumerate(yearly_inc_size)), key=lambda x: x[1], reverse=True)
-    sorted_inc_i = [best_individual.inc_facility[i] for i, _ in sorted_inc_size]
     output_content.extend(item for sublist in (format_inc(best_individual.inc_facility[i], yearly_inc_size, yearly_trans_size, best_individual, cities_to_inc, trans_to_inc) for i, yearly_inc_size in sorted_inc_size) for item in sublist)
-
-    # コスト情報
-    sorted_trans_size = sorted(((i, trans_size) for i, trans_size in enumerate(yearly_trans_size)), key=lambda x: x[1], reverse=True)
-    sorted_trans_i = [best_individual.trans_facility[i] for i, _ in sorted_trans_size]
-
-    output_content += ["\n---------------------  コスト情報  ---------------------\n",                        
-                    "TC_direct: " + str({hokkaido[key]: TC_direct_values[key] for key in sorted_inc_i if key in TC_direct_values}),
-                    "IC_inc: " + str({hokkaido[key]: IC_inc_values[key] for key in sorted_inc_i if key in IC_inc_values}),
-                    "OC_inc: " + str({hokkaido[key]: OC_inc_values[key] for key in sorted_inc_i if key in OC_inc_values}),
-                    "\nTC_indirect: " + str({hokkaido[key]: TC_indirect_values[key] for key in sorted_trans_i if key in TC_indirect_values}),
-                    "IC_trans: " + str({hokkaido[key]: IC_trans_values[key] for key in sorted_trans_i if key in IC_trans_values}),
-                    "OC_trans: " + str({hokkaido[key]: OC_trans_values[key] for key in sorted_trans_i if key in OC_trans_values}) + "\n",
-                    "="*len(str("Total cost: ") + str(total_cost_)),
-                    "Total cost: " + str(total_cost_),
-                    "="*len(str("Total cost: ") + str(total_cost_)),
-                    "\n----------------------  遺伝情報  ----------------------\n",
+    
+    # 遺伝情報    
+    output_content +=["\n----------------------  遺伝情報  ----------------------\n",
                     "個体数＝"+ str(N_IND),
                     "世代数＝"+ str(N_GEN),
                     ]
-    
     output_content += gen_info
     
     # ファイルに書き込む
