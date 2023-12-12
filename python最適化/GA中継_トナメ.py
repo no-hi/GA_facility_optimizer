@@ -14,7 +14,6 @@ waste_name = "sanpai"
 N_CITIES = len(hokkaido)   # 市町村数
 N_INC_INITIAL = 21         # 焼却初期値
 N_INC_MAX = 28             # 焼却上限
-# N_INC_MAX = N_INITIAL    # 焼却上限(施設数指定)
 N_TRANS_INITIAL = 0        # 中継初期値
 N_TRANS_MAX = 3            # 中継上限
 TOP_N_CITIES = 30          # ごみ量順位下限
@@ -347,8 +346,9 @@ def GA_count(N_INC, N_TRANS):
     gen_info = []
     for gen in range(N_GEN):
         sumgen = gen + 1
-        for individual in population:
-            individual = toolbox.repair(individual)
+        if set(individual)<N_INC+N_TRANS:
+            for individual in population:
+                individual = toolbox.repair(individual)
         # 次世代の個体を生成
         offspring = algorithms.varAnd(population, toolbox, cxpb=CX_PROB, mutpb=MUT_PROB)
         population[:] = toolbox.select(offspring, len(population) - elite_size)
