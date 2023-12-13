@@ -10,12 +10,12 @@ import data
 toolbox = base.Toolbox()
 hokkaido = data.name
 # パラメータ##########################################################
-waste_name = "sanpai"
+waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 23         # 焼却初期値
-N_INC_MAX = 28             # 焼却上限
+N_INC_INITIAL = 3         # 焼却初期値
+N_INC_MAX = 5             # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 3            # 中継上限
+N_TRANS_MAX = 0            # 中継上限
 TOP_N_CITIES = 30          # ごみ量順位下限
 N_IND_UNIT = 50            # 1施設当たり個体数
 N_GEN = 1000               # 世代数
@@ -428,7 +428,6 @@ def GA_count(N_INC, N_TRANS):
             formatted_output.append(f"indirect {hokkaido[facility_key]}({round(indirect_size/365)}/{round(yearly_inc_size/365)}) t/day → receive from: 中継施設＝ {trans_to_inc_details_str}")
 
         return formatted_output
-
     output_content.extend(item for sublist in (format_inc(best_individual.inc_facility[i], yearly_inc_size, yearly_trans_size, best_individual, cities_to_inc, trans_to_inc) for i, yearly_inc_size in sorted_inc_size) for item in sublist)
     
     # 遺伝情報    
@@ -443,20 +442,40 @@ def GA_count(N_INC, N_TRANS):
     sorted_inc_indices = sorted(range(len(yearly_inc_size)), key=lambda i: yearly_inc_size[i], reverse=True)
     sorted_trans_indices = sorted(range(len(yearly_trans_size)), key=lambda i: yearly_trans_size[i], reverse=True)
 
+    def create_2d_lists(cities_to_inc, cities_to_trans):
+        direct_cities_list = []
+        indirect_cities_list = []
+
+        for facility_key in cities_to_inc:
+            direct_cities = [hokkaido[city] for city in cities_to_inc[facility_key]]
+            direct_cities_list.append(direct_cities)
+
+            indirect_cities = []
+            for trans in cities_to_trans.get(facility_key, []):
+                indirect_cities.extend([hokkaido[city] for city in cities_to_trans[trans]])
+            indirect_cities_list.append(list(set(indirect_cities)))  # Remove duplicates
+
+        return direct_cities_list, indirect_cities_list
+    direct_cities_list, indirect_cities_list = create_2d_lists(cities_to_inc, cities_to_trans)
+    
     with open(os.path.join(output_directory, f"GAPlot_{current_time}.txt"), 'a', encoding="utf-8") as file:
         file.write(f"----焼却 {len(best_individual.inc_facility)} + 中継 {len(best_individual.trans_facility)}----\n")
         
         file.write("inc_size=" + str([yearly_inc_size[i] for i in sorted_inc_indices]) + "\n")
-        file.write(f"焼却施設＝")
+        file.write("焼却施設＝")
         for inc_index in sorted_inc_indices:
             file.write(f"{hokkaido[best_individual.inc_facility[inc_index]]}, ")
-        
+        file.write("\n")
+        for sublist in direct_cities_list:
+            file.write(",".join(sublist) + "\n")
+
         file.write("\n" + "trans_size=" + str([yearly_trans_size[i] for i in sorted_trans_indices]) + "\n")
-        file.write(f"中継施設＝")
+        file.write("中継施設＝")
         for trans_index in sorted_trans_indices:
             file.write(f"{hokkaido[best_individual.trans_facility[trans_index]]}, ")
-        
         file.write("\n")
+        for sublist in indirect_cities_list:
+            file.write("\n[".join(sublist) + "]\n")
 
         
     return hof[0]
