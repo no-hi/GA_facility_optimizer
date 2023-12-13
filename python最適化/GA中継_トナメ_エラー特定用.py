@@ -12,13 +12,14 @@ hokkaido = data.name
 # パラメータ##########################################################
 waste_name = "sanpai"
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 23         # 焼却初期値
+N_INC_INITIAL = 21         # 焼却初期値
 N_INC_MAX = 23             # 焼却上限
-N_TRANS_INITIAL = 3        # 中継初期値
+# N_INC_MAX = N_INITIAL    # 焼却上限(施設数指定)
+N_TRANS_INITIAL = 0        # 中継初期値
 N_TRANS_MAX = 3            # 中継上限
 TOP_N_CITIES = 30          # ごみ量順位下限
-N_IND_UNIT = 50            # 1施設当たり個体数
-N_GEN = 1000               # 世代数
+N_IND = 500                # 個体数
+N_GEN = 500                # 世代数
 CX_PROB = 0.7              # 一様交叉
 MUT_PROB = 0.3             # 突然変異
 TOUR_SIZE = 4              # トーナメント
@@ -53,31 +54,38 @@ def get_top_cities():
 def GA_count(N_INC, N_TRANS):
     start_time_count = time.perf_counter()
     top_cities = get_top_cities()
-    N_IND = N_IND_UNIT * (N_INC+N_TRANS)
 
     #（TOP_N_CITIES）が（N_INC）を超える場合にエラー
     def create_individual():
         inc_facility = random.sample(top_cities, N_INC)
-        trans_facility = random.sample([city for city in top_cities if city not in inc_facility], N_TRANS)
+        trans_facility = random.sample([top_cities_not_inc for top_cities_not_inc in top_cities if top_cities_not_inc not in inc_facility], N_TRANS) 
         individual = creator.Individual(inc_facility + trans_facility)
+        # 処理施設の遺伝子：上位の都市からランダムに選ばれる
         individual.inc_facility = inc_facility
-        individual.trans_facility = trans_facility if N_TRANS > 0 else []
-        individual.unused_cities = set(range(N_CITIES)) - set(individual.inc_facility) - set(individual.trans_facility)
-        return individual
-
+        # 中継施設の遺伝子：すべての都市からランダムに選ばれる
+        if N_TRANS > 0:  # 中継施設が0の場合は空のリストを割り当てる
+            individual.trans_facility = trans_facility
+        else:
+            individual.trans_facility = []
+        # 未使用の都市リストを計算
+        individual.unused_cities = set(range(N_CITIES)) - set(individual.inc_facility) - set(individual.trans_facility)            
+        return individual       
     toolbox.register("individual", create_individual)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-
+    
     def repair(individual):
+        # 焼却施設と中継施設の重複を特定する
         duplicates = set(individual.inc_facility) & set(individual.trans_facility)
-        if duplicates:
-            for facility in duplicates:
-                indices = [i for i, x in enumerate(individual.trans_facility) if x == facility]
-                for i in indices:
-                    new_facility = random.choice(list(individual.unused_cities))
-                    individual.unused_cities.remove(new_facility)
-                    individual.trans_facility[i] = new_facility
+        
+        # 中継施設での重複を置き換える
+        for facility in duplicates:
+            indices = [i for i, x in enumerate(individual.trans_facility) if x == facility]
+            for i in indices:
+                new_facility = random.choice(list(individual.unused_cities))
+                individual.unused_cities.remove(new_facility)
+                individual.trans_facility[i] = new_facility
 
+        # その他の重複を処理する
         combined = individual.inc_facility + individual.trans_facility
         facility_count = collections.Counter(combined)
         for facility, count in facility_count.items():
@@ -85,14 +93,13 @@ def GA_count(N_INC, N_TRANS):
                 indices = [i for i, x in enumerate(combined) if x == facility]
                 keep = random.choice(indices)
                 for idx in indices:
-                    if idx != keep:
-                        new_facility = random.choice(list(individual.unused_cities))
-                        individual.unused_cities.remove(new_facility)
-                        combined[idx] = new_facility
+                    if idx != keep and idx >= N_INC:  # 中継施設のインデックスのみ置き換える
+                        if individual.unused_cities:
+                            new_facility = random.choice(list(individual.unused_cities))
+                            individual.unused_cities.remove(new_facility)
 
-        individual.inc_facility = combined[:N_INC]
-        individual.trans_facility = combined[N_INC:]      
         individual[:] = individual.inc_facility + individual.trans_facility
+        
         return individual
     toolbox.register("repair", repair)
     
@@ -101,49 +108,74 @@ def GA_count(N_INC, N_TRANS):
         common_inc = set(ind1.inc_facility) & set(ind2.inc_facility)
         unique_inc1 = [gene for gene in ind1.inc_facility if gene not in common_inc]
         unique_inc2 = [gene for gene in ind2.inc_facility if gene not in common_inc]
+        # 非共通遺伝子のシャッフル
         random.shuffle(unique_inc1)
         random.shuffle(unique_inc2)
-
-        for i in range(len(unique_inc1)):
-            if random.random() < CX_PROB:
-                unique_inc1[i], unique_inc2[i] = unique_inc2[i], unique_inc1[i]
+        # 一様交叉
+        try:
+            for i in range(len(unique_inc1)):
+                if random.random() < CX_PROB:
+                    unique_inc1[i], unique_inc2[i] = unique_inc2[i], unique_inc1[i]
+        except IndexError as e:
+            print("エラーが発生しました: ", e)
+            print("ind1",f"長さ={len(ind1)}",ind1)
+            print("ind1.inc_facility",f"長さ={len(ind1.inc_facility)}",ind1.inc_facility)
+            print("ind2",f"長さ={len(ind2)}",ind2)
+            print("ind2.inc_facility",f"長さ={len(ind2.inc_facility)}",ind2.inc_facility)
+            print("common_inc",f"長さ={len(common_inc)}",common_inc)
+            print("unique_inc1",f"長さ={len(unique_inc1)}",unique_inc1)
+            print("unique_inc2",f"長さ={len(unique_inc2)}",unique_inc2)
+            print("現在のインデックス: ", i)
+            raise  # エラーを再度発生させる
 
         ind1.inc_facility = sorted(list(common_inc) + unique_inc1)
-        ind2.inc_facility = sorted(list(common_inc) + unique_inc2)
-
+        ind2.inc_facility = sorted(list(common_inc) + unique_inc2)        
+        
         # 中継施設の遺伝子リストでの一様交叉
         common_trans = set(ind1.trans_facility) & set(ind2.trans_facility)
         unique_trans1 = [gene for gene in ind1.trans_facility if gene not in common_trans]
         unique_trans2 = [gene for gene in ind2.trans_facility if gene not in common_trans]
+        # 非共通遺伝子のシャッフル
         random.shuffle(unique_trans1)
         random.shuffle(unique_trans2)
-
+        # 一様交叉
         for i in range(len(unique_trans1)):
             if random.random() < CX_PROB:
                 unique_trans1[i], unique_trans2[i] = unique_trans2[i], unique_trans1[i]
 
         ind1.trans_facility = sorted(list(common_trans) + unique_trans1)
         ind2.trans_facility = sorted(list(common_trans) + unique_trans2)
-
+        
         ind1[:] = ind1.inc_facility + ind1.trans_facility
         ind2[:] = ind2.inc_facility + ind2.trans_facility
-        ind1.unused_cities = set(range(N_CITIES)) - set(ind1)
-        ind2.unused_cities = set(range(N_CITIES)) - set(ind2)
 
         return ind1, ind2
     toolbox.register("mate", cxSet)
 
     def mutSet(individual):
-        for i in range(len(individual)):
+        unused = list(individual.unused_cities)
+        
+        # 処理施設の突然変異
+        for i in range(len(individual.inc_facility)):
             if random.random() < MUT_PROB:
-                new_value = random.choice(list(individual.unused_cities))
-                individual.unused_cities.add(individual[i])
-                individual[i] = new_value
-                individual.unused_cities.remove(new_value)
+                if unused:
+                    new_value = random.choice(unused)
+                    unused.append(individual.inc_facility[i])
+                    individual.inc_facility[i] = new_value
+                    unused.remove(new_value)
 
-        individual.inc_facility = individual[:N_INC]
-        individual.trans_facility = individual[N_INC:]
+        # 中継施設の突然変異
+        for i in range(len(individual.trans_facility)):
+            if random.random() < MUT_PROB:
+                if unused:
+                    new_value = random.choice(unused)
+                    unused.append(individual.trans_facility[i])
+                    individual.trans_facility[i] = new_value
+                    unused.remove(new_value)
 
+        individual.unused_cities = set(unused)
+        individual[:] = individual.inc_facility + individual.trans_facility
+        
         return individual,
     toolbox.register("mutate", mutSet)
 
@@ -323,9 +355,6 @@ def GA_count(N_INC, N_TRANS):
     gen_info = []
     for gen in range(N_GEN):
         sumgen = gen + 1
-        for individual in population:
-            if len(set(individual)) < N_INC + N_TRANS :
-                individual = toolbox.repair(individual)
         # 次世代の個体を生成
         offspring = algorithms.varAnd(population, toolbox, cxpb=CX_PROB, mutpb=MUT_PROB)
         population[:] = toolbox.select(offspring, len(population) - elite_size)
@@ -375,7 +404,6 @@ def GA_count(N_INC, N_TRANS):
     end_time_count = time.perf_counter()
     elapsed_time_count = end_time_count - start_time_count
     output_content = ["\n"+f"実行時間＝{round(elapsed_time_count)}秒"]
-    output_content += [f"個体数＝{str(N_IND)}"]    
     output_content += [f"合計世代数＝{str(sumgen)}"]
     
     # total_costからの返り値を受け取る
@@ -390,28 +418,9 @@ def GA_count(N_INC, N_TRANS):
                     f"\n焼却施設数: {str(len(best_individual.inc_facility))}",
                     f"中継施設数: {str(len(best_individual.trans_facility))}\n",
                     f"輸送単価＝ {str(UNIT_TRANS)} 円/t/km",
-                    ]
-    
-    # コスト情報
-    sorted_inc_size = sorted(((i, inc_size) for i, inc_size in enumerate(yearly_inc_size)), key=lambda x: x[1], reverse=True)
-    sorted_inc_i = [best_individual.inc_facility[i] for i, _ in sorted_inc_size]
-    sorted_trans_size = sorted(((i, trans_size) for i, trans_size in enumerate(yearly_trans_size)), key=lambda x: x[1], reverse=True)
-    sorted_trans_i = [best_individual.trans_facility[i] for i, _ in sorted_trans_size]
+                    "\n----------------------  輸送情報  ----------------------\n"]
 
-    output_content += ["\n---------------------  コスト情報  ---------------------\n",                        
-                    "TC_direct: " + str({hokkaido[key]: TC_direct_values[key] for key in sorted_inc_i if key in TC_direct_values}),
-                    "IC_inc: " + str({hokkaido[key]: IC_inc_values[key] for key in sorted_inc_i if key in IC_inc_values}),
-                    "OC_inc: " + str({hokkaido[key]: OC_inc_values[key] for key in sorted_inc_i if key in OC_inc_values}),
-                    "\nTC_indirect: " + str({hokkaido[key]: TC_indirect_values[key] for key in sorted_trans_i if key in TC_indirect_values}),
-                    "IC_trans: " + str({hokkaido[key]: IC_trans_values[key] for key in sorted_trans_i if key in IC_trans_values}),
-                    "OC_trans: " + str({hokkaido[key]: OC_trans_values[key] for key in sorted_trans_i if key in OC_trans_values}) + "\n",
-                    "="*len(str("Total cost: ") + str(total_cost_)),
-                    "Total cost: " + str(total_cost_),
-                    "="*len(str("Total cost: ") + str(total_cost_))
-                    ]
-    
-    # 輸送情報
-    output_content += ["\n----------------------  輸送情報  ----------------------\n"]
+    # 焼却施設の詳細情報
     def format_inc(facility_key, yearly_inc_size, yearly_trans_size, best_individual, cities_to_inc, trans_to_inc):
         direct_size = yearly_inc_size - sum(yearly_trans_size[best_individual.trans_facility.index(trans)] for trans in trans_to_inc[facility_key])
         city_to_inc_names = ', '.join(hokkaido[city] for city in cities_to_inc[facility_key])
@@ -429,13 +438,29 @@ def GA_count(N_INC, N_TRANS):
 
         return formatted_output
 
+    sorted_inc_size = sorted(((i, inc_size) for i, inc_size in enumerate(yearly_inc_size)), key=lambda x: x[1], reverse=True)
+    sorted_inc_i = [best_individual.inc_facility[i] for i, _ in sorted_inc_size]
     output_content.extend(item for sublist in (format_inc(best_individual.inc_facility[i], yearly_inc_size, yearly_trans_size, best_individual, cities_to_inc, trans_to_inc) for i, yearly_inc_size in sorted_inc_size) for item in sublist)
-    
-    # 遺伝情報    
-    output_content +=["\n----------------------  遺伝情報  ----------------------\n",
+
+    # コスト情報
+    sorted_trans_size = sorted(((i, trans_size) for i, trans_size in enumerate(yearly_trans_size)), key=lambda x: x[1], reverse=True)
+    sorted_trans_i = [best_individual.trans_facility[i] for i, _ in sorted_trans_size]
+
+    output_content += ["\n---------------------  コスト情報  ---------------------\n",                        
+                    "TC_direct: " + str({hokkaido[key]: TC_direct_values[key] for key in sorted_inc_i if key in TC_direct_values}),
+                    "IC_inc: " + str({hokkaido[key]: IC_inc_values[key] for key in sorted_inc_i if key in IC_inc_values}),
+                    "OC_inc: " + str({hokkaido[key]: OC_inc_values[key] for key in sorted_inc_i if key in OC_inc_values}),
+                    "\nTC_indirect: " + str({hokkaido[key]: TC_indirect_values[key] for key in sorted_trans_i if key in TC_indirect_values}),
+                    "IC_trans: " + str({hokkaido[key]: IC_trans_values[key] for key in sorted_trans_i if key in IC_trans_values}),
+                    "OC_trans: " + str({hokkaido[key]: OC_trans_values[key] for key in sorted_trans_i if key in OC_trans_values}) + "\n",
+                    "="*len(str("Total cost: ") + str(total_cost_)),
+                    "Total cost: " + str(total_cost_),
+                    "="*len(str("Total cost: ") + str(total_cost_)),
+                    "\n----------------------  遺伝情報  ----------------------\n",
                     "個体数＝"+ str(N_IND),
                     "世代数＝"+ str(N_GEN),
                     ]
+    
     output_content += gen_info
     
     # ファイルに書き込む
