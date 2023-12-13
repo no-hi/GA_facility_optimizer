@@ -12,11 +12,12 @@ hokkaido = data.name
 # パラメータ##########################################################
 waste_name = "sanpai"
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 23         # 焼却初期値
-N_INC_MAX = 23             # 焼却上限
-N_TRANS_INITIAL = 3        # 中継初期値
+N_INC_INITIAL = 24         # 焼却初期値
+N_INC_MAX = 30             # 焼却上限
+N_TRANS_INITIAL = 0        # 中継初期値
 N_TRANS_MAX = 3            # 中継上限
-TOP_N_CITIES = 30          # ごみ量順位下限
+# TOP_N_CITIES = 30          # ごみ量順位下限
+TOP_N_CITIES = N_INC_MAX + N_TRANS_MAX +10          # ごみ量順位下限
 N_IND_UNIT = 50            # 1施設当たり個体数
 N_GEN = 1000               # 世代数
 CX_PROB = 0.7              # 一様交叉
