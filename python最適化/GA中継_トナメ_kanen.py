@@ -583,20 +583,20 @@ def GA_count(N_INC, N_TRANS):
         sorted_inc_indices = sorted(range(len(yearly_inc_size)), key=lambda i: yearly_inc_size[i], reverse=True)
         sorted_trans_indices = sorted(range(len(yearly_trans_size)), key=lambda i: yearly_trans_size[i], reverse=True)
         file.write(f"----焼却 {len(best_individual.inc_facility)} + 中継 {len(best_individual.trans_facility)}----\n")
-        file.write(f"inc_size= {str([yearly_inc_size[i] for i in sorted_inc_indices])}\n")
-        file.write("焼却施設＝")
-        inc_facility = [hokkaido[best_individual.inc_facility[inc_index]] for inc_index in sorted_inc_indices]
-        inc_facilities = ', '.join(inc_facility)
-        file.write(inc_facilities)
-        file.write(f"\n{str(direct_cities_list)}\n")
+        file.write(f"inc_size= {str([round(yearly_inc_size[i]/365) for i in sorted_inc_indices])}\n")
+        inc_facility = [hokkaido[best_individual.inc_facility[inc_index]] for inc_index in sorted_inc_indices]       
+        file.write(f"inc_facility = {inc_facility}\n")
+        file.write(f"inc_blocks = {str(direct_cities_list)}\n")        
         
-        file.write(f"\ntrans_size={str([yearly_trans_size[i] for i in sorted_trans_indices])}\n")
-        file.write("中継施設＝")
-        trans_facility = [hokkaido[best_individual.trans_facility[trans_index]] for trans_index in sorted_trans_indices]
-        trans_facilities = ', '.join(trans_facility)
-        file.write(trans_facilities)
-        if indirect_cities_list:
-            file.write(f"\n{str(indirect_cities_list)}\n")
+        if yearly_trans_size !=[]:
+            file.write(f"\ntrans_size={str([round(yearly_trans_size[i]/365) for i in sorted_trans_indices])}\n")
+            trans_facility = [hokkaido[best_individual.trans_facility[trans_index]] for trans_index in sorted_trans_indices]
+            file.write(f"trans_facility = {trans_facility}\n")
+            file.write(f"trans_blocks = {str(indirect_cities_list)}\n")        
+            file.write("\n")
+        else:
+            file.write("\n")
+
 
         
     return hof[0]

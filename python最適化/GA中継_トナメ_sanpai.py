@@ -590,13 +590,14 @@ def GA_count(N_INC, N_TRANS):
         file.write(inc_facilities)
         file.write(f"\n{str(direct_cities_list)}\n")
         
-        file.write(f"\ntrans_size={str([yearly_trans_size[i] for i in sorted_trans_indices])}\n")
-        file.write("中継施設＝")
-        trans_facility = [hokkaido[best_individual.trans_facility[trans_index]] for trans_index in sorted_trans_indices]
-        trans_facilities = ', '.join(trans_facility)
-        file.write(trans_facilities)
-        if indirect_cities_list:
+        if yearly_trans_size !=[]:
+            file.write(f"\ntrans_size={str([yearly_trans_size[i] for i in sorted_trans_indices])}\n")
+            file.write("中継施設＝")
+            trans_facility = [hokkaido[best_individual.trans_facility[trans_index]] for trans_index in sorted_trans_indices]
+            trans_facilities = ', '.join(trans_facility)
+            file.write(trans_facilities)
             file.write(f"\n{str(indirect_cities_list)}\n")
+        file.write("\n")
 
         
     return hof[0]
