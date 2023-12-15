@@ -12,10 +12,10 @@ hokkaido = data.name
 # パラメータ##########################################################
 waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 1         # 焼却初期値
+N_INC_INITIAL = 12         # 焼却初期値
 N_INC_MAX = 15             # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 20            # 中継上限
+N_TRANS_MAX = 5            # 中継上限
 # TOP_N_CITIES = N_INC_MAX + N_TRANS_MAX +10    
 N_IND_UNIT = 50            # 1施設当たり個体数
 N_GEN = 1000               # 世代数
@@ -477,7 +477,7 @@ def GA_count(N_INC, N_TRANS):
             min_change_count = 0
 
         gen_info.append(f"{gen}: neval={neval}{record} best={hof[0].fitness.values[0]}")
-        print(f"焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
+        print(f"（{waste_name}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
         
         # 最小値が一定世代変化しない場合、ループを抜ける
         # if best_in_generation_count >= 20*(1+(N_INC+N_TRANS)//3):
@@ -488,6 +488,9 @@ def GA_count(N_INC, N_TRANS):
     best_individual = hof[0]
     output_content = []
     output_file_path = f"{waste_name}_{len(best_individual.inc_facility)}&{len(best_individual.trans_facility)}.txt"
+    
+    # total_costからの返り値を受け取る
+    total_cost_, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values, IC_trans_values, OC_trans_values, yearly_inc_size, yearly_trans_size, cities_to_inc, cities_to_trans, trans_to_inc = total_cost_info(best_individual)
 
     def write_to_file(filename, content):
             filepath = os.path.join(output_directory, filename)
@@ -497,13 +500,65 @@ def GA_count(N_INC, N_TRANS):
     # 実行時間の計算と出力
     end_time_count = time.perf_counter()
     elapsed_time_count = end_time_count - start_time_count
-    output_content = ["\n"+f"実行時間＝{round(elapsed_time_count)}秒"]
-    output_content += [f"個体数＝{str(N_IND)}"]    
-    output_content += [f"合計世代数＝{str(sumgen)}"]
+    output_content = []
     
-    # total_costからの返り値を受け取る
-    total_cost_, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values, IC_trans_values, OC_trans_values, yearly_inc_size, yearly_trans_size, cities_to_inc, cities_to_trans, trans_to_inc = total_cost_info(best_individual)
+    # GAPlot入力情報
+    def create_2d_lists(cities_to_inc, cities_to_trans):
+        direct_cities_list = []
+        indirect_cities_list = []
 
+        for facility_key in cities_to_inc:
+            direct_cities = [hokkaido[city] for city in cities_to_inc[facility_key]]
+            direct_cities_list.append(direct_cities)
+
+        for facility_key in cities_to_trans:
+            indirect_cities = [hokkaido[city] for city in cities_to_trans[facility_key]]
+            indirect_cities_list.append(indirect_cities) 
+                
+        return direct_cities_list, indirect_cities_list
+    direct_cities_list, indirect_cities_list = create_2d_lists(cities_to_inc, cities_to_trans)
+    
+    sorted_inc_indices = sorted(range(len(yearly_inc_size)), key=lambda i: yearly_inc_size[i], reverse=True)
+    sorted_trans_indices = sorted(range(len(yearly_trans_size)), key=lambda i: yearly_trans_size[i], reverse=True)
+    inc_facility = [hokkaido[best_individual.inc_facility[inc_index]] for inc_index in sorted_inc_indices]
+    
+    output_content += [f"--------------------  GAPlot_input  --------------------\n",
+                    f"inc_size= {str([round(yearly_inc_size[i]/365) for i in sorted_inc_indices])}\n"
+                    f"inc_facility = {inc_facility}",
+                    f"inc_blocks = {str(direct_cities_list)}\n"  
+                    ]
+    
+    if yearly_trans_size != []:
+        trans_facility = [hokkaido[best_individual.trans_facility[trans_index]] for trans_index in sorted_trans_indices]
+        output_content += [f"trans_size={str([round(yearly_trans_size[i]/365) for i in sorted_trans_indices])}",
+                        f"trans_facility = {trans_facility}",
+                        f"trans_blocks = {str(indirect_cities_list)}"
+                        ]
+        arrows = []
+        for inc_facility_index in best_individual.inc_facility:
+            trans_indices = trans_to_inc.get(inc_facility_index)
+
+            if trans_indices:
+                inc_facility_name = [hokkaido[inc_facility_index]]
+                trans_facility_names = [hokkaido[trans_index] for trans_index in trans_indices]
+                arrows.append([inc_facility_name, trans_facility_names])
+
+        output_content += [f"\narrows = {arrows}\n"]
+        
+    else:
+        output_content += [f"trans_size = []",
+                        f"trans_facility = []",
+                        f"trans_blocks = []",
+                        f"\narrows = []\n"
+                        ]
+    
+    # 諸情報
+    output_content += ["----------------------  実行情報  ----------------------",
+                    f"実行時間＝{round(elapsed_time_count)}秒",
+                    f"個体数＝{str(N_IND)}",
+                    f"合計世代数＝{str(sumgen)}"
+                    ]
+    
     # ごみ量ソート
     top_cities_info = [f"{hokkaido[i]} ({waste[i]})" for i in get_top_cities()]
     output_content += ["------------------------  前提  ------------------------\n",
@@ -564,49 +619,7 @@ def GA_count(N_INC, N_TRANS):
     # ファイルに書き込む
     write_to_file(output_file_path, '\n'.join(output_content))
     
-    with open(os.path.join(output_directory, f"GAPlot_{current_time}.txt"), 'a', encoding="utf-8") as file:
-        def create_2d_lists(cities_to_inc, cities_to_trans):
-            direct_cities_list = []
-            indirect_cities_list = []
-
-            for facility_key in cities_to_inc:
-                direct_cities = [hokkaido[city] for city in cities_to_inc[facility_key]]
-                direct_cities_list.append(direct_cities)
-
-            for facility_key in cities_to_trans:
-                indirect_cities = [hokkaido[city] for city in cities_to_trans[facility_key]]
-                indirect_cities_list.append(indirect_cities) 
-                    
-            return direct_cities_list, indirect_cities_list
-        direct_cities_list, indirect_cities_list = create_2d_lists(cities_to_inc, cities_to_trans)
-        
-        sorted_inc_indices = sorted(range(len(yearly_inc_size)), key=lambda i: yearly_inc_size[i], reverse=True)
-        sorted_trans_indices = sorted(range(len(yearly_trans_size)), key=lambda i: yearly_trans_size[i], reverse=True)
-        file.write(f"----焼却 {len(best_individual.inc_facility)} + 中継 {len(best_individual.trans_facility)}----\n")
-        file.write(f"inc_size= {str([round(yearly_inc_size[i]/365) for i in sorted_inc_indices])}\n")
-        inc_facility = [hokkaido[best_individual.inc_facility[inc_index]] for inc_index in sorted_inc_indices]       
-        file.write(f"inc_facility = {inc_facility}\n")
-        file.write(f"inc_blocks = {str(direct_cities_list)}\n")        
-        
-        if yearly_trans_size != []:
-            file.write(f"\ntrans_size={str([round(yearly_trans_size[i]/365) for i in sorted_trans_indices])}\n")
-            trans_facility = [hokkaido[best_individual.trans_facility[trans_index]] for trans_index in sorted_trans_indices]
-            file.write(f"trans_facility = {trans_facility}\n")
-            file.write(f"trans_blocks = {str(indirect_cities_list)}\n")
-            arrows = []
-            for inc_facility_index in best_individual.inc_facility:
-                trans_indices = trans_to_inc.get(inc_facility_index)
-
-                if trans_indices:
-                    inc_facility_name = [hokkaido[inc_facility_index]]
-                    trans_facility_names = [hokkaido[trans_index] for trans_index in trans_indices]
-                    arrows.append([inc_facility_name, trans_facility_names])
-
-            file.write(f"\narrows = {arrows}\n\n")
-        else:
-            file.write("\n")
-
-        
+    
     return hof[0]
 
 # ループ終了########################################################################################################################
