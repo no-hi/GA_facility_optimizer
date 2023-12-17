@@ -477,7 +477,7 @@ def GA_count(N_INC, N_TRANS):
             min_change_count = 0
 
         gen_info.append(f"{gen}: neval={neval}{record} best={hof[0].fitness.values[0]}")
-        print(f"（{waste_name}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
+        print(f"（{waste_name}{UNIT_TRANS}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
         
         # 最小値が一定世代変化しない場合、ループを抜ける
         # if best_in_generation_count >= 20*(1+(N_INC+N_TRANS)//3):
@@ -652,5 +652,5 @@ print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_tr
 
 end_time = time.perf_counter()
 elapsed_time = end_time - start_time
-print(f"\n実行時間= {round(elapsed_time)}秒\n\n")
+print(f"\n実行時間= {round(elapsed_time/3600)}h\n\n")
 

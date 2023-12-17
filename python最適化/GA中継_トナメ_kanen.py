@@ -12,10 +12,10 @@ hokkaido = data.name
 # パラメータ##########################################################
 waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 12         # 焼却初期値
+N_INC_INITIAL = 1          # 焼却初期値
 N_INC_MAX = 15             # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 5            # 中継上限
+N_TRANS_MAX = 15            # 中継上限
 # TOP_N_CITIES = N_INC_MAX + N_TRANS_MAX +10    
 N_IND_UNIT = 50            # 1施設当たり個体数
 N_GEN = 1000               # 世代数
@@ -195,8 +195,8 @@ def GA_count(N_INC, N_TRANS):
             return (total_TC, yearly_inc_size, yearly_trans_size)
         total_TC, yearly_inc_size, yearly_trans_size = TC(individual)
         
-        def ICOC(individual):
-            def ICOC_INC(individual):
+        def ICOC(yearly_inc_size,yearly_trans_size):
+            def ICOC_INC(yearly_inc_size):
                 total_IC_inc = 0
                 total_OC_inc = 0
                 
@@ -224,9 +224,9 @@ def GA_count(N_INC, N_TRANS):
                     total_OC_inc += OC_INC
                 
                 return (total_IC_inc, total_OC_inc)
-            total_IC_inc, total_OC_inc = ICOC_INC(individual)
+            total_IC_inc, total_OC_inc = ICOC_INC(yearly_inc_size)
 
-            def ICOC_TRANS(individual):
+            def ICOC_TRANS(yearly_trans_size):
                 total_IC_trans = 0
                 total_OC_trans = 0
                 
@@ -259,12 +259,12 @@ def GA_count(N_INC, N_TRANS):
                 
                 return (total_IC_trans, total_OC_trans)
             if N_TRANS > 0:
-                total_IC_trans, total_OC_trans = ICOC_TRANS(individual)
+                total_IC_trans, total_OC_trans = ICOC_TRANS(yearly_trans_size)
             else:
                 total_IC_trans = total_OC_trans = 0
 
             return (total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans)
-        total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans = ICOC(individual)
+        total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans = ICOC(yearly_inc_size,yearly_trans_size)
         
         total_cost_ = total_TC + total_IC_inc + total_OC_inc + total_IC_trans + total_OC_trans
         return (total_cost_, yearly_inc_size, yearly_trans_size)
@@ -477,7 +477,7 @@ def GA_count(N_INC, N_TRANS):
             min_change_count = 0
 
         gen_info.append(f"{gen}: neval={neval}{record} best={hof[0].fitness.values[0]}")
-        print(f"（{waste_name}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
+        print(f"（{waste_name}{UNIT_TRANS}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
         
         # 最小値が一定世代変化しない場合、ループを抜ける
         # if best_in_generation_count >= 20*(1+(N_INC+N_TRANS)//3):
@@ -652,5 +652,5 @@ print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_tr
 
 end_time = time.perf_counter()
 elapsed_time = end_time - start_time
-print(f"\n実行時間= {round(elapsed_time)}秒\n\n")
+print(f"\n実行時間= {round(elapsed_time/3600)}h\n\n")
 
