@@ -12,11 +12,11 @@ hokkaido = data.name
 # パラメータ##########################################################
 waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 3         # 焼却初期値
-N_INC_MAX = 3             # 焼却上限
+N_INC_INITIAL = 1         # 焼却初期値
+N_INC_MAX = 7             # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 2            # 中継上限
-# TOP_N_CITIES = N_INC+N_TRANS+10          # ごみ量順位下限はループ内で設定
+N_TRANS_MAX = 1            # 中継上限
+# TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 N_IND_UNIT = 50            # 1施設当たり個体数
 N_GEN = 1000                  # 世代数
 CX_PROB = 0.7              # 一様交叉
@@ -332,8 +332,8 @@ def GA_count(N_INC, N_TRANS):
                     total_TC += TC_direct
                     cities_to_inc[inc_faci[near_inc_faci_i]].append(city_i)
 
-            return (total_TC, TC_direct_values, TC_indirect_values, yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc)
-        total_TC, TC_direct_values, TC_indirect_values, yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc = TC(best_individual)
+            return (total_TC, total_TC_direct, total_TC_indirect, TC_direct_values, TC_indirect_values, yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc)
+        total_TC, total_TC_direct, total_TC_indirect, TC_direct_values, TC_indirect_values, yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc = TC(best_individual)
         
         def ICOC(best_individual):
             def ICOC_INC(best_individual):
@@ -415,7 +415,7 @@ def GA_count(N_INC, N_TRANS):
         total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans, IC_inc_values, OC_inc_values, IC_trans_values ,OC_trans_values = ICOC(best_individual)
         
         total_cost_ = total_TC + total_IC_inc + total_OC_inc + total_IC_trans + total_OC_trans
-        return (total_cost_, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values , IC_trans_values ,OC_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc)
+        return (total_cost_, total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values , IC_trans_values ,OC_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc)
 
     def evaluate(individual):
         if (len(set(individual.inc_facility)) + len(set(individual.trans_facility))) != N_INC + N_TRANS:
@@ -490,7 +490,7 @@ def GA_count(N_INC, N_TRANS):
     output_file_path = f"{waste_name}_{len(best_individual.inc_facility)}&{len(best_individual.trans_facility)}.txt"
     
     # total_costからの返り値を受け取る
-    total_cost_, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values, IC_trans_values, OC_trans_values, yearly_inc_size, yearly_trans_size, cities_to_inc, cities_to_trans, trans_to_inc = total_cost_info(best_individual)
+    total_cost_, total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values , IC_trans_values ,OC_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc = total_cost_info(best_individual)
 
     def write_to_file(filename, content):
             filepath = os.path.join(output_directory, filename)
@@ -503,7 +503,7 @@ def GA_count(N_INC, N_TRANS):
     output_content = []
     
     # GAPlot入力情報
-    def create_2d_lists(cities_to_inc, cities_to_trans):
+    def city_2d_lists(cities_to_inc, cities_to_trans):
         direct_cities_list = []
         indirect_cities_list = []
 
@@ -516,7 +516,7 @@ def GA_count(N_INC, N_TRANS):
             indirect_cities_list.append(indirect_cities) 
                 
         return direct_cities_list, indirect_cities_list
-    direct_cities_list, indirect_cities_list = create_2d_lists(cities_to_inc, cities_to_trans)
+    direct_cities_list, indirect_cities_list = city_2d_lists(cities_to_inc, cities_to_trans)
     
     sorted_inc_indices = sorted(range(len(yearly_inc_size)), key=lambda i: yearly_inc_size[i], reverse=True)
     sorted_trans_indices = sorted(range(len(yearly_trans_size)), key=lambda i: yearly_trans_size[i], reverse=True)
@@ -620,6 +620,19 @@ def GA_count(N_INC, N_TRANS):
     write_to_file(output_file_path, '\n'.join(output_content))
     
     
+    # 折れ線グラフ用出力
+    global cost_2D
+    if N_INC == N_INC_INITIAL and N_TRANS == N_TRANS_INITIAL:
+        cost_2D = [[] for _ in range(N_TRANS_MAX + 1)]
+
+    cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
+    cost_2D[N_TRANS].append(cost_list)
+
+    with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+        file.write(f"inc({N_INC_INITIAL}~{N_INC_MAX})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
+        file.write(f"cost = {str(cost_2D)}\n")
+
+
     return hof[0]
 
 # ループ終了########################################################################################################################
