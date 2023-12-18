@@ -629,7 +629,7 @@ def GA_count(N_INC, N_TRANS):
     cost_2D[N_TRANS].append(cost_list)
 
     with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-        file.write(f"inc({N_INC_INITIAL}~{N_INC_MAX})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
+        file.write(f"inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
         file.write(f"cost = {str(cost_2D)}\n")
 
 

@@ -16,7 +16,7 @@ N_INC_INITIAL = 1          # 焼却初期値
 N_INC_MAX = 28             # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
 N_TRANS_MAX = 8           # 中継上限
-# TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限
+# TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 N_IND_UNIT = 50            # 1施設当たり個体数
 N_GEN = 1000               # 世代数
 CX_PROB = 0.7              # 一様交叉
@@ -629,7 +629,7 @@ def GA_count(N_INC, N_TRANS):
     cost_2D[N_TRANS].append(cost_list)
 
     with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-        file.write(f"inc({N_INC_INITIAL}~{N_INC_MAX})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
+        file.write(f"inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
         file.write(f"cost = {str(cost_2D)}\n")
 
 
