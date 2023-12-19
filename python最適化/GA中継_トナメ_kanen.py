@@ -96,6 +96,7 @@ def GA_count(N_INC, N_TRANS):
         return individual
     toolbox.register("repair", repair)
     
+    # 全topでやるならunused_citiesかつtopから選ぶ
     def cxSet(ind1, ind2):
         # 処理施設の遺伝子リストでの一様交叉
         common_inc = set(ind1.inc_facility) & set(ind2.inc_facility)
@@ -133,6 +134,7 @@ def GA_count(N_INC, N_TRANS):
         return ind1, ind2
     toolbox.register("mate", cxSet)
 
+    # 全topでやるならunused_citiesかつtopから選ぶ
     def mutSet(individual):
         for i in range(len(individual)):
             if random.random() < MUT_PROB:
