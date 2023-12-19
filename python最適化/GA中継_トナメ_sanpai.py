@@ -12,7 +12,7 @@ hokkaido = data.name
 # パラメータ##########################################################
 waste_name = "sanpai"
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 13          # 焼却初期値
+N_INC_INITIAL = 1          # 焼却初期値
 N_INC_MAX = 28             # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
 N_TRANS_MAX = 8           # 中継上限
@@ -96,6 +96,7 @@ def GA_count(N_INC, N_TRANS):
         return individual
     toolbox.register("repair", repair)
     
+    # 全topでやるならunused_citiesかつtopから選ぶ
     def cxSet(ind1, ind2):
         # 処理施設の遺伝子リストでの一様交叉
         common_inc = set(ind1.inc_facility) & set(ind2.inc_facility)
@@ -133,6 +134,7 @@ def GA_count(N_INC, N_TRANS):
         return ind1, ind2
     toolbox.register("mate", cxSet)
 
+    # 全topでやるならunused_citiesかつtopから選ぶ
     def mutSet(individual):
         for i in range(len(individual)):
             if random.random() < MUT_PROB:
