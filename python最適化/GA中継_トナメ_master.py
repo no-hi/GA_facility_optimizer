@@ -13,12 +13,12 @@ hokkaido = data.name
 waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
 N_INC_INITIAL = 1         # 焼却初期値
-N_INC_MAX = 7             # 焼却上限
+N_INC_MAX = 4             # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 1            # 中継上限
+N_TRANS_MAX = 3            # 中継上限
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 N_IND_UNIT = 50            # 1施設当たり個体数
-N_GEN = 1000                  # 世代数
+N_GEN = 5                  # 世代数
 CX_PROB = 0.7              # 一様交叉
 MUT_PROB = 0.3             # 突然変異
 TOUR_SIZE = 4              # トーナメント
@@ -628,9 +628,10 @@ def GA_count(N_INC, N_TRANS):
     cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
     cost_2D[N_TRANS].append(cost_list)
 
-    with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-        file.write(f"inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
-        file.write(f"cost = {str(cost_2D)}\n")
+    if N_TRANS==N_TRANS_MAX:
+        with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+            file.write(f"inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
+            file.write(f"cost = {str(cost_2D)}\n")
 
 
     return hof[0]
