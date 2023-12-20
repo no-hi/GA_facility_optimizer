@@ -13,9 +13,9 @@ hokkaido = data.name
 waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
 N_INC_INITIAL = 1         # 焼却初期値
-N_INC_MAX = 15             # 焼却上限
+N_INC_MAX = 20             # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 5            # 中継上限
+N_TRANS_MAX = 8            # 中継上限
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 N_IND_UNIT = 50            # 1施設当たり個体数
 N_GEN = 1000               # 世代数
@@ -504,6 +504,25 @@ def GA_count(N_INC, N_TRANS):
     elapsed_time_count = end_time_count - start_time_count
     output_content = []
     
+    # 諸情報
+    output_content += ["----------------------  実行情報  ----------------------",
+                    f"実行時間＝{round(elapsed_time_count)}秒",
+                    f"個体数＝{str(N_IND)}",
+                    f"合計世代数＝{str(sumgen)}"
+                    ]
+    
+    # 前提情報
+    top_cities_info = [f"{hokkaido[i]} ({waste[i]})" for i in get_top_cities()]
+    output_content += ["------------------------  前提  ------------------------\n",
+                    f"waste={waste_name}\n",
+                    # f"ごみ量{str(TOP_N_CITIES)}位以内：",
+                    f"ごみ量{str(len(best_individual)+10)}位以内：",                    
+                    ", ".join(top_cities_info),
+                    f"\n焼却施設数: {str(len(best_individual.inc_facility))}",
+                    f"中継施設数: {str(len(best_individual.trans_facility))}\n",
+                    f"輸送単価＝ {str(UNIT_TRANS)} 円/t/km",
+                    ]
+    
     # GAPlot入力情報
     def city_2d_lists(cities_to_inc, cities_to_trans):
         direct_cities_list = []
@@ -554,25 +573,6 @@ def GA_count(N_INC, N_TRANS):
                         f"\narrows = []\n"
                         ]
     
-    # 諸情報
-    output_content += ["----------------------  実行情報  ----------------------",
-                    f"実行時間＝{round(elapsed_time_count)}秒",
-                    f"個体数＝{str(N_IND)}",
-                    f"合計世代数＝{str(sumgen)}"
-                    ]
-    
-    # ごみ量ソート
-    top_cities_info = [f"{hokkaido[i]} ({waste[i]})" for i in get_top_cities()]
-    output_content += ["------------------------  前提  ------------------------\n",
-                    f"waste={waste_name}\n",
-                    # f"ごみ量{str(TOP_N_CITIES)}位以内：",
-                    f"ごみ量{str(len(best_individual)+10)}位以内：",                    
-                    ", ".join(top_cities_info),
-                    f"\n焼却施設数: {str(len(best_individual.inc_facility))}",
-                    f"中継施設数: {str(len(best_individual.trans_facility))}\n",
-                    f"輸送単価＝ {str(UNIT_TRANS)} 円/t/km",
-                    ]
-    
     # コスト情報
     sorted_inc_size = sorted(((i, inc_size) for i, inc_size in enumerate(yearly_inc_size)), key=lambda x: x[1], reverse=True)
     sorted_inc_i = [best_individual.inc_facility[i] for i, _ in sorted_inc_size]
@@ -622,7 +622,7 @@ def GA_count(N_INC, N_TRANS):
     write_to_file(output_file_path, '\n'.join(output_content))
     
     
-    # 折れ線グラフ用
+    # 折れ線グラフ用出力
     global cost_2D
     if N_INC == N_INC_INITIAL and N_TRANS == N_TRANS_INITIAL:
         cost_2D = [[] for _ in range(N_TRANS_MAX + 1)]
@@ -634,6 +634,7 @@ def GA_count(N_INC, N_TRANS):
         with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
             file.write(f"inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
             file.write(f"cost = {str(cost_2D)}\n")
+
 
     return hof[0]
 
