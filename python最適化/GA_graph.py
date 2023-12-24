@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import matplotlib
-matplotlib.rcParams['font.family'] = 'TakaoPGothic'
+matplotlib.rcParams['font.family'] = 'TakaoPGothic' # takao インストール後、matplotlibのフォルダ行ってキャッシュ削除
 # matplotlib.rcParams['font.family'] = 'IPAexGothic'
 
 ##############################################################################
