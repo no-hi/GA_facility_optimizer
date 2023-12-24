@@ -580,15 +580,15 @@ def GA_count(N_INC, N_TRANS):
     sorted_trans_i = [best_individual.trans_facility[i] for i, _ in sorted_trans_size]
 
     output_content += ["\n---------------------  コスト情報  ---------------------\n",                        
+                    "="*len(str("Total cost: ") + str(total_cost_)),
+                    "Total cost: " + str(total_cost_),
+                    "="*len(str("Total cost: ") + str(total_cost_)),
                     "TC_direct: " + str({hokkaido[key]: TC_direct_values[key] for key in sorted_inc_i if key in TC_direct_values}),
                     "IC_inc: " + str({hokkaido[key]: IC_inc_values[key] for key in sorted_inc_i if key in IC_inc_values}),
                     "OC_inc: " + str({hokkaido[key]: OC_inc_values[key] for key in sorted_inc_i if key in OC_inc_values}),
                     "\nTC_indirect: " + str({hokkaido[key]: TC_indirect_values[key] for key in sorted_trans_i if key in TC_indirect_values}),
                     "IC_trans: " + str({hokkaido[key]: IC_trans_values[key] for key in sorted_trans_i if key in IC_trans_values}),
-                    "OC_trans: " + str({hokkaido[key]: OC_trans_values[key] for key in sorted_trans_i if key in OC_trans_values}) + "\n",
-                    "="*len(str("Total cost: ") + str(total_cost_)),
-                    "Total cost: " + str(total_cost_),
-                    "="*len(str("Total cost: ") + str(total_cost_))
+                    "OC_trans: " + str({hokkaido[key]: OC_trans_values[key] for key in sorted_trans_i if key in OC_trans_values}) + "\n"
                     ]
     
     # 輸送情報
