@@ -111,10 +111,10 @@ for pair in arrows:
 
 
 # 凡例用のダミーマーカーを作成
-legend_markers = [plt.scatter([], [], s=size*symbolsize, edgecolor="black", color="gray", marker="o") for size in [10000, 100000, 1000000]]
+legend_markers = [plt.scatter([], [], s=size*symbolsize, edgecolor="black", color="gray", marker="o") for size in [1000, 10000, 1000000]]
 
 # 凡例のラベル
-legend_labels = ["1万 t/year", "10万 t/year", "1000万 t/year"]
+legend_labels = ["1千 t/year", "1万 t/year", "100万 t/year"]
 
 # 凡例をプロットに追加
 plt.legend(legend_markers, legend_labels, scatterpoints=1, frameon=True, labelspacing=1, title='施設の規模')
