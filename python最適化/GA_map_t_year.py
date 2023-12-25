@@ -15,6 +15,7 @@ matplotlib.rcParams['font.family'] = 'TakaoPGothic' # takao インストール�
 
 ##############################################################################
 waste = "sanpai"
+unit = "t/year"
 
 inc_size= [5587, 3668, 2068, 1857, 1179, 977, 892, 668, 579, 468, 459, 313, 302, 271, 267, 262, 235, 229, 225, 180, 170, 126, 119, 113, 99, 96, 80, 67]
 inc_facility = ['苫小牧市', '釧路市', '札幌市', '室蘭市', '登別市', '伊達市', '帯広市', '函館市', '旭川市', '江別市', '千歳市', '北見市', '小樽市', '白老町', 'むかわ町', '洞爺湖町', '新十津川町', '標茶町', '厚岸町', '稚内市', '中標津町', '名寄市', '網走市', '俱知安町', '新ひだか町', '紋別市', '今金町', '根室市']
@@ -111,12 +112,18 @@ for pair in arrows:
 
 
 # 凡例用のダミーマーカーを作成
-legend_markers = [plt.scatter([], [], s=size*symbolsize, edgecolor="black", color="gray", marker="o") for size in [1000, 10000, 1000000]]
+if unit == "t/year":
+    legend_markers = [plt.scatter([], [], s=size*symbolsize, edgecolor="black", color="gray", marker="o") for size in [10000, 100000, 1000000]]
+if unit == "t/day":
+    legend_markers = [plt.scatter([], [], s=size*symbolsize, edgecolor="black", color="gray", marker="o") for size in [100, 1000, 10000]]
 
 # 凡例のラベル
-legend_labels = ["1千 t/year", "1万 t/year", "100万 t/year"]
+if unit == "t/year":
+    legend_labels = ["1万", "10万", "100万"]
+if unit == "t/day":
+    legend_labels = ["100", "1000", "10000"]
 
 # 凡例をプロットに追加
-plt.legend(legend_markers, legend_labels, scatterpoints=1, frameon=True, labelspacing=1, title='施設の規模')
+plt.legend(legend_markers, legend_labels, scatterpoints=1, frameon=True, labelspacing=1, title= f'施設の規模{unit}')
 
 plt.show()
