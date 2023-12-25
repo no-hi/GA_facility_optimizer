@@ -9,6 +9,9 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import matplotlib.cm as cm
+import matplotlib
+matplotlib.rcParams['font.family'] = 'TakaoPGothic' # takao インストール後、matplotlibのフォルダ行ってキャッシュ削除
+
 
 ##############################################################################
 waste = "sanpai"
@@ -107,6 +110,13 @@ for pair in arrows:
                         arrowprops=dict(arrowstyle="->", color="blue"))
 
 
+# 凡例用のダミーマーカーを作成
+legend_markers = [plt.scatter([], [], s=size*symbolsize, edgecolor="black", color="gray", marker="o") for size in [100, 500, 1000]]
 
+# 凡例のラベル
+legend_labels = ["100 t/day", "500 t/day", "1000 t/day"]
+
+# 凡例をプロットに追加
+plt.legend(legend_markers, legend_labels, scatterpoints=1, frameon=True, labelspacing=1, title='施設の規模')
 
 plt.show()
