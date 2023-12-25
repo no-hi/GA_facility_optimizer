@@ -544,14 +544,15 @@ def GA_count(N_INC, N_TRANS):
     inc_facility = [hokkaido[best_individual.inc_facility[inc_index]] for inc_index in sorted_inc_indices]
     
     output_content += [f"--------------------  GAPlot_input  --------------------\n",
-                    f"inc_size= {str([round(yearly_inc_size[i]/365) for i in sorted_inc_indices])}\n"
+                    f"waste ={waste_name}\n" ,
+                    f"inc_size= {str([round(yearly_inc_size[i]) for i in sorted_inc_indices])}\n" ,
                     f"inc_facility = {inc_facility}",
                     f"inc_blocks = {str(direct_cities_list)}\n"  
                     ]
     
     if yearly_trans_size != []:
         trans_facility = [hokkaido[best_individual.trans_facility[trans_index]] for trans_index in sorted_trans_indices]
-        output_content += [f"trans_size={str([round(yearly_trans_size[i]/365) for i in sorted_trans_indices])}",
+        output_content += [f"trans_size={str([round(yearly_trans_size[i]) for i in sorted_trans_indices])}",
                         f"trans_facility = {trans_facility}",
                         f"trans_blocks = {str(indirect_cities_list)}"
                         ]
