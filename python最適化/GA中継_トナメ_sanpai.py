@@ -634,6 +634,7 @@ def GA_count(N_INC, N_TRANS):
     if N_TRANS==N_TRANS_MAX:
         with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
             file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
+            file.write(f"foldername = {waste_name}{UNIT_TRANS}\n")
             file.write(f"cost = {str(cost_2D)}\n")
 
 

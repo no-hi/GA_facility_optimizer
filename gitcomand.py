@@ -11,5 +11,8 @@
 
 
 # git pull
-# git reset --hard origin/master
+# git reset --hard origin/master        無理やりpull
 
+# git stash         現在の変更を一時保存
+# git pull
+# git stash pop     一時保存した変更を戻す
