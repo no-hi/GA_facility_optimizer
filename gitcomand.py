@@ -13,6 +13,8 @@
 # git pull
 # git reset --hard origin/master        無理やりpull
 
-# git stash         現在の変更を一時保存
+# git fetch               最新の変更を取得する
+# git stash               現在の変更を一時保存
+# git merge origin/main   リモートの変更をマージする
 # git pull
-# git stash pop     一時保存した変更を戻す
+# git stash pop           スタッシュからローカルの変更を戻す
