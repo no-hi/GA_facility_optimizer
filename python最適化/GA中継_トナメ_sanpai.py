@@ -508,7 +508,10 @@ def GA_count(N_INC, N_TRANS):
     output_content += ["----------------------  実行情報  ----------------------",
                     f"実行時間＝{round(elapsed_time_count)}秒",
                     f"個体数＝{str(N_IND)}",
-                    f"合計世代数＝{str(sumgen)}"
+                    f"合計世代数＝{str(sumgen)}",
+                    "="*len(str("Total cost: ") + str(total_cost_)),
+                    "Total cost: " + str(total_cost_),
+                    "="*len(str("Total cost: ") + str(total_cost_))
                     ]
     
     # 前提情報
@@ -587,9 +590,6 @@ def GA_count(N_INC, N_TRANS):
                     "\nTC_indirect: " + str({hokkaido[key]: TC_indirect_values[key] for key in sorted_trans_i if key in TC_indirect_values}),
                     "IC_trans: " + str({hokkaido[key]: IC_trans_values[key] for key in sorted_trans_i if key in IC_trans_values}),
                     "OC_trans: " + str({hokkaido[key]: OC_trans_values[key] for key in sorted_trans_i if key in OC_trans_values}) + "\n",
-                    "="*len(str("Total cost: ") + str(total_cost_)),
-                    "Total cost: " + str(total_cost_),
-                    "="*len(str("Total cost: ") + str(total_cost_))
                     ]
     
     # 輸送情報

@@ -508,7 +508,10 @@ def GA_count(N_INC, N_TRANS):
     output_content += ["----------------------  実行情報  ----------------------",
                     f"実行時間＝{round(elapsed_time_count)}秒",
                     f"個体数＝{str(N_IND)}",
-                    f"合計世代数＝{str(sumgen)}"
+                    f"合計世代数＝{str(sumgen)}",
+                    "="*len(str("Total cost: ") + str(total_cost_)),
+                    "Total cost: " + str(total_cost_),
+                    "="*len(str("Total cost: ") + str(total_cost_)),
                     ]
     
     # 前提情報
@@ -580,10 +583,7 @@ def GA_count(N_INC, N_TRANS):
     sorted_trans_size = sorted(((i, trans_size) for i, trans_size in enumerate(yearly_trans_size)), key=lambda x: x[1], reverse=True)
     sorted_trans_i = [best_individual.trans_facility[i] for i, _ in sorted_trans_size]
 
-    output_content += ["\n---------------------  コスト情報  ---------------------\n",                        
-                    "="*len(str("Total cost: ") + str(total_cost_)),
-                    "Total cost: " + str(total_cost_),
-                    "="*len(str("Total cost: ") + str(total_cost_)),
+    output_content += ["\n---------------------  コスト情報  ---------------------\n",
                     "TC_direct: " + str({hokkaido[key]: TC_direct_values[key] for key in sorted_inc_i if key in TC_direct_values}),
                     "IC_inc: " + str({hokkaido[key]: IC_inc_values[key] for key in sorted_inc_i if key in IC_inc_values}),
                     "OC_inc: " + str({hokkaido[key]: OC_inc_values[key] for key in sorted_inc_i if key in OC_inc_values}),
