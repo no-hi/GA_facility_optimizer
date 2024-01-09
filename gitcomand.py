@@ -22,7 +22,7 @@
 # git pull
 # git stash pop           スタッシュからローカルの変更を戻す
 
-# このＰＣでの変更を破棄してpull
+# このPCでの変更を破棄してpull
 # git checkout -- python最適化/GA中継_トナメ_kanen.py
 # git checkout -- python最適化/GA中継_トナメ_sanpai.py
 # git pull
