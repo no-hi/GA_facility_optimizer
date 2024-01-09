@@ -23,7 +23,7 @@ CX_PROB = 0.7              # 一様交叉
 MUT_PROB = 0.3             # 突然変異
 TOUR_SIZE = 4              # トーナメント
 ELITE_SIZE = 0.1           # エリートサイズ
-UNIT_TRANS = 300          # 広域輸送単価
+UNIT_TRANS = 1000          # 広域輸送単価
 toolbox.register("select", tools.selTournament, tournsize=TOUR_SIZE)
 #####################################################################
 waste = getattr(data, waste_name)

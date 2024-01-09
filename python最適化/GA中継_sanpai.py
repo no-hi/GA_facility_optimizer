@@ -12,7 +12,7 @@ hokkaido = data.name
 # パラメータ##########################################################
 waste_name = "sanpai"
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 10         # 焼却初期値
+N_INC_INITIAL = 1         # 焼却初期値
 N_INC_MAX = 30             # 焼却上限
 N_TRANS_INITIAL = 0       # 中継初期値
 N_TRANS_MAX = 8           # 中継上限
@@ -23,7 +23,7 @@ CX_PROB = 0.7              # 一様交叉
 MUT_PROB = 0.3             # 突然変異
 TOUR_SIZE = 4              # トーナメント
 ELITE_SIZE = 0.1           # エリートサイズ
-UNIT_TRANS = 300           # 広域輸送単価
+UNIT_TRANS = 1000           # 広域輸送単価
 toolbox.register("select", tools.selTournament, tournsize=TOUR_SIZE)
 #####################################################################
 waste = getattr(data, waste_name)
