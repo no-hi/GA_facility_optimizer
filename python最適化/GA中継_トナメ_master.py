@@ -243,7 +243,8 @@ def GA_count(N_INC, N_TRANS):
                         else:
                             CAR_trans = daily_trans_size / 10
                             # CT＝建設費、CB＝車両購入費
-                            C_T = float(3*10**8 * (daily_trans_size / 100)**0.7 /20) /10000
+                            # C_T = float(3*10**8 * (daily_trans_size / 100)**0.7 /20) /10000
+                            C_T= 216468*daily_trans_size**(-0.643)*1000*daily_trans_size/20/10000
                             C_B = float((1+0.4)*10**7 *CAR_trans /7) /10000
                             IC_TRANS = C_T+C_B
                             
@@ -391,7 +392,8 @@ def GA_count(N_INC, N_TRANS):
                         else:
                             CAR_trans = daily_trans_size / 10
                             # CT＝建設費、CB＝車両購入費
-                            C_T = float(3*10**8 * (daily_trans_size / 100)**0.7 /20) /10000
+                            # C_T = float(3*10**8 * (daily_trans_size / 100)**0.7 /20) /10000
+                            C_T= 216468*daily_trans_size**(-0.643)*1000*daily_trans_size/20/10000
                             C_B = float((1+0.4)*10**7 *CAR_trans /7) /10000
                             IC_TRANS = C_T+C_B
                             
