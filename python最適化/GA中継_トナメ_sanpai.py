@@ -249,7 +249,7 @@ def GA_count(N_INC, N_TRANS):
                             
                             # CM=整備補修費、CP=人件費、CE=電気使用料、CW=水道費
                             C_M = float(1.344*10**6 * CAR_trans +0.4*C_T) /10000
-                            C_P = float(7*10**6 * (4 + int(1.16*CAR_trans) + int(3*daily_trans_size/100 - 1))) /10000
+                            C_P = float(7*10**6 * (4 + int(3*daily_trans_size/100 - 1))) /10000
                             # 2021日本産業用平均電気価格＝19.28円/kWh
                             C_E = float(6200*19.28*daily_trans_size) /10000
                             # 水道代=300円/m3（松藤中継資料のエクセルの通り）
@@ -397,7 +397,7 @@ def GA_count(N_INC, N_TRANS):
                             
                             # CM=整備補修費、CP=人件費、CE=電気使用料、CW=水道費
                             C_M = float(1.344*10**6 * CAR_trans +0.4*C_T) /10000
-                            C_P = float(7*10**6 * (4 + int(1.16*CAR_trans) + int(3*daily_trans_size/100 - 1))) /10000
+                            C_P = float(7*10**6 * (4 + int(3*daily_trans_size/100 - 1))) /10000
                             # 2021日本産業用平均電気価格＝19.28円/kWh
                             C_E = float(6200*19.28*daily_trans_size) /10000
                             # 水道代=300円/m3（松藤中継資料のエクセルの通り）

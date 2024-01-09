@@ -1,4 +1,4 @@
-daily_trans_size=273
+daily_trans_size=90
 
 CAR_trans = daily_trans_size / 10
 # CT＝建設費、CB＝車両購入費
@@ -8,7 +8,7 @@ IC_TRANS = C_T+C_B
 
 # CM=整備補修費、CP=人件費、CE=電気使用料、CW=水道費
 C_M = float(1.344*10**6 * CAR_trans +0.4*C_T) /10000
-C_P = float(7*10**6 * (4 + int(1.16*CAR_trans) + int(3*daily_trans_size/100 - 1))) /10000
+C_P = float(7*10**6 * (4 + int(3*daily_trans_size/100 - 1))) /10000
 
 # /100
 
