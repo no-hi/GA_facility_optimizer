@@ -642,20 +642,12 @@ def GA_count(N_INC, N_TRANS):
 
 # ループ終了########################################################################################################################
 
-best_solutions = {}
-
 # 本チャン########################################################################
+best_solutions = {}
 for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1):
     for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1):
         best_individual = GA_count(count_inc,count_trans)
         best_solutions[count_inc,count_trans] = best_individual.fitness.values[0]
-#################################################################################
-
-# 施設数指定######################################################################
-# count_inc = 1
-# count_trans = 0
-# best_individual = GA_count(count_inc,count_trans)
-# best_solutions[count_inc,count_trans] = best_individual.fitness.values[0]
 #################################################################################
 
 optimal_count_inc = min(best_solutions, key=lambda x: best_solutions[x])[0]
