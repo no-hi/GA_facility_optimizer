@@ -1,8 +1,9 @@
-daily_trans_size=90
+daily_trans_size=45
 
 CAR_trans = daily_trans_size / 10
 # CT＝建設費、CB＝車両購入費
 C_T = float(3*10**8 * (daily_trans_size / 100)**0.7 /20) /10000
+C_T2= 216468*daily_trans_size**(-0.643)*1000*daily_trans_size/20/10000
 C_B = float((1+0.4)*10**7 *CAR_trans /7) /10000
 IC_TRANS = C_T+C_B
 
@@ -18,7 +19,8 @@ C_E = float(6200*19.28*daily_trans_size) /10000
 C_W = float(93*300*CAR_trans) /10000
 OC_TRANS = C_M + C_P + C_E + C_W
 
-print(f"C_T={C_T}")
+print(f"C_T={round(C_T*20/10000,2)}億円")
+print(f"C_T2={round(C_T2*20/10000,2)}億円")
 print(f"C_B={C_B}")
 print(f"C_M={C_M}")
 print(f"C_P={C_P}")
