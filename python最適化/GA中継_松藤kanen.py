@@ -10,6 +10,7 @@ import data
 toolbox = base.Toolbox()
 hokkaido = data.name
 # パラメータ##########################################################
+add_name = ""
 waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
 N_INC_INITIAL = 16         # 焼却初期値
@@ -33,7 +34,7 @@ distance = np.array(distance).reshape(len(hokkaido), len(hokkaido)) #2次元距�
 start_time = time.perf_counter()
 current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 script_name = os.path.splitext(os.path.basename(__file__))[0]
-output_directory_name = f"{UNIT_TRANS}{waste_name}_{current_time}"
+output_directory_name = f"{UNIT_TRANS}{waste_name}{add_name}_{current_time}"
 current_directory = os.path.dirname(os.path.abspath(__file__))
 output_directory = os.path.join(current_directory, output_directory_name)
 if not os.path.exists(output_directory):
