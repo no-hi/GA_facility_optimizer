@@ -26,3 +26,8 @@
 # git checkout -- python最適化/GA中継_トナメ_kanen.py
 # git checkout -- python最適化/GA中継_トナメ_sanpai.py
 # git pull
+
+# 状況確認
+# git status
+
+# rebaseかmergeのやり方を知る
