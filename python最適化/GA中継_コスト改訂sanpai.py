@@ -242,21 +242,19 @@ def GA_count(N_INC, N_TRANS):
                             OC_TRANS = 0
                         
                         else:
-                            CAR_trans = daily_trans_size / 10
+                            CAR_trans = round(daily_trans_size / 10)
                             # CT＝建設費、CB＝車両購入費
-                            # C_T = float(3*10**8 * (daily_trans_size / 100)**0.7 /20) /10000
-                            C_T= 216468*daily_trans_size**(-0.643)*1000*daily_trans_size/20/10000
+                            C_T= float(216468*daily_trans_size**(-0.643)*1000*daily_trans_size/25) * (153.2/92.3) /10000
                             C_B = float((1+0.4)*10**7 *CAR_trans /7) /10000
                             IC_TRANS = C_T+C_B
-                            
-                            # CM=整備補修費、CP=人件費、CE=電気使用料、CW=水道費
-                            C_M = float(1.344*10**6 * CAR_trans +0.4*C_T) /10000
+
+                            # CM=整備補修費、CP=人件費、CE=電気使用料
+                            C_M = float(0.02*25*C_T*10000) /10000
                             C_P = float(7*10**6 * (4 + int(3*daily_trans_size/100 - 1))) /10000
+
                             # 2021日本産業用平均電気価格＝19.28円/kWh
                             C_E = float(6200*19.28*daily_trans_size) /10000
-                            # 水道代=300円/m3（松藤中継資料のエクセルの通り）
-                            C_W = float(93*300*CAR_trans) /10000
-                            OC_TRANS = C_M + C_P + C_E + C_W
+                            OC_TRANS = C_M + C_P + C_E
                         
                         total_IC_trans += IC_TRANS
                         total_OC_trans += OC_TRANS
@@ -391,21 +389,19 @@ def GA_count(N_INC, N_TRANS):
                             OC_TRANS = 0
                         
                         else:
-                            CAR_trans = daily_trans_size / 10
+                            CAR_trans = round(daily_trans_size / 10)
                             # CT＝建設費、CB＝車両購入費
-                            # C_T = float(3*10**8 * (daily_trans_size / 100)**0.7 /20) /10000
-                            C_T= 216468*daily_trans_size**(-0.643)*1000*daily_trans_size/20/10000
+                            C_T= float(216468*daily_trans_size**(-0.643)*1000*daily_trans_size/25) * (153.2/92.3) /10000
                             C_B = float((1+0.4)*10**7 *CAR_trans /7) /10000
                             IC_TRANS = C_T+C_B
-                            
-                            # CM=整備補修費、CP=人件費、CE=電気使用料、CW=水道費
-                            C_M = float(1.344*10**6 * CAR_trans +0.4*C_T) /10000
+
+                            # CM=整備補修費、CP=人件費、CE=電気使用料
+                            C_M = float(0.02*25*C_T*10000) /10000
                             C_P = float(7*10**6 * (4 + int(3*daily_trans_size/100 - 1))) /10000
+
                             # 2021日本産業用平均電気価格＝19.28円/kWh
                             C_E = float(6200*19.28*daily_trans_size) /10000
-                            # 水道代=300円/m3（松藤中継資料のエクセルの通り）
-                            C_W = float(93*300*CAR_trans) /10000
-                            OC_TRANS = C_M + C_P + C_E + C_W
+                            OC_TRANS = C_M + C_P + C_E
                         
                         total_IC_trans += IC_TRANS
                         total_OC_trans += OC_TRANS
@@ -514,7 +510,7 @@ def GA_count(N_INC, N_TRANS):
                     f"合計世代数＝{str(sumgen)}",
                     "="*len(str("Total cost: ") + str(total_cost_)),
                     "Total cost: " + str(total_cost_),
-                    "="*len(str("Total cost: ") + str(total_cost_))
+                    "="*len(str("Total cost: ") + str(total_cost_)),
                     ]
     
     # 前提情報
@@ -586,13 +582,13 @@ def GA_count(N_INC, N_TRANS):
     sorted_trans_size = sorted(((i, trans_size) for i, trans_size in enumerate(yearly_trans_size)), key=lambda x: x[1], reverse=True)
     sorted_trans_i = [best_individual.trans_facility[i] for i, _ in sorted_trans_size]
 
-    output_content += ["\n---------------------  コスト情報  ---------------------\n",                        
+    output_content += ["\n---------------------  コスト情報  ---------------------\n",
                     "TC_direct: " + str({hokkaido[key]: TC_direct_values[key] for key in sorted_inc_i if key in TC_direct_values}),
                     "IC_inc: " + str({hokkaido[key]: IC_inc_values[key] for key in sorted_inc_i if key in IC_inc_values}),
                     "OC_inc: " + str({hokkaido[key]: OC_inc_values[key] for key in sorted_inc_i if key in OC_inc_values}),
                     "\nTC_indirect: " + str({hokkaido[key]: TC_indirect_values[key] for key in sorted_trans_i if key in TC_indirect_values}),
                     "IC_trans: " + str({hokkaido[key]: IC_trans_values[key] for key in sorted_trans_i if key in IC_trans_values}),
-                    "OC_trans: " + str({hokkaido[key]: OC_trans_values[key] for key in sorted_trans_i if key in OC_trans_values}) + "\n",
+                    "OC_trans: " + str({hokkaido[key]: OC_trans_values[key] for key in sorted_trans_i if key in OC_trans_values}) + "\n"
                     ]
     
     # 輸送情報
@@ -665,5 +661,5 @@ print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_tr
 
 end_time = time.perf_counter()
 elapsed_time = end_time - start_time
-print(f"\n実行時間= {round(elapsed_time/3600)}h\n\n")
+print(f"\n実行時間= {round(elapsed_time/3600,1)}h\n\n")
 
