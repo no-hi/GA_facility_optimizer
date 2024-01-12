@@ -15,12 +15,12 @@ add_name = ""
 waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
 N_INC_INITIAL = 1          # 焼却初期値
-N_INC_MAX = 4              # 焼却上限
+N_INC_MAX = 20              # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 3            # 中継上限
+N_TRANS_MAX = 8            # 中継上限
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 N_IND_UNIT = 50            # 1施設当たり個体数
-N_GEN = 5                  # 世代数
+N_GEN = 1000                  # 世代数
 CX_PROB = 0.7              # 一様交叉
 MUT_PROB = 0.3             # 突然変異
 TOUR_SIZE = 4              # トーナメント
@@ -45,7 +45,6 @@ if not os.path.exists(output_directory):
 # 最小化
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,)) 
 creator.create("Individual", list, fitness=creator.FitnessMin, inc_facility=None, trans_facility=None, unused_cities=None)
-
 
 # GA施設数ループ##################################################
 def GA_optimization(N_INC, N_TRANS):
@@ -622,13 +621,8 @@ def GA_optimization(N_INC, N_TRANS):
     write_to_file(output_file_path, '\n'.join(output_content))
     
     
-    # 折れ線グラフ用出力
-    global cost_2D
-    if N_INC == N_INC_INITIAL and N_TRANS == N_TRANS_INITIAL:
-        cost_2D = [[] for _ in range(N_TRANS_MAX + 1)]
-
+    # 折れ線グラフ用出力(最初、関数外でcost2D作成済み)
     cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
-    cost_2D[N_TRANS].append(cost_list)
 
     if N_TRANS==N_TRANS_MAX:
         with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
@@ -637,28 +631,31 @@ def GA_optimization(N_INC, N_TRANS):
             file.write(f"cost = {str(cost_2D)}\n")
 
 
-    return hof[0]
+    return hof[0], cost_list
 
 # ループ終了########################################################################################################################
 
 # 並列実行########################################################################
 def multi_task(tasks):
     count_inc, count_trans = tasks
-    best_individual = GA_optimization(count_inc, count_trans)
-    return count_inc, count_trans, best_individual.fitness.values[0]
+    best_individual, cost_list = GA_optimization(count_inc, count_trans)
+    return count_inc, count_trans, best_individual.fitness.values[0], cost_list
 
-tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
-pool = multiprocessing.Pool()
-results = pool.map(multi_task, tasks)
+if __name__ == '__main__':
+    tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
+    pool = multiprocessing.Pool()
+    results = pool.map(multi_task, tasks)
 
-# 結果格納
-best_solutions = {}
-for count_inc, count_trans, fitness in results:
-    best_solutions[(count_inc, count_trans)] = fitness
+    # 結果格納
+    best_solutions = {}
+    for count_inc, count_trans, fitness in results:
+        best_solutions[(count_inc, count_trans)] = fitness
 
-# プールを閉じて待機
-pool.close()
-pool.join()
+    cost_2D[count_trans]= cost_list
+
+    # プールを閉じて待機
+    pool.close()
+    pool.join()
 #################################################################################
 
 optimal_count_inc = min(best_solutions, key=lambda x: best_solutions[x])[0]
