@@ -6,6 +6,7 @@ import time
 import datetime
 import collections
 import data
+import multiprocessing
 
 toolbox = base.Toolbox()
 hokkaido = data.name
@@ -640,12 +641,24 @@ def GA_optimization(N_INC, N_TRANS):
 
 # ループ終了########################################################################################################################
 
-# 本チャン########################################################################
+# 並列実行########################################################################
+def multi_task(tasks):
+    count_inc, count_trans = tasks
+    best_individual = GA_optimization(count_inc, count_trans)
+    return count_inc, count_trans, best_individual.fitness.values[0]
+
+tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
+pool = multiprocessing.Pool()
+results = pool.map(multi_task, tasks)
+
+# 結果格納
 best_solutions = {}
-for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1):
-    for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1):
-        best_individual = GA_optimization(count_inc,count_trans)
-        best_solutions[count_inc,count_trans] = best_individual.fitness.values[0]
+for count_inc, count_trans, fitness in results:
+    best_solutions[(count_inc, count_trans)] = fitness
+
+# プールを閉じて待機
+pool.close()
+pool.join()
 #################################################################################
 
 optimal_count_inc = min(best_solutions, key=lambda x: best_solutions[x])[0]

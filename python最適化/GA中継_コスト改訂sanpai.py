@@ -47,7 +47,7 @@ creator.create("Individual", list, fitness=creator.FitnessMin, inc_facility=None
 
 
 # GA施設数ループ##################################################
-def GA_count(N_INC, N_TRANS):
+def GA_optimization(N_INC, N_TRANS):
     start_time_count = time.perf_counter()
     N_IND = N_IND_UNIT * (N_INC+N_TRANS)
 
@@ -646,7 +646,7 @@ def GA_count(N_INC, N_TRANS):
 best_solutions = {}
 for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1):
     for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1):
-        best_individual = GA_count(count_inc,count_trans)
+        best_individual = GA_optimization(count_inc,count_trans)
         best_solutions[count_inc,count_trans] = best_individual.fitness.values[0]
 #################################################################################
 
