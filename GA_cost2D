@@ -26,3 +26,79 @@ def GA_optimization(N_INC,N_TRANS):
             file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
             file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
             file.write(f"cost = {str(cost_2D)}\n")
+
+
+
+#　マルチプロセスmanager
+def GA_optimization(N_INC, N_TRANS, cost_2D_proxy):
+    # ... (GA_optimizationの処理)
+    cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
+    
+    # Managerを使用して共有されるリストを更新
+    with cost_2D_proxy.get_lock():  # 複数プロセス間のデータの整合性を保つためにロックを使用
+        cost_2D_proxy[N_TRANS].append(cost_list)
+
+def multi_task(tasks, cost_2D_proxy):
+    count_inc, count_trans = tasks
+    best_individual, cost_list = GA_optimization(count_inc, count_trans, cost_2D_proxy)
+    return count_inc, count_trans, best_individual.fitness.values[0]
+
+if __name__ == '__main__':
+    manager = multiprocessing.Manager()
+    cost_2D_proxy = manager.list([[] for _ in range(N_TRANS_MAX + 1)])  # Managerを使用して共有リストを作成
+
+    tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
+    pool = multiprocessing.Pool()
+
+    # multi_taskにcost_2D_proxyを渡す
+    results = pool.starmap(multi_task, [(task, cost_2D_proxy) for task in tasks])
+
+    pool.close()
+    pool.join()
+
+    # ファイルに書き込み
+    with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+        file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
+        file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
+        file.write(f"cost = {str(list(cost_2D_proxy))}\n")  # プロキシオブジェクトから通常のリストに変換
+
+import multiprocessing
+
+def GA_optimization(N_INC, N_TRANS):
+    # ... (GA_optimizationの処理)
+    cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
+    return best_individual, cost_list  # best_individualは適宜定義
+
+def multi_task(tasks, cost_2D_proxy):
+    count_inc, count_trans = tasks
+    best_individual, cost_list = GA_optimization(count_inc, count_trans)
+    
+    with cost_2D_proxy.get_lock():  # 共有リストへの安全なアクセス
+        cost_2D_proxy[count_trans].append(cost_list)
+    
+    return count_inc, count_trans, best_individual.fitness.values[0]
+
+if __name__ == '__main__':
+    manager = multiprocessing.Manager()
+    cost_2D_proxy = manager.list([[] for _ in range(N_TRANS_MAX + 1)])  # 共有リストの作成
+
+    tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
+    pool = multiprocessing.Pool()
+
+    # multi_taskにcost_2D_proxyを渡す
+    results = pool.starmap(multi_task, [(task, cost_2D_proxy) for task in tasks])
+
+    # 結果格納
+    best_solutions = {}
+    for count_inc, count_trans, fitness in results:
+        best_solutions[(count_inc, count_trans)] = fitness
+
+    pool.close()
+    pool.join()
+
+    # ファイルに書き込み
+    with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+        file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
+        file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
+        file.write(f"cost = {str(list(cost_2D_proxy))}\n")  # プロキシオブジェクトから通常のリストに変換
+

@@ -17,3 +17,7 @@ for count_inc, count_trans, fitness in results:
 # プールを閉じて待機
 pool.close()
 pool.join()
+
+
+
+
