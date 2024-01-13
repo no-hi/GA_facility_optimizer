@@ -7,6 +7,7 @@ import datetime
 import collections
 import data
 import multiprocessing
+from multiprocessing import Process
 
 toolbox = base.Toolbox()
 hokkaido = data.name
@@ -38,7 +39,7 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin, inc_facility=None, trans_facility=None, unused_cities=None)
 
 # GA施設数ループ##################################################
-def GA_optimization(N_INC, N_TRANS, output_directory, lock, cost_2D, counter):
+def GA_optimization(N_INC, N_TRANS, output_directory, lock, cost_2D, counter, queue):
     start_time_count = time.perf_counter()
     N_IND = N_IND_UNIT * (N_INC+N_TRANS)
 
@@ -469,6 +470,8 @@ def GA_optimization(N_INC, N_TRANS, output_directory, lock, cost_2D, counter):
 
         gen_info.append(f"{gen}: neval={neval}{record} best={hof[0].fitness.values[0]}")
         # print(f"（{waste_name}{UNIT_TRANS}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
+        message = f"（{waste_name}{UNIT_TRANS}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}"
+        queue.put(message)
         
         # 最小値が一定世代変化しない場合、ループを抜ける
         # if best_in_generation_count >= 20*(1+(N_INC+N_TRANS)//3):
@@ -624,17 +627,23 @@ def GA_optimization(N_INC, N_TRANS, output_directory, lock, cost_2D, counter):
                 file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
                 file.write(f"cost = {str(cost_2D)}\n")
 
-    print(f"{waste_name}{UNIT_TRANS}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
 
     return hof[0]
 
 
 # 並列実行########################################################################
-def multi_task(task, output_directory, lock, cost_2D, counter):
+def multi_task(task, output_directory, lock, cost_2D, counter, queue):
     count_inc, count_trans = task
-    best_individual = GA_optimization(count_inc, count_trans, output_directory, lock, cost_2D, counter)
+    best_individual = GA_optimization(count_inc, count_trans, output_directory, lock, cost_2D, counter, queue)
     return count_inc, count_trans, best_individual.fitness.values[0]
 
+def log_listener(queue):
+    # キューからメッセージを受け取り、ログとして出力する
+    while True:
+        message = queue.get()
+        if message == "kill":
+            break
+        print(message)
 
 if __name__ == '__main__':
     # 通常実行
@@ -649,16 +658,22 @@ if __name__ == '__main__':
     
     # 並列実行
     manager = multiprocessing.Manager()
+    queue = manager.Queue()
+    listener = Process(target=log_listener, args=(queue,))
+    listener.start()
     lock = manager.Lock()
     cost_2D = [[[] for _ in range(N_TRANS_MAX + 1)] for _ in range(N_INC_MAX + 1)]
     counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
 
     tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
     pool = multiprocessing.Pool()
-    results = pool.starmap(multi_task, [(task, output_directory, lock, cost_2D, counter) for task in tasks])
+    results = pool.starmap(multi_task, [(task, output_directory, lock, cost_2D, counter, queue) for task in tasks])
 
     pool.close()
     pool.join()
+
+    queue.put("kill")
+    listener.join()
     
     # 結果格納
     best_solutions = {}
