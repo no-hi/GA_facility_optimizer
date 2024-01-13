@@ -15,9 +15,9 @@ add_name = ""
 waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
 N_INC_INITIAL = 1          # 焼却初期値
-N_INC_MAX = 20              # 焼却上限
+N_INC_MAX = 2              # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 8            # 中継上限
+N_TRANS_MAX = 2            # 中継上限
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 N_IND_UNIT = 50            # 1施設当たり個体数
 N_GEN = 1000                  # 世代数
@@ -38,7 +38,7 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin, inc_facility=None, trans_facility=None, unused_cities=None)
 
 # GA施設数ループ##################################################
-def GA_optimization(N_INC, N_TRANS, output_directory, lock, cost_2D, counter):
+def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2D, counter):
     start_time_count = time.perf_counter()
     N_IND = N_IND_UNIT * (N_INC+N_TRANS)
 
@@ -622,6 +622,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, lock, cost_2D, counter):
             # すべての N_TRANS が完了した場合にファイルに書き込み
             with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'a', encoding="utf-8") as file:
                 file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
+                file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
                 file.write(f"cost = {str(cost_2D)}\n")
 
     print(f"{waste_name}{UNIT_TRANS}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
@@ -630,9 +631,9 @@ def GA_optimization(N_INC, N_TRANS, output_directory, lock, cost_2D, counter):
 
 
 # 並列実行########################################################################
-def multi_task(task, output_directory, lock, cost_2D, counter):
+def multi_task(task, output_directory, current_time, lock, cost_2D, counter):
     count_inc, count_trans = task
-    best_individual = GA_optimization(count_inc, count_trans, output_directory, lock, cost_2D, counter)
+    best_individual = GA_optimization(count_inc, count_trans, output_directory, current_time, lock, cost_2D, counter)
     return count_inc, count_trans, best_individual.fitness.values[0]
 
 
@@ -655,7 +656,7 @@ if __name__ == '__main__':
 
     tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
     pool = multiprocessing.Pool()
-    results = pool.starmap(multi_task, [(task, output_directory, lock, cost_2D, counter) for task in tasks])
+    results = pool.starmap(multi_task, [(task, output_directory, current_time, lock, cost_2D, counter) for task in tasks])
 
     pool.close()
     pool.join()
