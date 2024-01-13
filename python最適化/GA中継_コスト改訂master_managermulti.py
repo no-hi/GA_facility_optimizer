@@ -47,7 +47,7 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin, inc_facility=None, trans_facility=None, unused_cities=None)
 
 # GA施設数ループ##################################################
-def GA_optimization(N_INC, N_TRANS, lock, output_directory, cost_2D, counters):
+def GA_optimization(N_INC, N_TRANS, lock, cost_2D, counters):
     start_time_count = time.perf_counter()
     N_IND = N_IND_UNIT * (N_INC+N_TRANS)
 
@@ -625,37 +625,34 @@ def GA_optimization(N_INC, N_TRANS, lock, output_directory, cost_2D, counters):
     cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
     # 条件を満たした場合のみファイル書き込み
     with lock:
-        cost_2D[N_INC][N_TRANS] = cost_list
+        cost_2D[N_INC-1][N_TRANS] = cost_list
         counters[N_INC] += 1
         if counters[N_INC] == N_TRANS_MAX + 1:
             # すべての N_TRANS が完了した場合にファイルに書き込み
             with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'a', encoding="utf-8") as file:
-                file.write(f"#inc({N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
+                file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
                 file.write(f"cost = {str(cost_2D)}\n")
+    
 
-
-    return hof[0], cost_list
+    return hof[0]
 
 # ループ終了########################################################################################################################
 
 # 並列実行########################################################################
-def multi_task(task, lock, output_directory, cost_2D, counters):
+def multi_task(task, lock, cost_2D, counters):
     count_inc, count_trans = task
-    best_individual = GA_optimization(count_inc, count_trans, lock, output_directory, cost_2D, counters)
+    best_individual = GA_optimization(count_inc, count_trans, lock, cost_2D, counters)
     return count_inc, count_trans, best_individual.fitness.values[0]
 
 if __name__ == '__main__':
     manager = multiprocessing.Manager()
     lock = manager.Lock()
-    cost_2D = manager.list([[] for _ in range(N_TRANS_MAX + 1)])
+    cost_2D = [[[] for _ in range(N_TRANS_MAX + 1)] for _ in range(N_INC_MAX + 1)]
     counters = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
-    output_directory = "path_to_directory"  # 適宜設定
 
     tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
     pool = multiprocessing.Pool()
-    # results = pool.starmap(multi_task, [(task, lock, output_directory, cost_2D, counters) for task in tasks])
-    for task in tasks:
-        pool.apply_async(multi_task, args=(task, lock, output_directory, cost_2D, counters))
+    results = pool.starmap(multi_task, [(task, lock, cost_2D, counters) for task in tasks])
 
     pool.close()
     pool.join()
