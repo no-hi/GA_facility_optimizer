@@ -13,7 +13,7 @@ hokkaido = data.name
 add_name = ""
 waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 7          # 焼却初期値
+N_INC_INITIAL = 1          # 焼却初期値
 N_INC_MAX = 11             # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
 N_TRANS_MAX = 8            # 中継上限
@@ -624,11 +624,11 @@ def GA_count(N_INC, N_TRANS):
     # 折れ線グラフ用出力
     global cost_2D
     if N_INC == N_INC_INITIAL and N_TRANS == N_TRANS_INITIAL:
-        cost_2D = [[] for _ in range(N_TRANS_MAX + 1)]
+        cost_2D = [[[] for _ in range(N_TRANS_MAX + 1)] for _ in range(N_INC_MAX + 1)]
 
     cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
-    cost_2D[N_TRANS].append(cost_list)
-
+    cost_2D[N_INC-1][N_TRANS] = cost_list
+    
     if N_TRANS==N_TRANS_MAX:
         with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
             file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
