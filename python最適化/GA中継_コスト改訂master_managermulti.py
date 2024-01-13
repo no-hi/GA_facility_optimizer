@@ -7,6 +7,8 @@ import datetime
 import collections
 import data
 import multiprocessing
+import sys
+import signal
 
 toolbox = base.Toolbox()
 hokkaido = data.name
@@ -33,21 +35,12 @@ waste = getattr(data, waste_name)
 distance = data.distance
 distance = np.array(distance).reshape(len(hokkaido), len(hokkaido)) #2次元距離リスト生成
 
-start_time = time.perf_counter()
-current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-script_name = os.path.splitext(os.path.basename(__file__))[0]
-output_directory_name = f"{UNIT_TRANS}{waste_name}{add_name}_{current_time}"
-current_directory = os.path.dirname(os.path.abspath(__file__))
-output_directory = os.path.join(current_directory, output_directory_name)
-if not os.path.exists(output_directory):
-    os.makedirs(output_directory)
-
 # 最小化
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,)) 
 creator.create("Individual", list, fitness=creator.FitnessMin, inc_facility=None, trans_facility=None, unused_cities=None)
 
 # GA施設数ループ##################################################
-def GA_optimization(N_INC, N_TRANS, lock, cost_2D, counters):
+def GA_optimization(N_INC, N_TRANS, output_directory, lock, cost_2D, counter):
     start_time_count = time.perf_counter()
     N_IND = N_IND_UNIT * (N_INC+N_TRANS)
 
@@ -621,59 +614,70 @@ def GA_optimization(N_INC, N_TRANS, lock, cost_2D, counters):
     write_to_file(output_file_path, '\n'.join(output_content))
     
     
-    # 折れ線グラフ用出力(最初、関数外でcost2D作成済み)
+    # 折れ線グラフ用出力
     cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
     # 条件を満たした場合のみファイル書き込み
     with lock:
         cost_2D[N_INC-1][N_TRANS] = cost_list
-        counters[N_INC] += 1
-        if counters[N_INC] == N_TRANS_MAX + 1:
+        counter[N_INC] += 1
+        if counter[N_INC] == N_TRANS_MAX + 1:
             # すべての N_TRANS が完了した場合にファイルに書き込み
             with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'a', encoding="utf-8") as file:
                 file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
                 file.write(f"cost = {str(cost_2D)}\n")
-    
+
 
     return hof[0]
 
-# ループ終了########################################################################################################################
 
 # 並列実行########################################################################
-def multi_task(task, lock, cost_2D, counters):
+def multi_task(task, output_directory, lock, cost_2D, counter):
     count_inc, count_trans = task
-    best_individual = GA_optimization(count_inc, count_trans, lock, cost_2D, counters)
+    best_individual = GA_optimization(count_inc, count_trans, output_directory, lock, cost_2D, counter)
     return count_inc, count_trans, best_individual.fitness.values[0]
 
 if __name__ == '__main__':
+    # 通常実行
+    start_time = time.perf_counter()
+    current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    script_name = os.path.splitext(os.path.basename(__file__))[0]
+    output_directory_name = f"{UNIT_TRANS}{waste_name}{add_name}_{current_time}"
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    output_directory = os.path.join(current_directory, output_directory_name)
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+    
+    # 並列実行
     manager = multiprocessing.Manager()
     lock = manager.Lock()
     cost_2D = [[[] for _ in range(N_TRANS_MAX + 1)] for _ in range(N_INC_MAX + 1)]
-    counters = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
+    counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
 
     tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
     pool = multiprocessing.Pool()
-    results = pool.starmap(multi_task, [(task, lock, cost_2D, counters) for task in tasks])
+    
+    results = pool.starmap(multi_task, [(task, output_directory, lock, cost_2D, counter) for task in tasks])
 
     pool.close()
     pool.join()
-    
+
     # 結果格納
     best_solutions = {}
     for count_inc, count_trans, fitness in results:
         best_solutions[(count_inc, count_trans)] = fitness
-#################################################################################
+    #################################################################################
 
-optimal_count_inc = min(best_solutions, key=lambda x: best_solutions[x])[0]
-optimal_count_trans = min(best_solutions, key=lambda x: best_solutions[x])[1]
-optimal_file_name = f"{waste_name}_{optimal_count_inc}&{optimal_count_trans}.txt"
-new_file_name = f"{waste_name}_{optimal_count_inc}&{optimal_count_trans}_best.txt"
-optimal_file_path = os.path.join(output_directory, optimal_file_name)
-new_file_path = os.path.join(output_directory, new_file_name)
-os.rename(optimal_file_path, new_file_path)
+    optimal_count_inc = min(best_solutions, key=lambda x: best_solutions[x])[0]
+    optimal_count_trans = min(best_solutions, key=lambda x: best_solutions[x])[1]
+    optimal_file_name = f"{waste_name}_{optimal_count_inc}&{optimal_count_trans}.txt"
+    new_file_name = f"{waste_name}_{optimal_count_inc}&{optimal_count_trans}_best.txt"
+    optimal_file_path = os.path.join(output_directory, optimal_file_name)
+    new_file_path = os.path.join(output_directory, new_file_name)
+    os.rename(optimal_file_path, new_file_path)
 
-print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}")
+    print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}")
 
-end_time = time.perf_counter()
-elapsed_time = end_time - start_time
-print(f"\n実行時間= {round(elapsed_time/3600,1)}h\n\n")
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    print(f"\n実行時間= {round(elapsed_time/3600,1)}h\n\n")
 
