@@ -626,11 +626,11 @@ def GA_optimization(N_INC, N_TRANS):
     # 折れ線グラフ用出力
     global cost_2D
     if N_INC == N_INC_INITIAL and N_TRANS == N_TRANS_INITIAL:
-        cost_2D = [[[] for _ in range(N_TRANS_MAX + 1)] for _ in range(N_INC_MAX + 1)]
+        cost_2D = [[] for _ in range(N_TRANS_MAX + 1)]
 
     cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
-    cost_2D[N_INC-1][N_TRANS] = cost_list
-    
+    cost_2D[N_TRANS].append(cost_list)
+
     if N_TRANS==N_TRANS_MAX:
         with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
             file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
