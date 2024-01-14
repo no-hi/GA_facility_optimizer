@@ -624,9 +624,9 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
     
     # GA_Graph用出力
     with lock: # 共有化されたcost2Dやcounterをいじるときはlockをかける
-        cost_2D[N_INC-1][N_TRANS] = cost_list
+        cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
         counter[N_INC] += 1                
-        if counter[N_INC] == N_TRANS_MAX + 1:
+        if counter[N_INC] == N_TRANS_MAX - N_TRANS_INITIAL + 1:
             normal_cost_2D = extract_list(cost_2D)
             # 時点N_INC以下のデータのみを抽出
             filtered_cost_2D = normal_cost_2D[:N_INC]
@@ -636,17 +636,20 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
 
     # 並列実行用の表示
-    def print_progress(cost_2D):
-        for i, finish in enumerate(cost_2D, start=1):
-            progress = [str(j) if finish[j] else "@" for j in range(len(finish))]
-            progress_display = ",".join(progress)
-            sys.stdout.write(f"焼却{i} → [{progress_display}]\n")
-        sys.stdout.flush()
-        sys.stdout.write("\033[F" * len(cost_2D))
+    for i, finish in enumerate(cost_2D):
+        display_inc = i + N_INC_INITIAL
+        all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
+        progress = [str(j + N_TRANS_INITIAL) if finish[j] else "@" for j in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
+        progress_display = ",".join(progress)
+        sys.stdout.write(f"焼却{display_inc} → [{progress_display}]")
+        if all_done:
+            sys.stdout.write("完")  # すべてのトランザクションが完了した場合に"完"を追加
+        sys.stdout.write("\n")
+    sys.stdout.flush()
+    sys.stdout.write("\033[F" * len(cost_2D))
 
-    with lock:
-        print_progress(cost_2D)
 
+    
     
     return hof[0]
 
@@ -659,12 +662,15 @@ def multi_task(task, output_directory, current_time, lock, cost_2D, counter):
 
 
 if __name__ == '__main__':
+    if N_INC_INITIAL < 1:
+        print("N_INC_INITIALは1以上に設定してください")
+        sys.exit()
     sys.stdout.write("\033[?25l")
     # 通常実行
     start_time = time.perf_counter()
     current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     script_name = os.path.splitext(os.path.basename(__file__))[0]
-    output_directory_name = f"{UNIT_TRANS}{waste_name}{add_name}_{current_time}"
+    output_directory_name = f"{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}{add_name}_{current_time}"
     current_directory = os.path.dirname(os.path.abspath(__file__))
     output_directory = os.path.join(current_directory, output_directory_name)
     if not os.path.exists(output_directory):
@@ -673,9 +679,18 @@ if __name__ == '__main__':
     # 並列実行
     manager = multiprocessing.Manager()
     lock = manager.Lock()
-    cost_2D_origin = [[[] for _ in range(N_TRANS_MAX + 1)] for _ in range(N_INC_MAX)]
-    cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])
+    cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
+    cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])    
     counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
+    
+    # 初期表示
+    for i, finish in enumerate(cost_2D):
+        display_inc = i + N_INC_INITIAL
+        progress = [str(j + N_TRANS_INITIAL) if finish[j] else "@" for j in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
+        progress_display = ",".join(progress)
+        sys.stdout.write(f"焼却{display_inc} → [{progress_display}]\n")
+    sys.stdout.flush()
+    sys.stdout.write("\033[F" * len(cost_2D))
 
     tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
     pool = multiprocessing.Pool()
