@@ -622,22 +622,23 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
         else:
             return shared_list
     
-    with lock:
+    # GA_Graph用出力
+    with lock: # 共有化されたcost2Dやcounterをいじるときはlockをかける
         cost_2D[N_INC-1][N_TRANS] = cost_list
         counter[N_INC] += 1                
         if counter[N_INC] == N_TRANS_MAX + 1:
             normal_cost_2D = extract_list(cost_2D)
             # 時点N_INC以下のデータのみを抽出
             filtered_cost_2D = normal_cost_2D[:N_INC]
-            with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+            with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
                 file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
                 file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
 
     # 並列実行用の表示
     def print_progress(cost_2D):
-        for i, inc_costs in enumerate(cost_2D, start=1):
-            progress = [str(j) if inc_costs[j] else "@" for j in range(len(inc_costs))]
+        for i, finish in enumerate(cost_2D, start=1):
+            progress = [str(j) if finish[j] else "@" for j in range(len(finish))]
             progress_display = ",".join(progress)
             sys.stdout.write(f"焼却{i} → [{progress_display}]\n")
         sys.stdout.flush()
@@ -658,6 +659,7 @@ def multi_task(task, output_directory, current_time, lock, cost_2D, counter):
 
 
 if __name__ == '__main__':
+    sys.stdout.write("\033[?25l")
     # 通常実行
     start_time = time.perf_counter()
     current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -702,3 +704,5 @@ if __name__ == '__main__':
     end_time = time.perf_counter()
     elapsed_time = end_time - start_time
     print(f"\n実行時間= {round(elapsed_time/3600,1)}h\n\n")
+    sys.stdout.write("\033[?25h")
+
