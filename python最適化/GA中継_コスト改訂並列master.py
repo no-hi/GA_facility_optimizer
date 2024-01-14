@@ -20,7 +20,7 @@ N_TRANS_INITIAL = 0        # 中継初期値
 N_TRANS_MAX = 2            # 中継上限
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 N_IND_UNIT = 50            # 1施設当たり個体数
-N_GEN = 1000               # 世代数
+N_GEN = 3               # 世代数
 CX_PROB = 0.7              # 一様交叉
 MUT_PROB = 0.3             # 突然変異
 TOUR_SIZE = 4              # トーナメント
@@ -615,15 +615,21 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
     
     
     # 折れ線グラフ用出力
+    def extract_list(shared_list):  # 共有化されたcost_2Dを通常リストに変換
+        if isinstance(shared_list, multiprocessing.managers.ListProxy):
+            return [extract_list(item) for item in shared_list]
+        else:
+            return shared_list
+    
     with lock:
         cost_2D[N_INC-1][N_TRANS] = cost_list
-        counter[N_INC] += 1
+        counter[N_INC] += 1                
         if counter[N_INC] == N_TRANS_MAX + 1:
-            # すべての N_TRANS が完了した場合にファイルに書き込み
+            normal_cost_2D = extract_list(cost_2D)
             with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'a', encoding="utf-8") as file:
                 file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
                 file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
-                file.write(f"cost = {str(cost_2D)}\n")
+                file.write(f"cost = {str(normal_cost_2D)}\n")
 
     print(f"{waste_name}{UNIT_TRANS}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
 
@@ -651,13 +657,14 @@ if __name__ == '__main__':
     # 並列実行
     manager = multiprocessing.Manager()
     lock = manager.Lock()
-    cost_2D = [[[] for _ in range(N_TRANS_MAX + 1)] for _ in range(N_INC_MAX + 1)]
+    cost_2D_origin = [[[] for _ in range(N_TRANS_MAX + 1)] for _ in range(N_INC_MAX)]
+    cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])
     counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
 
     tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
     pool = multiprocessing.Pool()
     results = pool.starmap(multi_task, [(task, output_directory, current_time, lock, cost_2D, counter) for task in tasks])
-
+    
     pool.close()
     pool.join()
     
