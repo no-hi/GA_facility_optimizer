@@ -491,6 +491,7 @@ def GA_optimization(N_INC, N_TRANS):
     
     # total_costからの返り値を受け取る
     total_cost_, total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values , IC_trans_values ,OC_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc = total_cost_info(best_individual)
+    cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
 
     def write_to_file(filename, content):
             filepath = os.path.join(output_directory, filename)
@@ -581,7 +582,8 @@ def GA_optimization(N_INC, N_TRANS):
     sorted_trans_size = sorted(((i, trans_size) for i, trans_size in enumerate(yearly_trans_size)), key=lambda x: x[1], reverse=True)
     sorted_trans_i = [best_individual.trans_facility[i] for i, _ in sorted_trans_size]
 
-    output_content += ["\n---------------------  コスト情報  ---------------------\n",
+    output_content += ["\n---------------------  コスト情報  ---------------------",
+                    str(cost_list)+ "\n",
                     "TC_direct: " + str({hokkaido[key]: TC_direct_values[key] for key in sorted_inc_i if key in TC_direct_values}),
                     "IC_inc: " + str({hokkaido[key]: IC_inc_values[key] for key in sorted_inc_i if key in IC_inc_values}),
                     "OC_inc: " + str({hokkaido[key]: OC_inc_values[key] for key in sorted_inc_i if key in OC_inc_values}),

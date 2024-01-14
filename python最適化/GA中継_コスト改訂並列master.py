@@ -20,7 +20,7 @@ N_TRANS_INITIAL = 0        # 中継初期値
 N_TRANS_MAX = 2            # 中継上限
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 N_IND_UNIT = 50            # 1施設当たり個体数
-N_GEN = 1000                  # 世代数
+N_GEN = 1000               # 世代数
 CX_PROB = 0.7              # 一様交叉
 MUT_PROB = 0.3             # 突然変異
 TOUR_SIZE = 4              # トーナメント
@@ -482,6 +482,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
     
     # total_costからの返り値を受け取る
     total_cost_, total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values , IC_trans_values ,OC_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc = total_cost_info(best_individual)
+    cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
 
     def write_to_file(filename, content):
             filepath = os.path.join(output_directory, filename)
@@ -572,7 +573,8 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
     sorted_trans_size = sorted(((i, trans_size) for i, trans_size in enumerate(yearly_trans_size)), key=lambda x: x[1], reverse=True)
     sorted_trans_i = [best_individual.trans_facility[i] for i, _ in sorted_trans_size]
 
-    output_content += ["\n---------------------  コスト情報  ---------------------\n",
+    output_content += ["\n---------------------  コスト情報  ---------------------",
+                    str(cost_list)+ "\n",
                     "TC_direct: " + str({hokkaido[key]: TC_direct_values[key] for key in sorted_inc_i if key in TC_direct_values}),
                     "IC_inc: " + str({hokkaido[key]: IC_inc_values[key] for key in sorted_inc_i if key in IC_inc_values}),
                     "OC_inc: " + str({hokkaido[key]: OC_inc_values[key] for key in sorted_inc_i if key in OC_inc_values}),
@@ -613,8 +615,6 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
     
     
     # 折れ線グラフ用出力
-    cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
-    # 条件を満たした場合のみファイル書き込み
     with lock:
         cost_2D[N_INC-1][N_TRANS] = cost_list
         counter[N_INC] += 1
