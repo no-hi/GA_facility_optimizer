@@ -7,6 +7,7 @@ import datetime
 import collections
 import data
 import multiprocessing
+import sys
 
 toolbox = base.Toolbox()
 hokkaido = data.name
@@ -15,9 +16,9 @@ add_name = ""
 waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
 N_INC_INITIAL = 1          # 焼却初期値
-N_INC_MAX = 2              # 焼却上限
+N_INC_MAX = 3              # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 4            # 中継上限
+N_TRANS_MAX = 3            # 中継上限
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 N_IND_UNIT = 50            # 1施設当たり個体数
 N_GEN = 7               # 世代数
@@ -633,8 +634,19 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
                 file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
 
-    print(f"{waste_name}{UNIT_TRANS}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
+    # 並列実行用の表示
+    def print_progress(cost_2D):
+        for i, inc_costs in enumerate(cost_2D, start=1):
+            progress = [str(j) if inc_costs[j] else "@" for j in range(len(inc_costs))]
+            progress_display = ",".join(progress)
+            sys.stdout.write(f"焼却{i} → [{progress_display}]\n")
+        sys.stdout.flush()
+        sys.stdout.write("\033[F" * len(cost_2D))
 
+    with lock:
+        print_progress(cost_2D)
+
+    
     return hof[0]
 
 
@@ -684,9 +696,9 @@ if __name__ == '__main__':
     new_file_path = os.path.join(output_directory, new_file_name)
     os.rename(optimal_file_path, new_file_path)
 
+    print("\n" * len(cost_2D))
     print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}")
 
     end_time = time.perf_counter()
     elapsed_time = end_time - start_time
     print(f"\n実行時間= {round(elapsed_time/3600,1)}h\n\n")
-
