@@ -17,10 +17,10 @@ N_CITIES = len(hokkaido)   # 市町村数
 N_INC_INITIAL = 1          # 焼却初期値
 N_INC_MAX = 2              # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 2            # 中継上限
+N_TRANS_MAX = 4            # 中継上限
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 N_IND_UNIT = 50            # 1施設当たり個体数
-N_GEN = 3               # 世代数
+N_GEN = 7               # 世代数
 CX_PROB = 0.7              # 一様交叉
 MUT_PROB = 0.3             # 突然変異
 TOUR_SIZE = 4              # トーナメント
@@ -626,10 +626,12 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
         counter[N_INC] += 1                
         if counter[N_INC] == N_TRANS_MAX + 1:
             normal_cost_2D = extract_list(cost_2D)
-            with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'a', encoding="utf-8") as file:
+            # 時点N_INC以下のデータのみを抽出
+            filtered_cost_2D = normal_cost_2D[:N_INC]
+            with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
                 file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
                 file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
-                file.write(f"cost = {str(normal_cost_2D)}\n")
+                file.write(f"cost = {str(filtered_cost_2D)}\n")
 
     print(f"{waste_name}{UNIT_TRANS}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
 
