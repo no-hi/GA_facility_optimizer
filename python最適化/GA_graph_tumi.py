@@ -75,26 +75,26 @@ def bar_chart(cost_per_, N_START, filename):
     plt.savefig(filename)
     plt.close()  # グラフを閉じる
 
-if horizon == "trans":
-    save_folder = f"graphs_{str(foldername)}_TRANS_{current_time}"
+if horizon == "inc":
+    save_folder = f"graphs_{str(foldername)}_INC_{current_time}"
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     for N_TRANS in range(len(cost)):
         cost_per_inc = np.array(cost[N_TRANS])
-        title_suffix = f'N_INC = {N_TRANS+1}'
-        xlabel = 'N_TRANS'
-        filename = os.path.join(save_folder, f'INC{N_TRANS+1}.png')
-        bar_chart(cost_per_inc, 0, filename)
+        title_suffix = f'N_TRANS = {N_TRANS}'
+        xlabel = 'N_INC'
+        filename = os.path.join(save_folder, f'TRANS{N_TRANS}.png')
+        bar_chart(cost_per_inc, 1, filename)
 
-if horizon == "inc":
-    save_folder = f"graphs_{str(foldername)}_INC_{current_time}"
+if horizon == "trans":
+    save_folder = f"graphs_{str(foldername)}_TRANS_{current_time}"
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     transposed_cost = np.transpose(cost, (1, 0, 2))
     for N_INC in range(len(transposed_cost)):
         cost_per_trans = np.array(transposed_cost[N_INC])
-        title_suffix = f'N_TRANS = {N_INC}'
-        xlabel = 'N_INC'
-        filename = os.path.join(save_folder, f'TRANS{N_INC}.png')
-        bar_chart(cost_per_trans, 1, filename)
+        title_suffix = f'N_INC = {N_INC+1}'
+        xlabel = 'N_TRANS'
+        filename = os.path.join(save_folder, f'INC{N_INC+1}.png')
+        bar_chart(cost_per_trans, 0, filename)
 
