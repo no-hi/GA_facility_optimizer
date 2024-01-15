@@ -16,9 +16,9 @@ add_name = ""
 waste_name = "kanen"
 N_CITIES = len(hokkaido)   # 市町村数
 N_INC_INITIAL = 1          # 焼却初期値
-N_INC_MAX = 20              # 焼却上限
+N_INC_MAX = 11              # 焼却上限
 N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 8            # 中継上限
+N_TRANS_MAX = 3            # 中継上限
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 N_IND_UNIT = 50            # 1施設当たり個体数
 N_GEN = 1000               # 世代数
@@ -636,36 +636,24 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
 
     # 並列実行用の表示
-    # for i, finish in enumerate(cost_2D):
-    #     display_inc = i + N_INC_INITIAL
-    #     all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
-    #     progress = [str(j + N_TRANS_INITIAL) if finish[j] else "@" for j in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
-    #     progress_display = ",".join(progress)
-    #     sys.stdout.write(f"焼却{display_inc} → [{progress_display}]")
-    #     if all_done:
-    #         sys.stdout.write("完")  # すべてのトランザクションが完了した場合に"完"を追加
-    #     sys.stdout.write("\n")
-    # sys.stdout.flush()
-    # sys.stdout.write("\033[F" * len(cost_2D))
     group_size = 3  # 一行に表示する進捗表示の数
-    for i in range(0, len(cost_2D), group_size):
-        line_output = []  # 一行分の出力を格納するリスト
     with lock2:
-        for j in range(group_size):
-            if i + j < len(cost_2D):
-                finish = cost_2D[i + j]
-                display_inc = i + j + N_INC_INITIAL
-                all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
-                progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
-                progress_display = ",".join(progress)
-                line_part = f"焼却{display_inc} → [{progress_display}]"
-                if all_done:
-                    line_part += "完"  # すべてのトランザクションが完了した場合に"完"を追加
-                line_output.append(line_part)
-            sys.stdout.write("　　".join(line_output) + "\n")
-        sys.stdout.flush()
         sys.stdout.write("\033[F" * (len(cost_2D) // group_size + (len(cost_2D) % group_size > 0)))
-        
+        for i in range(0, len(cost_2D), group_size):
+            line_output = []
+            for j in range(group_size):
+                if i + j < len(cost_2D):
+                    finish = cost_2D[i + j]
+                    display_inc = i + j + N_INC_INITIAL
+                    all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
+                    progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
+                    progress_display = ",".join(progress)
+                    completion_status = "完" if all_done else "　"  # "完"またはスペースを選択
+                    line_part = f"焼却{display_inc:2} → [{progress_display}]{completion_status}"
+                    line_output.append(line_part)
+            sys.stdout.write("　".join(line_output) + "\n")  # スペースを1つに縮小
+        sys.stdout.flush()
+    
     
     return hof[0]
 
@@ -704,22 +692,14 @@ if __name__ == '__main__':
     group_size = 3  # 一行に表示する進捗表示の数
     for i in range(0, len(cost_2D), group_size):
         line_output = []  # 一行分の出力を格納するリスト
-    with lock2:
         for j in range(group_size):
             if i + j < len(cost_2D):
-                finish = cost_2D[i + j]
                 display_inc = i + j + N_INC_INITIAL
-                all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
-                progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
-                progress_display = ",".join(progress)
-                line_part = f"焼却{display_inc} → [{progress_display}]"
-                if all_done:
-                    line_part += "完"  # すべてのトランザクションが完了した場合に"完"を追加
+                progress_display = ",".join(["@" for _ in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)])
+                line_part = f"焼却{display_inc:2} → [{progress_display}]"  # 2文字の幅を確保
                 line_output.append(line_part)
-            sys.stdout.write("　　".join(line_output) + "\n")
-        sys.stdout.flush()
-        sys.stdout.write("\033[F" * (len(cost_2D) // group_size + (len(cost_2D) % group_size > 0)))
-
+        sys.stdout.write("　　".join(line_output) + "\n")
+    sys.stdout.flush()
 
     tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
     pool = multiprocessing.Pool()
