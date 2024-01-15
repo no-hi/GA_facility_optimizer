@@ -615,14 +615,13 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
     write_to_file(output_file_path, '\n'.join(output_content))
     
     
-    # 折れ線グラフ用出力
+    # GA_graph用出力
     def extract_list(shared_list):  # 共有化されたcost_2Dを通常リストに変換
         if isinstance(shared_list, multiprocessing.managers.ListProxy):
             return [extract_list(item) for item in shared_list]
         else:
             return shared_list
     
-    # GA_Graph用出力
     with lock: # 共有化されたcost2Dやcounterをいじるときはlockをかける
         cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
         counter[N_INC] += 1                
