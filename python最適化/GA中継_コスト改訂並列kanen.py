@@ -648,8 +648,6 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
     sys.stdout.flush()
     sys.stdout.write("\033[F" * len(cost_2D))
 
-
-    
     
     return hof[0]
 
