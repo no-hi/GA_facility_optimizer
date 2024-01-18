@@ -1,3 +1,17 @@
+# # 設定→git pathで検索→settings.json
+# {
+#     "explorer.confirmDragAndDrop": false,
+#     "git.autofetch": true,
+#     "git.enableSmartCommit": true,
+#     "git.path": "C:\\Program Files\\Git\\bin\\git.exe",
+#     "python.condaPath": "C:\\Users\\hyo15\\anaconda3\\Scripts\\conda-script.py",
+#     "python.defaultInterpreterPath": "C:\\Users\\hyo15\\anaconda3\\python.exe",
+#     "python.pythonPath": "C:\\Users\\hyo15\\anaconda3\\python.exe",
+#     "python.terminal.activateEnvironment": true,
+#     "terminal.integrated.enableMultiLinePasteWarning": false,
+#     "workbench.startupEditor": "none"
+# }
+
 # # git init
 # git remote add origin https://github.com/no-hi/remote_nohi_11_16
 # git clone https://github.com/no-hi/remote_nohi_11_16
