@@ -23,9 +23,8 @@
 # git push --force
 
 # git pull
+# git reset --hard origin/master  #無理やりpull
 
-# 無理やりpull
-# git reset --hard origin/master
 
 # 一時保存してマージ
 # git fetch               最新の変更を取得する
