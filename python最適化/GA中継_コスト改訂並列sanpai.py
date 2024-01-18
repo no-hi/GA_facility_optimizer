@@ -165,7 +165,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                     near_trans_distance = distance[city_i][trans_faci[near_trans_faci_i]]
                     near_inc_from_trans_faci_i = min(range(len(inc_faci)), key=lambda x: distance[trans_faci[near_trans_faci_i]][inc_faci[x]])
                     near_inc_from_trans_distance = distance[trans_faci[near_trans_faci_i]][inc_faci[near_inc_from_trans_faci_i]]
-                    TC_indirect = (float(waste[city_i]) * near_trans_distance * UNIT_TRANS + float(waste[city_i]) * near_inc_from_trans_distance * UNIT_TRANS2 * (2/10)) / 10000
+                    TC_indirect = (float(waste[city_i]) * near_trans_distance * UNIT_TRANS + float(waste[city_i]) * near_inc_from_trans_distance * UNIT_TRANS2) / 10000
 
                     # 最もコストが低い輸送経路を選択
                     if TC_direct <= TC_indirect:
@@ -236,7 +236,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                         
                         else:
                             CAR_trans = round(daily_trans_size / 10)
-                            # CT＝建設費、CB＝車両購入費
+                            # CT＝建設費×現在の建築資材指数/式導出時指数、CB＝車両購入費
                             C_T= float(216468*daily_trans_size**(-0.643)*1000*daily_trans_size/25) * (153.2/92.3) /10000
                             C_B = float((1+0.4)*10**7 *CAR_trans /7) /10000
                             IC_TRANS = C_T+C_B
@@ -294,7 +294,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                     near_trans_distance = distance[city_i][trans_faci[near_trans_faci_i]]
                     near_inc_from_trans_faci_i = min(range(len(inc_faci)), key=lambda x: distance[trans_faci[near_trans_faci_i]][inc_faci[x]])
                     near_inc_from_trans_distance = distance[trans_faci[near_trans_faci_i]][inc_faci[near_inc_from_trans_faci_i]]
-                    TC_indirect = (float(waste[city_i]) * near_trans_distance * UNIT_TRANS + float(waste[city_i]) * near_inc_from_trans_distance * UNIT_TRANS2 * (2/10)) / 10000
+                    TC_indirect = (float(waste[city_i]) * near_trans_distance * UNIT_TRANS + float(waste[city_i]) * near_inc_from_trans_distance * UNIT_TRANS2) / 10000
 
                     # 最もコストが低い輸送経路を選択
                     if TC_direct <= TC_indirect:
@@ -469,10 +469,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
             min_change_count = 0
 
         gen_info.append(f"{gen}: neval={neval}{record} best={hof[0].fitness.values[0]}")
-        # print(f"（{waste_name}{UNIT_TRANS}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
         
-        # 最小値が一定世代変化しない場合、ループを抜ける
-        # if best_in_generation_count >= 20*(1+(N_INC+N_TRANS)//3):
         if min_change_count >= 10*(N_INC+N_TRANS):
             break
     
@@ -648,10 +645,10 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                     all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
                     progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
                     progress_display = ",".join(progress)
-                    completion_status = "完" if all_done else "　"  # "完"またはスペースを選択
+                    completion_status = "完" if all_done else "  "  # "完"またはスペースを選択
                     line_part = f"焼却{display_inc:2} → [{progress_display}]{completion_status}"
                     line_output.append(line_part)
-            sys.stdout.write("　".join(line_output) + "\n")  # スペースを1つに縮小
+            sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
         sys.stdout.flush()
     
     
@@ -698,7 +695,7 @@ if __name__ == '__main__':
                 progress_display = ",".join(["@" for _ in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)])
                 line_part = f"焼却{display_inc:2} → [{progress_display}]"  # 2文字の幅を確保
                 line_output.append(line_part)
-        sys.stdout.write("　　".join(line_output) + "\n")
+        sys.stdout.write("    ".join(line_output) + "\n")
     sys.stdout.flush()
 
     tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]

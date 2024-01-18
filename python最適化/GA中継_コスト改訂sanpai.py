@@ -173,7 +173,7 @@ def GA_optimization(N_INC, N_TRANS):
                     near_trans_distance = distance[city_i][trans_faci[near_trans_faci_i]]
                     near_inc_from_trans_faci_i = min(range(len(inc_faci)), key=lambda x: distance[trans_faci[near_trans_faci_i]][inc_faci[x]])
                     near_inc_from_trans_distance = distance[trans_faci[near_trans_faci_i]][inc_faci[near_inc_from_trans_faci_i]]
-                    TC_indirect = (float(waste[city_i]) * near_trans_distance * UNIT_TRANS + float(waste[city_i]) * near_inc_from_trans_distance * UNIT_TRANS * (2/10)) / 10000
+                    TC_indirect = (float(waste[city_i]) * near_trans_distance * UNIT_TRANS + float(waste[city_i]) * near_inc_from_trans_distance * UNIT_TRANS2 * (2/10)) / 10000
 
                     # 最もコストが低い輸送経路を選択
                     if TC_direct <= TC_indirect:
@@ -221,10 +221,10 @@ def GA_optimization(N_INC, N_TRANS):
                         else:
                             OC_INC_coef = float(-5412 * np.log(daily_inc_size) + 36088)
 
-                    IC_INC = IC_INC_coef * daily_inc_size / 25
+                    IC_INC = IC_INC_coef * daily_inc_size * (153.2/94.7) / 25
                     total_IC_inc += IC_INC
 
-                    OC_INC = OC_INC_coef * yearly_inc_size[i] / 10000
+                    OC_INC = OC_INC_coef * yearly_inc_size[i] * (109.9/89.78) / 10000
                     total_OC_inc += OC_INC
                 
                 return (total_IC_inc, total_OC_inc)
@@ -252,7 +252,6 @@ def GA_optimization(N_INC, N_TRANS):
                             # CM=整備補修費、CP=人件費、CE=電気使用料
                             C_M = float(0.02*25*C_T*10000) /10000
                             C_P = float(7*10**6 * (4 + int(3*daily_trans_size/100 - 1))) /10000
-
                             # 2021日本産業用平均電気価格＝19.28円/kWh
                             C_E = float(6200*19.28*daily_trans_size) /10000
                             OC_TRANS = C_M + C_P + C_E
@@ -273,7 +272,7 @@ def GA_optimization(N_INC, N_TRANS):
         return (total_cost_, yearly_inc_size, yearly_trans_size)
 
     def total_cost_info(best_individual):     
-        # best_individualは判明しているので、逆順で表示だけつくればよい
+        # best_individualのコスト表示
         def TC(best_individual):
             # 近い方の施設に輸送と仮定！！！　近い方と仮定すると本来の最適化ではない？ただし、これがないと計算量が大きくなるかと思われる
             total_TC = 0
@@ -303,7 +302,7 @@ def GA_optimization(N_INC, N_TRANS):
                     near_trans_distance = distance[city_i][trans_faci[near_trans_faci_i]]
                     near_inc_from_trans_faci_i = min(range(len(inc_faci)), key=lambda x: distance[trans_faci[near_trans_faci_i]][inc_faci[x]])
                     near_inc_from_trans_distance = distance[trans_faci[near_trans_faci_i]][inc_faci[near_inc_from_trans_faci_i]]
-                    TC_indirect = (float(waste[city_i]) * near_trans_distance * UNIT_TRANS + float(waste[city_i]) * near_inc_from_trans_distance * UNIT_TRANS * (2/10)) / 10000
+                    TC_indirect = (float(waste[city_i]) * near_trans_distance * UNIT_TRANS + float(waste[city_i]) * near_inc_from_trans_distance * UNIT_TRANS2 * (2/10)) / 10000
 
                     # 最もコストが低い輸送経路を選択
                     if TC_direct <= TC_indirect:
@@ -362,10 +361,10 @@ def GA_optimization(N_INC, N_TRANS):
                         else:
                             OC_INC_coef = float(-5412 * np.log(daily_inc_size) + 36088)
 
-                    IC_INC = IC_INC_coef * daily_inc_size / 25
+                    IC_INC = IC_INC_coef * daily_inc_size * (153.2/94.7) / 25
                     total_IC_inc += IC_INC
 
-                    OC_INC = OC_INC_coef * yearly_inc_size[i] / 10000
+                    OC_INC = OC_INC_coef * yearly_inc_size[i] * (109.9/89.78) / 10000
                     total_OC_inc += OC_INC
 
                     # Update IC_inc_values and OC_inc_values with the facility's city index
@@ -399,7 +398,6 @@ def GA_optimization(N_INC, N_TRANS):
                             # CM=整備補修費、CP=人件費、CE=電気使用料
                             C_M = float(0.02*25*C_T*10000) /10000
                             C_P = float(7*10**6 * (4 + int(3*daily_trans_size/100 - 1))) /10000
-
                             # 2021日本産業用平均電気価格＝19.28円/kWh
                             C_E = float(6200*19.28*daily_trans_size) /10000
                             OC_TRANS = C_M + C_P + C_E
@@ -638,7 +636,6 @@ def GA_optimization(N_INC, N_TRANS):
             file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
             file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
             file.write(f"cost = {str(cost_2D)}\n")
-
 
     return hof[0]
 
