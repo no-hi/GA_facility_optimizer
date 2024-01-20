@@ -5,34 +5,35 @@ import numpy as np
 import time
 import datetime
 import collections
-import data
 import multiprocessing
 import sys
+import data
+import python最適化.GA_中継input as input
 
-toolbox = base.Toolbox()
-hokkaido = data.name
-# パラメータ##########################################################
-add_name = ""
-waste_name = "kanen"
-N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 1          # 焼却初期値
-N_INC_MAX = 8              # 焼却上限
-N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 3            # 中継上限
+add_name = input.add_name
+waste_name = input.waste_name
+N_CITIES = input.N_CITIES
+N_INC_INITIAL = input.N_INC_INITIAL
+N_INC_MAX = input.N_INC_MAX
+N_TRANS_INITIAL = input.N_TRANS_INITIAL
+N_TRANS_MAX = input.N_TRANS_MAX
+N_IND_UNIT = input.N_IND_UNIT
+N_GEN = input.N_GEN 
+CX_PROB = input.CX_PROB
+MUT_PROB = input.MUT_PROB
+TOUR_SIZE = input.TOUR_SIZE
+ELITE_SIZE = input.ELITE_SIZE
+UNIT_TRANS = input. UNIT_TRANS
+UNIT_TRANS2 = input.UNIT_TRANS2
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
-N_IND_UNIT = 50            # 1施設当たり個体数
-N_GEN = 7               # 世代数
-CX_PROB = 0.7              # 一様交叉
-MUT_PROB = 0.3             # 突然変異
-TOUR_SIZE = 4              # トーナメント
-ELITE_SIZE = 0.1           # エリートサイズ
-UNIT_TRANS = 877           # 2tパッカー車輸送単価
-UNIT_TRANS2 = 313          # 10t大型車輸送単価
-toolbox.register("select", tools.selTournament, tournsize=TOUR_SIZE)
-#####################################################################
-waste = getattr(data, waste_name)
+
+hokkaido = data.name
 distance = data.distance
 distance = np.array(distance).reshape(len(hokkaido), len(hokkaido)) #2次元距離リスト生成
+waste = getattr(data, waste_name)
+toolbox = base.Toolbox()
+toolbox.register("select", tools.selTournament, tournsize=TOUR_SIZE)
+
 
 # 最小化
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,)) 

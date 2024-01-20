@@ -6,40 +6,48 @@ import time
 import datetime
 import collections
 import data
-import multiprocessing
-import sys
+import GA_中継input as input
 
-toolbox = base.Toolbox()
-hokkaido = data.name
-# パラメータ##########################################################
-add_name = ""
-waste_name = "kanen"
-N_CITIES = len(hokkaido)   # 市町村数
-N_INC_INITIAL = 1          # 焼却初期値
-N_INC_MAX = 20              # 焼却上限
-N_TRANS_INITIAL = 0        # 中継初期値
-N_TRANS_MAX = 10            # 中継上限
+add_name = input.add_name
+waste_name = input.waste_name
+N_CITIES = input.N_CITIES
+N_INC_INITIAL = input.N_INC_INITIAL
+N_INC_MAX = input.N_INC_MAX
+N_TRANS_INITIAL = input.N_TRANS_INITIAL
+N_TRANS_MAX = input.N_TRANS_MAX
+N_IND_UNIT = input.N_IND_UNIT
+N_GEN = input.N_GEN 
+CX_PROB = input.CX_PROB
+MUT_PROB = input.MUT_PROB
+TOUR_SIZE = input.TOUR_SIZE
+ELITE_SIZE = input.ELITE_SIZE
+UNIT_TRANS = input. UNIT_TRANS
+UNIT_TRANS2 = input.UNIT_TRANS2
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
-N_IND_UNIT = 50            # 1施設当たり個体数
-N_GEN = 1000               # 世代数
-CX_PROB = 0.7              # 一様交叉
-MUT_PROB = 0.3             # 突然変異
-TOUR_SIZE = 4              # トーナメント
-ELITE_SIZE = 0.1           # エリートサイズ
-UNIT_TRANS = 877           # 2tパッカー車輸送単価
-UNIT_TRANS2 = 313          # 10t大型車輸送単価
-toolbox.register("select", tools.selTournament, tournsize=TOUR_SIZE)
-#####################################################################
-waste = getattr(data, waste_name)
+
+hokkaido = data.name
 distance = data.distance
 distance = np.array(distance).reshape(len(hokkaido), len(hokkaido)) #2次元距離リスト生成
+waste = getattr(data, waste_name)
+toolbox = base.Toolbox()
+toolbox.register("select", tools.selTournament, tournsize=TOUR_SIZE)
+
+start_time = time.perf_counter()
+current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+script_name = os.path.splitext(os.path.basename(__file__))[0]
+output_directory_name = f"{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
+current_directory = os.path.dirname(os.path.abspath(__file__))
+output_directory = os.path.join(current_directory, output_directory_name)
+if not os.path.exists(output_directory):
+    os.makedirs(output_directory)
 
 # 最小化
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,)) 
 creator.create("Individual", list, fitness=creator.FitnessMin, inc_facility=None, trans_facility=None, unused_cities=None)
 
+
 # GA施設数ループ##################################################
-def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2, cost_2D, counter):
+def GA_optimization(N_INC, N_TRANS):
     start_time_count = time.perf_counter()
     N_IND = N_IND_UNIT * (N_INC+N_TRANS)
 
@@ -165,7 +173,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                     near_trans_distance = distance[city_i][trans_faci[near_trans_faci_i]]
                     near_inc_from_trans_faci_i = min(range(len(inc_faci)), key=lambda x: distance[trans_faci[near_trans_faci_i]][inc_faci[x]])
                     near_inc_from_trans_distance = distance[trans_faci[near_trans_faci_i]][inc_faci[near_inc_from_trans_faci_i]]
-                    TC_indirect = (float(waste[city_i]) * near_trans_distance * UNIT_TRANS + float(waste[city_i]) * near_inc_from_trans_distance * UNIT_TRANS2) / 10000
+                    TC_indirect = (float(waste[city_i]) * near_trans_distance * UNIT_TRANS + float(waste[city_i]) * near_inc_from_trans_distance * UNIT_TRANS2 * (2/10)) / 10000
 
                     # 最もコストが低い輸送経路を選択
                     if TC_direct <= TC_indirect:
@@ -236,7 +244,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                         
                         else:
                             CAR_trans = round(daily_trans_size / 10)
-                            # CT＝建設費×現在の建築資材指数/式導出時指数、CB＝車両購入費
+                            # CT＝建設費、CB＝車両購入費
                             C_T= float(216468*daily_trans_size**(-0.643)*1000*daily_trans_size/25) * (153.2/92.3) /10000
                             C_B = float((1+0.4)*10**7 *CAR_trans /7) /10000
                             IC_TRANS = C_T+C_B
@@ -294,7 +302,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                     near_trans_distance = distance[city_i][trans_faci[near_trans_faci_i]]
                     near_inc_from_trans_faci_i = min(range(len(inc_faci)), key=lambda x: distance[trans_faci[near_trans_faci_i]][inc_faci[x]])
                     near_inc_from_trans_distance = distance[trans_faci[near_trans_faci_i]][inc_faci[near_inc_from_trans_faci_i]]
-                    TC_indirect = (float(waste[city_i]) * near_trans_distance * UNIT_TRANS + float(waste[city_i]) * near_inc_from_trans_distance * UNIT_TRANS2) / 10000
+                    TC_indirect = (float(waste[city_i]) * near_trans_distance * UNIT_TRANS + float(waste[city_i]) * near_inc_from_trans_distance * UNIT_TRANS2 * (2/10)) / 10000
 
                     # 最もコストが低い輸送経路を選択
                     if TC_direct <= TC_indirect:
@@ -469,7 +477,10 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
             min_change_count = 0
 
         gen_info.append(f"{gen}: neval={neval}{record} best={hof[0].fitness.values[0]}")
+        print(f"（{waste_name}{UNIT_TRANS}）焼却{N_INC}：中継{N_TRANS} → 世代{sumgen}")
         
+        # 最小値が一定世代変化しない場合、ループを抜ける
+        # if best_in_generation_count >= 20*(1+(N_INC+N_TRANS)//3):
         if min_change_count >= 10*(N_INC+N_TRANS):
             break
     
@@ -613,117 +624,42 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
     
     
     # 折れ線グラフ用出力
-    def extract_list(shared_list):  # 共有化されたcost_2Dを通常リストに変換
-        if isinstance(shared_list, multiprocessing.managers.ListProxy):
-            return [extract_list(item) for item in shared_list]
-        else:
-            return shared_list
-    
-    # GA_Graph用出力
-    with lock: # 共有化されたcost2Dやcounterをいじるときはlockをかける
-        cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
-        counter[N_INC] += 1                
-        if counter[N_INC] == N_TRANS_MAX - N_TRANS_INITIAL + 1:
-            normal_cost_2D = extract_list(cost_2D)
-            # 時点N_INC以下のデータのみを抽出
-            filtered_cost_2D = normal_cost_2D[:N_INC]
-            with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-                file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
-                file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
-                file.write(f"cost = {str(filtered_cost_2D)}\n")
+    global cost_2D
+    if N_INC == N_INC_INITIAL and N_TRANS == N_TRANS_INITIAL:
+        cost_2D = [[] for _ in range(N_TRANS_MAX + 1)]
 
-    # 並列実行用の表示
-    group_size = 3  # 一行に表示する進捗表示の数
-    with lock2:
-        sys.stdout.write("\033[F" * (len(cost_2D) // group_size + (len(cost_2D) % group_size > 0)))
-        for i in range(0, len(cost_2D), group_size):
-            line_output = []
-            for j in range(group_size):
-                if i + j < len(cost_2D):
-                    finish = cost_2D[i + j]
-                    display_inc = i + j + N_INC_INITIAL
-                    all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
-                    progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
-                    progress_display = ",".join(progress)
-                    completion_status = "完" if all_done else "  "  # "完"またはスペースを選択
-                    line_part = f"焼却{display_inc:2} → [{progress_display}]{completion_status}"
-                    line_output.append(line_part)
-            sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
-        sys.stdout.flush()
-    
-    
+    cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
+    cost_2D[N_TRANS].append(cost_list)
+
+    if N_TRANS==N_TRANS_MAX:
+        with open(os.path.join(output_directory, f"GAGraph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+            file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
+            file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
+            file.write(f"cost = {str(cost_2D)}\n")
+
     return hof[0]
 
+# ループ終了########################################################################################################################
 
-# 並列実行########################################################################
-def multi_task(task, output_directory, current_time, lock, lock2, cost_2D, counter):
-    count_inc, count_trans = task
-    best_individual = GA_optimization(count_inc, count_trans, output_directory, current_time, lock, lock2, cost_2D, counter)
-    return count_inc, count_trans, best_individual.fitness.values[0]
+# 本チャン########################################################################
+best_solutions = {}
+for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1):
+    for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1):
+        best_individual = GA_optimization(count_inc,count_trans)
+        best_solutions[count_inc,count_trans] = best_individual.fitness.values[0]
+#################################################################################
 
+optimal_count_inc = min(best_solutions, key=lambda x: best_solutions[x])[0]
+optimal_count_trans = min(best_solutions, key=lambda x: best_solutions[x])[1]
+optimal_file_name = f"{waste_name}_{optimal_count_inc}&{optimal_count_trans}.txt"
+new_file_name = f"{waste_name}_{optimal_count_inc}&{optimal_count_trans}_best.txt"
+optimal_file_path = os.path.join(output_directory, optimal_file_name)
+new_file_path = os.path.join(output_directory, new_file_name)
+os.rename(optimal_file_path, new_file_path)
 
-if __name__ == '__main__':
-    if N_INC_INITIAL < 1:
-        print("N_INC_INITIALは1以上に設定してください")
-        sys.exit()
-    sys.stdout.write("\033[?25l")
-    # 通常実行
-    start_time = time.perf_counter()
-    current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    script_name = os.path.splitext(os.path.basename(__file__))[0]
-    output_directory_name = f"{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    output_directory = os.path.join(current_directory, output_directory_name)
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory)
-    
-    # 並列実行
-    manager = multiprocessing.Manager()
-    lock = manager.Lock()
-    lock2 = manager.Lock()
-    cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
-    cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])    
-    counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
-    
-    # 初期表示
-    group_size = 3  # 一行に表示する進捗表示の数
-    for i in range(0, len(cost_2D), group_size):
-        line_output = []  # 一行分の出力を格納するリスト
-        for j in range(group_size):
-            if i + j < len(cost_2D):
-                display_inc = i + j + N_INC_INITIAL
-                progress_display = ",".join(["@" for _ in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)])
-                line_part = f"焼却{display_inc:2} → [{progress_display}]"  # 2文字の幅を確保
-                line_output.append(line_part)
-        sys.stdout.write("    ".join(line_output) + "\n")
-    sys.stdout.flush()
+print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}")
 
-    tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
-    pool = multiprocessing.Pool()
-    results = pool.starmap(multi_task, [(task, output_directory, current_time, lock, lock2, cost_2D, counter) for task in tasks])
-    
-    pool.close()
-    pool.join()
-    
-    # 結果格納
-    best_solutions = {}
-    for count_inc, count_trans, fitness in results:
-        best_solutions[(count_inc, count_trans)] = fitness
-    #################################################################################
-
-    optimal_count_inc = min(best_solutions, key=lambda x: best_solutions[x])[0]
-    optimal_count_trans = min(best_solutions, key=lambda x: best_solutions[x])[1]
-    optimal_file_name = f"{waste_name}_{optimal_count_inc}&{optimal_count_trans}.txt"
-    new_file_name = f"{waste_name}_{optimal_count_inc}&{optimal_count_trans}_best.txt"
-    optimal_file_path = os.path.join(output_directory, optimal_file_name)
-    new_file_path = os.path.join(output_directory, new_file_name)
-    os.rename(optimal_file_path, new_file_path)
-
-    print("\n" * len(cost_2D))
-    print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}")
-
-    end_time = time.perf_counter()
-    elapsed_time = end_time - start_time
-    print(f"\n実行時間= {round(elapsed_time/3600,1)}h\n\n")
-    sys.stdout.write("\033[?25h")
+end_time = time.perf_counter()
+elapsed_time = end_time - start_time
+print(f"\n実行時間= {round(elapsed_time/3600,1)}h\n\n")
 
