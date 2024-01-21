@@ -6,7 +6,7 @@ import time
 import datetime
 import collections
 import data
-import GA_中継input as input
+import GA中継_input as input
 
 add_name = input.add_name
 waste_name = input.waste_name

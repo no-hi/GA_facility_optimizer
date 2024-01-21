@@ -8,7 +8,7 @@ import collections
 import multiprocessing
 import sys
 import data
-import python最適化.GA_中継input as input
+import GA中継_input as input
 
 add_name = input.add_name
 waste_name = input.waste_name
