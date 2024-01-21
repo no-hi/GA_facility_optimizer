@@ -622,8 +622,6 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
             return shared_list
     
     # GA_Graph用出力
-    group_size = 3  # 一行に表示する進捗表示の数
-
     with lock: # 共有化されたcost2Dやcounterをいじるときはlockをかける
         cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
         counter[N_INC] += 1                
@@ -643,24 +641,12 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                     subprocess.run(["git", "add", "."], check=True)
                     subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
                     subprocess.run(["git", "push"], check=True)
-                    for i in range(0, len(cost_2D), group_size):
-                        line_output = []
-                        for j in range(group_size):
-                            if i + j < len(cost_2D):
-                                finish = cost_2D[i + j]
-                                display_inc = i + j + N_INC_INITIAL
-                                all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
-                                progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
-                                progress_display = ",".join(progress)
-                                completion_status = "完" if all_done else "  "  # "完"またはスペースを選択
-                                line_part = f"焼却{display_inc:2} → [{progress_display}]{completion_status}"
-                                line_output.append(line_part)
-                        sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
-                    sys.stdout.flush()
 
     # 並列実行用の表示
+    group_size = 3  # 一行に表示する進捗表示の数
     with lock2:
-        sys.stdout.write("\033[F" * (len(cost_2D) // group_size + (len(cost_2D) % group_size > 0)))
+        if not all_conditions_met:
+            sys.stdout.write("\033[F" * (len(cost_2D) // group_size + (len(cost_2D) % group_size > 0)))
         for i in range(0, len(cost_2D), group_size):
             line_output = []
             for j in range(group_size):
@@ -669,13 +655,12 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                     display_inc = i + j + N_INC_INITIAL
                     all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
                     progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
-                    progress_display = ",".join(progress)
+                    display = ",".join(progress)
                     completion_status = "完" if all_done else "  "  # "完"またはスペースを選択
-                    line_part = f"焼却{display_inc:2} → [{progress_display}]{completion_status}"
+                    line_part = f"焼却{display_inc:2} → [{display}]{completion_status}"
                     line_output.append(line_part)
             sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
-        sys.stdout.flush()
-    
+        sys.stdout.flush()    
     
     return hof[0]
 
@@ -717,8 +702,8 @@ if __name__ == '__main__':
         for j in range(group_size):
             if i + j < len(cost_2D):
                 display_inc = i + j + N_INC_INITIAL
-                progress_display = ",".join(["@" for _ in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)])
-                line_part = f"焼却{display_inc:2} → [{progress_display}]"  # 2文字の幅を確保
+                display = ",".join(["@" for _ in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)])
+                line_part = f"焼却{display_inc:2} → [{display}]"  # 2文字の幅を確保
                 line_output.append(line_part)
         sys.stdout.write("    ".join(line_output) + "\n")
     sys.stdout.flush()
