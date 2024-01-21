@@ -636,7 +636,6 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
             # 自動git pull/push
             all_conditions_met = all(counter[i] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for i in range(N_INC_INITIAL, N_INC + 1))
             if all_conditions_met:
-                sys.stdout.write("\033[?25h")
                 subprocess.run(["git", "pull"], check=True)
                 subprocess.run(["git", "add", "."], check=True)
                 subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
