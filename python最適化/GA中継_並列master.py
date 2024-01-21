@@ -662,6 +662,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
             sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
         sys.stdout.flush()    
     
+    
     return hof[0]
 
 
