@@ -6,6 +6,7 @@ import time
 import datetime
 import collections
 import data
+import subprocess
 import GA中継_input as input
 
 add_name = input.add_name
@@ -636,6 +637,11 @@ def GA_optimization(N_INC, N_TRANS):
             file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS})コスト行列\n")
             file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
             file.write(f"cost = {str(cost_2D)}\n")
+        # 自動git pull/push
+        subprocess.run(["git", "pull"], check=True)
+        subprocess.run(["git", "add", "."], check=True)
+        subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+        subprocess.run(["git", "push"], check=True)
 
     return hof[0]
 
@@ -662,4 +668,10 @@ print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_tr
 end_time = time.perf_counter()
 elapsed_time = end_time - start_time
 print(f"\n実行時間= {round(elapsed_time/3600,1)}h\n\n")
+
+# 自動git pull/push
+subprocess.run(["git", "pull"], check=True)
+subprocess.run(["git", "add", "."], check=True)
+subprocess.run(["git", "commit", "-m", f"自動コミット:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+subprocess.run(["git", "push"], check=True)
 

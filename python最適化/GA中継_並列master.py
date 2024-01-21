@@ -8,6 +8,7 @@ import collections
 import multiprocessing
 import sys
 import data
+import subprocess
 import GA中継_input as input
 
 add_name = input.add_name
@@ -632,6 +633,14 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                 file.write(f"#inc({N_INC_INITIAL}~{N_INC})+trans({N_TRANS_INITIAL}~{N_TRANS_MAX})コスト行列\n")
                 file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
+            # 自動git pull/push
+            all_conditions_met = all(counter[i] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for i in range(N_INC_INITIAL, N_INC + 1))
+            if all_conditions_met:
+                sys.stdout.write("\033[?25h")
+                subprocess.run(["git", "pull"], check=True)
+                subprocess.run(["git", "add", "."], check=True)
+                subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+                subprocess.run(["git", "push"], check=True)
 
     # 並列実行用の表示
     group_size = 3  # 一行に表示する進捗表示の数
@@ -727,4 +736,10 @@ if __name__ == '__main__':
     elapsed_time = end_time - start_time
     print(f"\n実行時間= {round(elapsed_time/3600,1)}h\n\n")
     sys.stdout.write("\033[?25h")
+
+    # 自動git pull/push
+    subprocess.run(["git", "pull"], check=True)
+    subprocess.run(["git", "add", "."], check=True)
+    subprocess.run(["git", "commit", "-m", f"自動コミット:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+    subprocess.run(["git", "push"], check=True)
 
