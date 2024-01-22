@@ -660,7 +660,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                     line_part = f"焼却{display_inc:2} → [{display}]{completion_status}"
                     line_output.append(line_part)
             sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
-            sys.stdout.write(waste_name + "\n")
+        sys.stdout.write(waste_name + "\n")
         sys.stdout.flush()    
     
     
