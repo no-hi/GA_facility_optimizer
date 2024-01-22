@@ -637,10 +637,10 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
             all_conditions_met = all(counter[i] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for i in range(N_INC_INITIAL, N_INC + 1))
             if all_conditions_met:
                 with lock2:
-                    subprocess.run(["git", "pull"], check=True)
-                    subprocess.run(["git", "add", "."], check=True)
-                    subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
-                    subprocess.run(["git", "push"], check=True)
+                    subprocess.run(["git", "pull"], check=False)
+                    subprocess.run(["git", "add", "."], check=False)
+                    subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+                    subprocess.run(["git", "push"], check=False)
 
     # 並列実行用の表示
     group_size = 3  # 一行に表示する進捗表示の数

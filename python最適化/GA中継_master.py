@@ -638,10 +638,10 @@ def GA_optimization(N_INC, N_TRANS):
             file.write(f"foldername = '{str(waste_name)}{str(UNIT_TRANS)}'\n")
             file.write(f"cost = {str(cost_2D)}\n")
         # 自動git pull/push
-        subprocess.run(["git", "pull"], check=True)
-        subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
-        subprocess.run(["git", "push"], check=True)
+        subprocess.run(["git", "pull"], check=False)
+        subprocess.run(["git", "add", "."], check=False)
+        subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+        subprocess.run(["git", "push"], check=False)
 
     return hof[0]
 
