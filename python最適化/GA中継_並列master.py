@@ -630,7 +630,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
             # 時点N_INC以下のデータのみを抽出
             filtered_cost_2D = normal_cost_2D[:N_INC]
             with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-                file.write(f"info_inc=[{N_INC_INITIAL},{N_INC}]\ninfo_trans=[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
+                file.write(f"info_inc = [{N_INC_INITIAL},{N_INC}]\ninfo_trans = [{N_TRANS_INITIAL},{N_TRANS_MAX}]\n")
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
             # 自動git pull/push
