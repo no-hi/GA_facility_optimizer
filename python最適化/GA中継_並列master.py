@@ -707,6 +707,7 @@ if __name__ == '__main__':
                 line_part = f"焼却{display_inc:2} → [{display}]"  # 2文字の幅を確保
                 line_output.append(line_part)
         sys.stdout.write("    ".join(line_output) + "\n")
+    sys.stdout.write(waste_name + "\n")
     sys.stdout.flush()
 
     tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
