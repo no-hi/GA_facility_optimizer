@@ -41,7 +41,7 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin, inc_facility=None, trans_facility=None, unused_cities=None)
 
 # GA施設数ループ##################################################
-def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2, cost_2D, counter):
+def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2D, counter):
     start_time_count = time.perf_counter()
     N_IND = N_IND_UNIT * (N_INC+N_TRANS)
 
@@ -622,10 +622,10 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
             return shared_list
     
     # GA_Graph用出力
-    all_conditions_met = all(counter[i] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for i in range(N_INC_INITIAL, N_INC + 1))
     with lock: # 共有化されたcost2Dやcounterをいじるときはlockをかける
         cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
-        counter[N_INC] += 1                
+        counter[N_INC] += 1
+        all_conditions_met = False
         if counter[N_INC] == N_TRANS_MAX - N_TRANS_INITIAL + 1:
             normal_cost_2D = extract_list(cost_2D)
             # 時点N_INC以下のデータのみを抽出
@@ -635,16 +635,15 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
             # 自動git pull/push
+            all_conditions_met = all(counter[i] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for i in range(N_INC_INITIAL, N_INC + 1))
             if all_conditions_met:
-                with lock2:
-                    subprocess.run(["git", "pull"], check=False)
-                    subprocess.run(["git", "add", "."], check=False)
-                    subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
-                    subprocess.run(["git", "push"], check=False)
-
-    # 並列実行用の表示
-    group_size = 3  # 一行に表示する進捗表示の数
-    with lock2:
+                subprocess.run(["git", "pull"], check=False)
+                subprocess.run(["git", "add", "."], check=False)
+                subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+                subprocess.run(["git", "push"], check=False)
+                
+        # 並列実行用の表示
+        group_size = 3  # 一行に表示する進捗表示の数
         if not all_conditions_met:
             sys.stdout.write("\033[F" * (len(cost_2D) // group_size + (len(cost_2D) % group_size > 0) + 1))
         for i in range(0, len(cost_2D), group_size):
@@ -668,9 +667,9 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
 
 
 # 並列実行########################################################################
-def multi_task(task, output_directory, current_time, lock, lock2, cost_2D, counter):
+def multi_task(task, output_directory, current_time, lock, cost_2D, counter):
     count_inc, count_trans = task
-    best_individual = GA_optimization(count_inc, count_trans, output_directory, current_time, lock, lock2, cost_2D, counter)
+    best_individual = GA_optimization(count_inc, count_trans, output_directory, current_time, lock, cost_2D, counter)
     return count_inc, count_trans, best_individual.fitness.values[0]
 
 
@@ -692,7 +691,6 @@ if __name__ == '__main__':
     # 並列実行
     manager = multiprocessing.Manager()
     lock = manager.Lock()
-    lock2 = manager.Lock()
     cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
     cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])    
     counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
@@ -712,7 +710,7 @@ if __name__ == '__main__':
 
     tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
     pool = multiprocessing.Pool()
-    results = pool.starmap(multi_task, [(task, output_directory, current_time, lock, lock2, cost_2D, counter) for task in tasks])
+    results = pool.starmap(multi_task, [(task, output_directory, current_time, lock, cost_2D, counter) for task in tasks])
     
     pool.close()
     pool.join()
