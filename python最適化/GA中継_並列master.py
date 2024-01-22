@@ -646,7 +646,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
     group_size = 3  # 一行に表示する進捗表示の数
     with lock2:
         if not all_conditions_met:
-            sys.stdout.write("\033[F" * (len(cost_2D) // group_size + (len(cost_2D) % group_size > 0)))
+            sys.stdout.write("\033[F" * (len(cost_2D) // group_size + (len(cost_2D) % group_size > 0) + 1))
         for i in range(0, len(cost_2D), group_size):
             line_output = []
             for j in range(group_size):
@@ -660,6 +660,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, lock2,
                     line_part = f"焼却{display_inc:2} → [{display}]{completion_status}"
                     line_output.append(line_part)
             sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
+            sys.stdout.write(waste_name + "\n")
         sys.stdout.flush()    
     
     
