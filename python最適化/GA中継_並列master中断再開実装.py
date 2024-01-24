@@ -618,14 +618,12 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
     write_to_file(output_file_path, '\n'.join(output_content))
     
     
-    # 折れ線グラフ用出力
+    # GA_Graph用出力
     def extract_list(shared_list):  # 共有化されたcost_2Dを通常リストに変換
         if isinstance(shared_list, multiprocessing.managers.ListProxy):
             return [extract_list(item) for item in shared_list]
         else:
             return shared_list
-    
-    # GA_Graph用出力
     with lock: # 共有化されたcost2Dやcounterをいじるときはlockをかける
         cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
         counter[N_INC] += 1
@@ -734,6 +732,13 @@ if __name__ == '__main__':
         script_name = os.path.splitext(os.path.basename(__file__))[0]
         current_directory = os.path.dirname(os.path.abspath(__file__))
         
+        def read_costlist_from_file(filepath):
+            with open(filepath, 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+                if len(lines) >= 36:
+                    return eval(lines[35].strip())
+            return None
+        
         if restarting_output_directory == "":
             output_directory_name = f"{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
             output_directory = os.path.join(current_directory, output_directory_name)
@@ -744,24 +749,19 @@ if __name__ == '__main__':
             output_directory_name = restarting_output_directory
             output_directory = os.path.join(current_directory, output_directory_name)
             if not os.path.exists(output_directory):
-                print(f"指定されたディレクトリ '{restarting_output_directory}' が存在しません。")
+                print(f"指定された中断フォルダが存在しません。")
                 sys.exit(1)
             # 既存のファイルから cost_2D と counter の状態を復元
-            for N_INC in range(N_INC_INITIAL, N_INC_MAX + 1):
-                for N_TRANS in range(N_TRANS_INITIAL, N_TRANS_MAX + 1):
-                    filepath = os.path.join(output_directory, f"{waste_name}_{N_INC}&{N_TRANS}.txt")
+            for n_inc in range(N_INC_INITIAL, N_INC_MAX + 1):
+                for n_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1):
+                    filepath = os.path.join(output_directory, f"{waste_name}_{n_inc}&{n_trans}.txt")
                     if os.path.exists(filepath):
-                        def read_costlist_from_file(filepath):
-                            with open(filepath, 'r', encoding='utf-8') as file:
-                                lines = file.readlines()
-                                if len(lines) >= 36:
-                                    return eval(lines[35].strip())
-                            return None
                         cost_list = read_costlist_from_file(filepath)
                         if cost_list is not None:
                             with lock:
-                                cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
-                                counter[N_INC] += 1  
+                                print(cost_list)
+                                cost_2D[n_inc-N_INC_INITIAL][n_trans-N_TRANS_INITIAL] = cost_list
+                                counter[n_inc] += 1  
 
         # フォルダ生成後すぐ自動git pull/push        
         subprocess.run(["git", "pull"], check=False)
@@ -800,16 +800,6 @@ if __name__ == '__main__':
                                 # ファイル名の形式が正しくない場合は無視する
                                 continue
             return completed_tasks
-        
-        # def check_completed_tasks(output_directory):
-        #     completed_tasks = set()
-        #     if os.path.exists(output_directory):
-        #         for filename in os.listdir(output_directory):
-        #             if filename.endswith(".txt"):
-        #                 parts = filename.replace(".txt", "").split("_")
-        #                 inc, trans = map(int, parts[-1].split("&"))
-        #                 completed_tasks.add((inc, trans))
-        #     return completed_tasks
         
         completed_tasks = check_completed_tasks(output_directory)  # 中断入力時は未完了のタスクのみを実行
         tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1) if (count_inc, count_trans) not in completed_tasks]        
