@@ -626,7 +626,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
             return shared_list
     with lock: # 共有化されたcost2Dやcounterをいじるときはlockをかける
         # 
-        print(counter[N_INC])
+        print(N_INC,counter[N_INC])
         print(str(cost_list))
         print(str(cost_2D))
         # 
