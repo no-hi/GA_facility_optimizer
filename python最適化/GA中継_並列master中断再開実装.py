@@ -721,6 +721,13 @@ if __name__ == '__main__':
             sys.exit()
         sys.stdout.write("\033[?25l")
 
+        # 並列実行
+        manager = multiprocessing.Manager()
+        lock = manager.Lock()
+        cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
+        cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])    
+        counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
+        
         start_time = time.perf_counter()
         current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         script_name = os.path.splitext(os.path.basename(__file__))[0]
@@ -732,24 +739,33 @@ if __name__ == '__main__':
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
         
-        else:
+        else:  # 中断入力時の再開
             output_directory = os.path.join(current_directory, restarting_output_directory)
             if not os.path.exists(output_directory):
                 print(f"指定されたディレクトリ '{restarting_output_directory}' が存在しません。")
-                sys.exit(1)      
-        
-        
+                sys.exit(1)
+            # 既存のファイルから cost_2D と counter の状態を復元
+            for N_INC in range(N_INC_INITIAL, N_INC_MAX + 1):
+                for N_TRANS in range(N_TRANS_INITIAL, N_TRANS_MAX + 1):
+                    filepath = os.path.join(output_directory, f"{waste_name}_{N_INC}&{N_TRANS}.txt")
+                    if os.path.exists(filepath):
+                        def read_costlist_from_file(filepath):
+                            with open(filepath, 'r') as file:
+                                lines = file.readlines()
+                                if len(lines) >= 36:
+                                    return eval(lines[35].strip())
+                            return None
+                        cost_list = read_costlist_from_file(filepath)
+                        if cost_list is not None:
+                            with lock:
+                                cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
+                                counter[N_INC] += 1  
+
+        # フォルダ生成後すぐ自動git pull/push        
         subprocess.run(["git", "pull"], check=False)
         subprocess.run(["git", "add", "."], check=False)
         subprocess.run(["git", "commit", "-m", f"自動コミット(スタート):{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
         subprocess.run(["git", "push"], check=False)
-        
-        # 並列実行
-        manager = multiprocessing.Manager()
-        lock = manager.Lock()
-        cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
-        cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])    
-        counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
         
         # 初期表示
         group_size = 3  # 一行に表示する進捗表示の数
