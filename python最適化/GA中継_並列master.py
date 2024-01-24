@@ -701,6 +701,7 @@ def send_end_email(end_message):
     username = 'enderman15.3318@gmail.com' # SMTPサーバのユーザ名
     password = 'lhdk4885' # SMTPサーバのパスワード
 
+    end_message = '\n'.join(end_message) if isinstance(end_message, list) else end_message
     msg = MIMEText(end_message)
     msg['Subject'] = 'エンダーマンより'
     msg['From'] = from_email
