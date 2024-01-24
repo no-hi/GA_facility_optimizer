@@ -788,11 +788,27 @@ if __name__ == '__main__':
             completed_tasks = set()
             if os.path.exists(output_directory):
                 for filename in os.listdir(output_directory):
-                    if filename.endswith(".txt"):
-                        parts = filename.replace(".txt", "").split("_")
-                        inc, trans = map(int, parts[-1].split("&"))
-                        completed_tasks.add((inc, trans))
+                    if filename.endswith(".txt") and "_" in filename and "&" in filename:
+                        parts = filename.split("_")
+                        inc_trans_part = parts[-1].split("&")
+                        if len(inc_trans_part) == 2:
+                            try:
+                                inc, trans = map(int, inc_trans_part)
+                                completed_tasks.add((inc, trans))
+                            except ValueError:
+                                # ファイル名の形式が正しくない場合は無視する
+                                continue
             return completed_tasks
+        
+        # def check_completed_tasks(output_directory):
+        #     completed_tasks = set()
+        #     if os.path.exists(output_directory):
+        #         for filename in os.listdir(output_directory):
+        #             if filename.endswith(".txt"):
+        #                 parts = filename.replace(".txt", "").split("_")
+        #                 inc, trans = map(int, parts[-1].split("&"))
+        #                 completed_tasks.add((inc, trans))
+        #     return completed_tasks
         
         completed_tasks = check_completed_tasks(output_directory)  # 中断入力時は未完了のタスクのみを実行
         tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1) if (count_inc, count_trans) not in completed_tasks]        
