@@ -17,3 +17,5 @@ TOUR_SIZE = 4              # トーナメント
 ELITE_SIZE = 0.1           # エリートサイズ
 UNIT_TRANS = 877           # 2tパッカー車輸送単価
 UNIT_TRANS2 = 313          # 10t大型車輸送単価
+
+restarting_output_directory = ""

@@ -28,6 +28,7 @@ TOUR_SIZE = input.TOUR_SIZE
 ELITE_SIZE = input.ELITE_SIZE
 UNIT_TRANS = input. UNIT_TRANS
 UNIT_TRANS2 = input.UNIT_TRANS2
+restarting_output_directory = input.restarting_output_directory
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 
 hokkaido = data.name
@@ -675,6 +676,7 @@ def multi_task(task, output_directory, current_time, lock, cost_2D, counter):
     best_individual = GA_optimization(count_inc, count_trans, output_directory, current_time, lock, cost_2D, counter)
     return count_inc, count_trans, best_individual.fitness.values[0]
 
+
 def send_error_email(error_message):
     smtp_host = 'smtp.gmail.com' # SMTPサーバのホスト名
     smtp_port = 587 # SMTPサーバのポート番号安全接続＝587
@@ -722,15 +724,25 @@ if __name__ == '__main__':
         start_time = time.perf_counter()
         current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         script_name = os.path.splitext(os.path.basename(__file__))[0]
-        output_directory_name = f"{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
         current_directory = os.path.dirname(os.path.abspath(__file__))
-        output_directory = os.path.join(current_directory, output_directory_name)
-        if not os.path.exists(output_directory):
-            os.makedirs(output_directory)
-            subprocess.run(["git", "pull"], check=False)
-            subprocess.run(["git", "add", "."], check=False)
-            subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
-            subprocess.run(["git", "push"], check=False)
+        
+        if restarting_output_directory == "":
+            output_directory_name = f"{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
+            output_directory = os.path.join(current_directory, output_directory_name)
+            if not os.path.exists(output_directory):
+                os.makedirs(output_directory)
+        
+        else:
+            output_directory = restarting_output_directory
+            if not os.path.exists(output_directory):
+                print(f"指定されたディレクトリ '{restarting_output_directory}' が存在しません。")
+                sys.exit(1)      
+        
+        
+        subprocess.run(["git", "pull"], check=False)
+        subprocess.run(["git", "add", "."], check=False)
+        subprocess.run(["git", "commit", "-m", f"自動コミット(スタート):{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+        subprocess.run(["git", "push"], check=False)
         
         # 並列実行
         manager = multiprocessing.Manager()
@@ -753,7 +765,20 @@ if __name__ == '__main__':
         sys.stdout.write(waste_name + "\n")
         sys.stdout.flush()
 
-        tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
+        
+        # 中断入力時の未完了のタスク確認
+        def check_completed_tasks(output_directory):
+            completed_tasks = set()
+            if os.path.exists(output_directory):
+                for filename in os.listdir(output_directory):
+                    if filename.endswith(".txt"):
+                        parts = filename.replace(".txt", "").split("_")
+                        inc, trans = map(int, parts[-1].split("&"))
+                        completed_tasks.add((inc, trans))
+            return completed_tasks
+        
+        completed_tasks = check_completed_tasks(output_directory)  # 中断入力時は未完了のタスクのみを実行
+        tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1) if (count_inc, count_trans) not in completed_tasks]        
         pool = multiprocessing.Pool()
         results = pool.starmap(multi_task, [(task, output_directory, current_time, lock, cost_2D, counter) for task in tasks])
         
@@ -777,7 +802,7 @@ if __name__ == '__main__':
         # 自動git pull/push
         subprocess.run(["git", "pull"], check=True)
         subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", f"自動コミット:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+        subprocess.run(["git", "commit", "-m", f"自動コミット（終了）:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
         subprocess.run(["git", "push"], check=True)
         
         print("\n" * len(cost_2D))
