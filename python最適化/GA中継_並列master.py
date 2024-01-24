@@ -676,7 +676,7 @@ def multi_task(task, output_directory, current_time, lock, cost_2D, counter):
     return count_inc, count_trans, best_individual.fitness.values[0]
 
 def send_error_email(error_message):
-    smtp_host = 'smtp.google.com' # SMTPサーバのホスト名
+    smtp_host = 'smtp.gmail.com' # SMTPサーバのホスト名
     smtp_port = 587 # SMTPサーバのポート番号安全接続＝587
     from_email = 'errorman15.3318@gmail.com' # 送信元のEmailアドレス
     to_email = 'hyo15.3318@gmail.com' # 送信先のEmailアドレス
@@ -694,7 +694,7 @@ def send_error_email(error_message):
         server.send_message(msg)  # メールを送信
 
 def send_end_email(end_message):
-    smtp_host = 'smtp.google.com' # SMTPサーバのホスト名
+    smtp_host = 'smtp.gmail.com' # SMTPサーバのホスト名
     smtp_port = 587 # SMTPサーバのポート番号安全接続＝587
     from_email = 'enderman15.3318@gmail.com' # 送信元のEmailアドレス
     to_email = 'hyo15.3318@gmail.com' # 送信先のEmailアドレス
@@ -770,6 +770,12 @@ if __name__ == '__main__':
         new_file_path = os.path.join(output_directory, new_file_name)
         os.rename(optimal_file_path, new_file_path)
 
+        # 自動git pull/push
+        subprocess.run(["git", "pull"], check=True)
+        subprocess.run(["git", "add", "."], check=True)
+        subprocess.run(["git", "commit", "-m", f"自動コミット:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+        subprocess.run(["git", "push"], check=True)
+        
         print("\n" * len(cost_2D))
         print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}")
 
@@ -778,12 +784,6 @@ if __name__ == '__main__':
         print(f"\n実行時間= {round(elapsed_time/3600,1)}h\n\n")
         sys.stdout.write("\033[?25h")
 
-        # 自動git pull/push
-        subprocess.run(["git", "pull"], check=True)
-        subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", f"自動コミット:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
-        subprocess.run(["git", "push"], check=True)
-
         end_message  = [output_directory_name,
                         f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}",
                         f"実行時間= {round(elapsed_time/3600,1)}h"
@@ -791,5 +791,5 @@ if __name__ == '__main__':
         send_end_email(end_message)
     
     except Exception as e:
-        error_message = e
+        error_message =  str(e)
         send_error_email(error_message)
