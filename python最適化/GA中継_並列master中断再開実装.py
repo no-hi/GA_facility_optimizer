@@ -635,9 +635,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
             # 時点N_INC以下のデータのみを抽出
             filtered_cost_2D = normal_cost_2D[:N_INC]
             with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-                # max_filled_N_INC = max(i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1)))
-                max_filled_N_INC = max((i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))), default=N_INC_INITIAL)
-
+                max_filled_N_INC = max(i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1)))
                 file.write(f"inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
@@ -743,7 +741,8 @@ if __name__ == '__main__':
                 os.makedirs(output_directory)
         
         else:  # 中断入力時の再開
-            output_directory = os.path.join(current_directory, restarting_output_directory)
+            output_directory_name = restarting_output_directory
+            output_directory = os.path.join(current_directory, output_directory_name)
             if not os.path.exists(output_directory):
                 print(f"指定されたディレクトリ '{restarting_output_directory}' が存在しません。")
                 sys.exit(1)
