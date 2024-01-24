@@ -759,9 +759,10 @@ if __name__ == '__main__':
                     if os.path.exists(filepath):
                         cost_list = read_costlist_from_file(filepath)
                         if cost_list is not None:
-                            with lock:
                                 cost_2D[n_inc-N_INC_INITIAL][n_trans-N_TRANS_INITIAL] = cost_list
-                                counter[n_inc] += 1  
+                                print(cost_list)
+                                counter[n_inc] += 1
+                                print(counter[n_inc])
 
         # フォルダ生成後すぐ自動git pull/push        
         subprocess.run(["git", "pull"], check=False)
