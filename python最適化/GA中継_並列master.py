@@ -681,7 +681,7 @@ def send_error_email(error_message):
     from_email = 'errorman15.3318@gmail.com' # 送信元のEmailアドレス
     to_email = 'hyo15.3318@gmail.com' # 送信先のEmailアドレス
     username = 'errorman15.3318@gmail.com' # SMTPサーバのユーザ名
-    password = 'lhdk4885' # SMTPサーバのパスワード
+    password = 'yurq vewc ezvo uarq' # SMTPサーバのパスワード
 
     msg = MIMEText(error_message)
     msg['Subject'] = 'エラーマンだよ'
@@ -699,7 +699,7 @@ def send_end_email(end_message):
     from_email = 'enderman15.3318@gmail.com' # 送信元のEmailアドレス
     to_email = 'hyo15.3318@gmail.com' # 送信先のEmailアドレス
     username = 'enderman15.3318@gmail.com' # SMTPサーバのユーザ名
-    password = 'lhdk4885' # SMTPサーバのパスワード
+    password = 'chdw cspd yjbj avmy' # SMTPサーバのパスワード
 
     end_message = '\n'.join(end_message) if isinstance(end_message, list) else end_message
     msg = MIMEText(end_message)
