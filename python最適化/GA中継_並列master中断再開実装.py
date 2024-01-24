@@ -11,6 +11,7 @@ import data
 import subprocess
 import GA中継_input as input
 import smtplib
+import traceback
 from email.mime.text import MIMEText
 
 add_name = input.add_name
@@ -750,7 +751,7 @@ if __name__ == '__main__':
                     filepath = os.path.join(output_directory, f"{waste_name}_{N_INC}&{N_TRANS}.txt")
                     if os.path.exists(filepath):
                         def read_costlist_from_file(filepath):
-                            with open(filepath, 'r') as file:
+                            with open(filepath, 'r', encoding='utf-8') as file:
                                 lines = file.readlines()
                                 if len(lines) >= 36:
                                     return eval(lines[35].strip())
@@ -838,3 +839,4 @@ if __name__ == '__main__':
     except Exception as e:
         error_message =  str(e)
         send_error_email(error_message)
+        traceback.print_exc()
