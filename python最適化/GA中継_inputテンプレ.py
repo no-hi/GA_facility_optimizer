@@ -1,6 +1,9 @@
 import data
 hokkaido = data.name
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
+
+restarting_output_directory = ""
+
 add_name = ""
 waste_name = "kanen"
 # waste_name = "sanpai"
@@ -17,5 +20,3 @@ TOUR_SIZE = 4              # トーナメント
 ELITE_SIZE = 0.1           # エリートサイズ
 UNIT_TRANS = 877           # 2tパッカー車輸送単価
 UNIT_TRANS2 = 313          # 10t大型車輸送単価
-
-restarting_output_directory = ""
