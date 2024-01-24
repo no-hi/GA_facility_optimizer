@@ -625,6 +625,12 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
         else:
             return shared_list
     with lock: # 共有化されたcost2Dやcounterをいじるときはlockをかける
+        # 
+        print(counter[N_INC])
+        print(str(cost_list))
+        print(str(cost_2D))
+        # 
+        
         cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
         counter[N_INC] += 1
         all_conditions_met = False
@@ -632,11 +638,6 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
             normal_cost_2D = extract_list(cost_2D)
             # 時点N_INC以下のデータのみを抽出
             filtered_cost_2D = normal_cost_2D[:N_INC]
-            
-            # 
-            print(counter[N_INC])
-            print(str(filtered_cost_2D))
-            # 
             with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
                 max_filled_N_INC = max(i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1)))
                 file.write(f"inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
