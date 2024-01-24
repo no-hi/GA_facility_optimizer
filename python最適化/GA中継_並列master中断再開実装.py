@@ -759,7 +759,6 @@ if __name__ == '__main__':
                         cost_list = read_costlist_from_file(filepath)
                         if cost_list is not None:
                             with lock:
-                                print(cost_list)
                                 cost_2D[n_inc-N_INC_INITIAL][n_trans-N_TRANS_INITIAL] = cost_list
                                 counter[n_inc] += 1  
 
