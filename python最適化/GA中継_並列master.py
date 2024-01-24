@@ -727,10 +727,10 @@ if __name__ == '__main__':
         output_directory = os.path.join(current_directory, output_directory_name)
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
-            subprocess.run(["git", "pull"], check=False)
-            subprocess.run(["git", "add", "."], check=False)
-            subprocess.run(["git", "commit", "-m", f"自動コミット（スタート）:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
-            subprocess.run(["git", "push"], check=False)
+            # subprocess.run(["git", "pull"], check=False)
+            # subprocess.run(["git", "add", "."], check=False)
+            # subprocess.run(["git", "commit", "-m", f"自動コミット（スタート）:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+            # subprocess.run(["git", "push"], check=False)
         
         # 並列実行
         manager = multiprocessing.Manager()
