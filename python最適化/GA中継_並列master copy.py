@@ -720,7 +720,7 @@ if __name__ == '__main__':
             print("N_INC_INITIALは1以上に設定してください")
             sys.exit()
         sys.stdout.write("\033[?25l")
-        # 通常実行
+
         start_time = time.perf_counter()
         current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         script_name = os.path.splitext(os.path.basename(__file__))[0]
@@ -733,7 +733,7 @@ if __name__ == '__main__':
                 os.makedirs(output_directory)
         
         else:
-            output_directory = restarting_output_directory
+            output_directory = os.path.join(current_directory, restarting_output_directory)
             if not os.path.exists(output_directory):
                 print(f"指定されたディレクトリ '{restarting_output_directory}' が存在しません。")
                 sys.exit(1)      
