@@ -856,7 +856,7 @@ if __name__ == '__main__':
                         f"実行時間= {round(elapsed_time/3600,1)}h"
                         ]
         send_end_email(end_message,output_directory_name)
-    
+        aa
     except Exception as e:
         error_message = [output_directory_name,
                         str(e)
