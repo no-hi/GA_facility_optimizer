@@ -771,7 +771,6 @@ if __name__ == '__main__':
                                 cost_2D[n_inc-N_INC_INITIAL][n_trans-N_TRANS_INITIAL] = cost_list
                                 counter[n_inc] += 1
                                 # 不足fitness補充
-                                print(sum(cost_list))
                                 best_solutions[(n_inc, n_trans)] = sum(cost_list)
                                 
             # 中断入力時の未完了のタスク確認
@@ -827,7 +826,6 @@ if __name__ == '__main__':
         
         # 結果格納
         for count_inc, count_trans, fitness in results:
-            print(fitness)
             best_solutions[(count_inc, count_trans)] = fitness
         #################################################################################
 
