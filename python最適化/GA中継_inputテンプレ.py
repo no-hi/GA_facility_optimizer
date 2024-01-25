@@ -1,6 +1,10 @@
 import data
 hokkaido = data.name
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
+
+# 再開したい中断フォルダ名
+restarting_output_directory = ""
+
 add_name = ""
 waste_name = "kanen"
 # waste_name = "sanpai"

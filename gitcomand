@@ -43,3 +43,6 @@ git checkout -- python最適化/GA中継_トナメ_kanen.py
 git checkout -- python最適化/GA中継_トナメ_sanpai.py
 git pull
 
+; git ignoreに追加
+ignoreに名前入れる
+git rm --cached -r python最適化/input.py
