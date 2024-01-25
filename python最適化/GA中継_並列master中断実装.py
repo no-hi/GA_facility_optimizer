@@ -756,6 +756,11 @@ if __name__ == '__main__':
             if not os.path.exists(output_directory):
                 print(f"指定された中断フォルダが存在しません。")
                 sys.exit(1)
+            # _best.txtファイルの_bestを取り除く
+            for filename in os.listdir(output_directory):
+                if filename.endswith("_best.txt"):
+                    new_filename = filename.replace("_best.txt", ".txt")
+                    os.rename(os.path.join(output_directory, filename), os.path.join(output_directory, new_filename))
             # 既存のファイルから cost_2D と counter の状態を復元
             for n_inc in range(N_INC_INITIAL, N_INC_MAX + 1):
                 for n_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1):
