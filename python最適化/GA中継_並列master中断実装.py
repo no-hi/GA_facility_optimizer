@@ -722,7 +722,7 @@ if __name__ == '__main__':
             sys.exit()
         sys.stdout.write("\033[?25l")
 
-        # 並列実行
+        # 並列初期設定
         manager = multiprocessing.Manager()
         lock = manager.Lock()
         cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
