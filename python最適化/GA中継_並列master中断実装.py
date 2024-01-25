@@ -786,7 +786,7 @@ if __name__ == '__main__':
         # フォルダ生成後すぐ自動git pull/push        
         subprocess.run(["git", "pull"], check=False)
         subprocess.run(["git", "add", "."], check=False)
-        subprocess.run(["git", "commit", "-m", f"自動コミット(スタート):{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+        subprocess.run(["git", "commit", "-m", f"自動コミット(スタート):{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
         subprocess.run(["git", "push"], check=False)
         
         # 初期表示
