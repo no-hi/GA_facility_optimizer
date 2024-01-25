@@ -9,12 +9,10 @@ current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 foldername = input.foldername
 cost = input.cost
 
-##############################################################################
-
 horizon = "inc"
+######################
 # horizon = "trans"
-
-##############################################################################
+######################
 
 def bar_chart(cost_per_, N_START, filename):
     # コストデータを億単位に変換
