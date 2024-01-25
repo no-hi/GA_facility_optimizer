@@ -1,6 +1,6 @@
 import datetime
 from collections import defaultdict
-import GA_graph_costlist as costlist
+import GA_cost2D__input as costlist
 current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 ########################################################################
