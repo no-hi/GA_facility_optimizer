@@ -10,6 +10,8 @@ import sys
 import data
 import subprocess
 import GA中継_input as input
+import smtplib
+from email.mime.text import MIMEText
 
 add_name = input.add_name
 waste_name = input.waste_name
@@ -673,75 +675,121 @@ def multi_task(task, output_directory, current_time, lock, cost_2D, counter):
     best_individual = GA_optimization(count_inc, count_trans, output_directory, current_time, lock, cost_2D, counter)
     return count_inc, count_trans, best_individual.fitness.values[0]
 
+def send_error_email(error_message):
+    smtp_host = 'smtp.gmail.com' # SMTPサーバのホスト名
+    smtp_port = 587 # SMTPサーバのポート番号安全接続＝587
+    from_email = 'errorman15.3318@gmail.com' # 送信元のEmailアドレス
+    to_email = 'hyo15.3318@gmail.com' # 送信先のEmailアドレス
+    username = 'errorman15.3318@gmail.com' # SMTPサーバのユーザ名
+    password = 'yurq vewc ezvo uarq' # SMTPサーバのパスワード
 
+    msg = MIMEText(error_message)
+    msg['Subject'] = 'エラーマンだよ'
+    msg['From'] = from_email
+    msg['To'] = to_email
+
+    with smtplib.SMTP(smtp_host, smtp_port) as server:
+        server.starttls()  # TLSセキュリティを開始
+        server.login(username, password)  # SMTPサーバにログイン
+        server.send_message(msg)  # メールを送信
+
+def send_end_email(end_message):
+    smtp_host = 'smtp.gmail.com' # SMTPサーバのホスト名
+    smtp_port = 587 # SMTPサーバのポート番号安全接続＝587
+    from_email = 'enderman15.3318@gmail.com' # 送信元のEmailアドレス
+    to_email = 'hyo15.3318@gmail.com' # 送信先のEmailアドレス
+    username = 'enderman15.3318@gmail.com' # SMTPサーバのユーザ名
+    password = 'chdw cspd yjbj avmy' # SMTPサーバのパスワード
+
+    end_message = '\n'.join(end_message) if isinstance(end_message, list) else end_message
+    msg = MIMEText(end_message)
+    msg['Subject'] = 'エンダーマンより'
+    msg['From'] = from_email
+    msg['To'] = to_email
+
+    with smtplib.SMTP(smtp_host, smtp_port) as server:
+        server.starttls()  # TLSセキュリティを開始
+        server.login(username, password)  # SMTPサーバにログイン
+        server.send_message(msg)  # メールを送信
+            
 if __name__ == '__main__':
-    if N_INC_INITIAL < 1:
-        print("N_INC_INITIALは1以上に設定してください")
-        sys.exit()
-    sys.stdout.write("\033[?25l")
-    # 通常実行
-    start_time = time.perf_counter()
-    current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    script_name = os.path.splitext(os.path.basename(__file__))[0]
-    output_directory_name = f"{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    output_directory = os.path.join(current_directory, output_directory_name)
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory)
+    try:
+        if N_INC_INITIAL < 1:
+            print("N_INC_INITIALは1以上に設定してください")
+            sys.exit()
+        sys.stdout.write("\033[?25l")
+        # 通常実行
+        start_time = time.perf_counter()
+        current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        script_name = os.path.splitext(os.path.basename(__file__))[0]
+        output_directory_name = f"{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+        output_directory = os.path.join(current_directory, output_directory_name)
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+        
+        # 並列実行
+        manager = multiprocessing.Manager()
+        lock = manager.Lock()
+        cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
+        cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])    
+        counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
+        
+        # 初期表示
+        group_size = 3  # 一行に表示する進捗表示の数
+        for i in range(0, len(cost_2D), group_size):
+            line_output = []  # 一行分の出力を格納するリスト
+            for j in range(group_size):
+                if i + j < len(cost_2D):
+                    display_inc = i + j + N_INC_INITIAL
+                    display = ",".join(["@" for _ in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)])
+                    line_part = f"焼却{display_inc:2} → [{display}]"  # 2文字の幅を確保
+                    line_output.append(line_part)
+            sys.stdout.write("    ".join(line_output) + "\n")
+        sys.stdout.write(waste_name + "\n")
+        sys.stdout.flush()
+
+        tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
+        pool = multiprocessing.Pool()
+        results = pool.starmap(multi_task, [(task, output_directory, current_time, lock, cost_2D, counter) for task in tasks])
+        
+        pool.close()
+        pool.join()
+        
+        # 結果格納
+        best_solutions = {}
+        for count_inc, count_trans, fitness in results:
+            best_solutions[(count_inc, count_trans)] = fitness
+        #################################################################################
+
+        optimal_count_inc = min(best_solutions, key=lambda x: best_solutions[x])[0]
+        optimal_count_trans = min(best_solutions, key=lambda x: best_solutions[x])[1]
+        optimal_file_name = f"{waste_name}_{optimal_count_inc}&{optimal_count_trans}.txt"
+        new_file_name = f"{waste_name}_{optimal_count_inc}&{optimal_count_trans}_best.txt"
+        optimal_file_path = os.path.join(output_directory, optimal_file_name)
+        new_file_path = os.path.join(output_directory, new_file_name)
+        os.rename(optimal_file_path, new_file_path)
+
+        # 自動git pull/push
+        subprocess.run(["git", "pull"], check=True)
+        subprocess.run(["git", "add", "."], check=True)
+        subprocess.run(["git", "commit", "-m", f"自動コミット:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+        subprocess.run(["git", "push"], check=True)
+        
+        print("\n" * len(cost_2D))
+        print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}")
+
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        print(f"\n実行時間= {round(elapsed_time/3600,1)}h\n\n")
+        sys.stdout.write("\033[?25h")
+
+        end_message  = [output_directory_name,
+                        f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}",
+                        f"実行時間= {round(elapsed_time/3600,1)}h"
+                        ]
+        send_end_email(end_message)
     
-    # 並列実行
-    manager = multiprocessing.Manager()
-    lock = manager.Lock()
-    cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
-    cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])    
-    counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
-    
-    # 初期表示
-    group_size = 3  # 一行に表示する進捗表示の数
-    for i in range(0, len(cost_2D), group_size):
-        line_output = []  # 一行分の出力を格納するリスト
-        for j in range(group_size):
-            if i + j < len(cost_2D):
-                display_inc = i + j + N_INC_INITIAL
-                display = ",".join(["@" for _ in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)])
-                line_part = f"焼却{display_inc:2} → [{display}]"  # 2文字の幅を確保
-                line_output.append(line_part)
-        sys.stdout.write("    ".join(line_output) + "\n")
-    sys.stdout.write(waste_name + "\n")
-    sys.stdout.flush()
-
-    tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
-    pool = multiprocessing.Pool()
-    results = pool.starmap(multi_task, [(task, output_directory, current_time, lock, cost_2D, counter) for task in tasks])
-    
-    pool.close()
-    pool.join()
-    
-    # 結果格納
-    best_solutions = {}
-    for count_inc, count_trans, fitness in results:
-        best_solutions[(count_inc, count_trans)] = fitness
-    #################################################################################
-
-    optimal_count_inc = min(best_solutions, key=lambda x: best_solutions[x])[0]
-    optimal_count_trans = min(best_solutions, key=lambda x: best_solutions[x])[1]
-    optimal_file_name = f"{waste_name}_{optimal_count_inc}&{optimal_count_trans}.txt"
-    new_file_name = f"{waste_name}_{optimal_count_inc}&{optimal_count_trans}_best.txt"
-    optimal_file_path = os.path.join(output_directory, optimal_file_name)
-    new_file_path = os.path.join(output_directory, new_file_name)
-    os.rename(optimal_file_path, new_file_path)
-
-    print("\n" * len(cost_2D))
-    print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}")
-
-    end_time = time.perf_counter()
-    elapsed_time = end_time - start_time
-    print(f"\n実行時間= {round(elapsed_time/3600,1)}h\n\n")
-    sys.stdout.write("\033[?25h")
-
-    # 自動git pull/push
-    subprocess.run(["git", "pull"], check=True)
-    subprocess.run(["git", "add", "."], check=True)
-    subprocess.run(["git", "commit", "-m", f"自動コミット:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
-    subprocess.run(["git", "push"], check=True)
-
+    except Exception as e:
+        error_message =  str(e)
+        send_error_email(error_message)
