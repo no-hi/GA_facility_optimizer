@@ -706,7 +706,7 @@ def send_end_email(end_message,output_directory_name):
 
     end_message = '\n'.join(end_message) if isinstance(end_message, list) else end_message
     msg = MIMEText(end_message)
-    msg['Subject'] = f'エンダーマンより{output_directory_name}'
+    msg['Subject'] = f'えんだーまんより{output_directory_name}'
     msg['From'] = from_email
     msg['To'] = to_email
 
@@ -856,8 +856,9 @@ if __name__ == '__main__':
                         f"実行時間= {round(elapsed_time/3600,1)}h"
                         ]
         send_end_email(end_message,output_directory_name)
-        aa
+        
     except Exception as e:
+        output_directory_name=f"{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"
         error_message = [output_directory_name,
                         str(e)
                         ]
