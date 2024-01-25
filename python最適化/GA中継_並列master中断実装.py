@@ -721,7 +721,7 @@ if __name__ == '__main__':
             print("N_INC_INITIALは1以上に設定してください")
             sys.exit()
         sys.stdout.write("\033[?25l")
-
+        
         # 並列初期設定
         manager = multiprocessing.Manager()
         lock = manager.Lock()
