@@ -677,7 +677,7 @@ def multi_task(task, output_directory, current_time, lock, cost_2D, counter):
     return count_inc, count_trans, best_individual.fitness.values[0]
 
 
-def send_error_email(error_message):
+def send_error_email(error_message,output_directory_name):
     smtp_host = 'smtp.gmail.com' # SMTPサーバのホスト名
     smtp_port = 587 # SMTPサーバのポート番号安全接続＝587
     from_email = 'errorman15.3318@gmail.com' # 送信元のEmailアドレス
@@ -687,7 +687,7 @@ def send_error_email(error_message):
 
     error_message = '\n'.join(error_message) if isinstance(error_message, list) else error_message
     msg = MIMEText(error_message)
-    msg['Subject'] = 'エラーマンだよ'
+    msg['Subject'] = f'エラーマンだよ{output_directory_name}'
     msg['From'] = from_email
     msg['To'] = to_email
 
@@ -696,7 +696,7 @@ def send_error_email(error_message):
         server.login(username, password)  # SMTPサーバにログイン
         server.send_message(msg)  # メールを送信
 
-def send_end_email(end_message):
+def send_end_email(end_message,output_directory_name):
     smtp_host = 'smtp.gmail.com' # SMTPサーバのホスト名
     smtp_port = 587 # SMTPサーバのポート番号安全接続＝587
     from_email = 'enderman15.3318@gmail.com' # 送信元のEmailアドレス
@@ -706,7 +706,7 @@ def send_end_email(end_message):
 
     end_message = '\n'.join(end_message) if isinstance(end_message, list) else end_message
     msg = MIMEText(end_message)
-    msg['Subject'] = 'エンダーマンより'
+    msg['Subject'] = f'エンダーマンより{output_directory_name}'
     msg['From'] = from_email
     msg['To'] = to_email
 
@@ -855,11 +855,11 @@ if __name__ == '__main__':
                         f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}",
                         f"実行時間= {round(elapsed_time/3600,1)}h"
                         ]
-        send_end_email(end_message)
+        send_end_email(end_message,output_directory_name)
     
     except Exception as e:
         error_message = [output_directory_name,
                         str(e)
                         ]
-        send_error_email(error_message)
+        send_error_email(error_message,output_directory_name)
         traceback.print_exc()
