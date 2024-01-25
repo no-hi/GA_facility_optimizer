@@ -11,6 +11,7 @@ import data
 import subprocess
 import GA中継_input as input
 import smtplib
+import traceback
 from email.mime.text import MIMEText
 
 add_name = input.add_name
@@ -28,6 +29,7 @@ TOUR_SIZE = input.TOUR_SIZE
 ELITE_SIZE = input.ELITE_SIZE
 UNIT_TRANS = input. UNIT_TRANS
 UNIT_TRANS2 = input.UNIT_TRANS2
+restarting_output_directory = input.restarting_output_directory
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 
 hokkaido = data.name
@@ -616,15 +618,19 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
     write_to_file(output_file_path, '\n'.join(output_content))
     
     
-    # 折れ線グラフ用出力
+    # GA_Graph用出力
     def extract_list(shared_list):  # 共有化されたcost_2Dを通常リストに変換
         if isinstance(shared_list, multiprocessing.managers.ListProxy):
             return [extract_list(item) for item in shared_list]
         else:
             return shared_list
-    
-    # GA_Graph用出力
     with lock: # 共有化されたcost2Dやcounterをいじるときはlockをかける
+        # 
+        print(N_INC,counter[N_INC])
+        print(str(cost_list))
+        print(str(cost_2D))
+        # 
+        
         cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
         counter[N_INC] += 1
         all_conditions_met = False
@@ -640,10 +646,11 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
             # 自動git pull/push
             all_conditions_met = all(counter[i] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for i in range(N_INC_INITIAL, N_INC + 1))
             if all_conditions_met:
-                subprocess.run(["git", "pull"], check=False)
-                subprocess.run(["git", "add", "."], check=False)
-                subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
-                subprocess.run(["git", "push"], check=False)
+                print("all_met")
+                # subprocess.run(["git", "pull"], check=False)
+                # subprocess.run(["git", "add", "."], check=False)
+                # subprocess.run(["git", "commit", "-m", f"自動コミット中途:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+                # subprocess.run(["git", "push"], check=False)
         
         # 並列実行用の表示
         group_size = 3  # 一行に表示する進捗表示の数
@@ -674,6 +681,7 @@ def multi_task(task, output_directory, current_time, lock, cost_2D, counter):
     count_inc, count_trans = task
     best_individual = GA_optimization(count_inc, count_trans, output_directory, current_time, lock, cost_2D, counter)
     return count_inc, count_trans, best_individual.fitness.values[0]
+
 
 def send_error_email(error_message):
     smtp_host = 'smtp.gmail.com' # SMTPサーバのホスト名
@@ -718,26 +726,55 @@ if __name__ == '__main__':
             print("N_INC_INITIALは1以上に設定してください")
             sys.exit()
         sys.stdout.write("\033[?25l")
-        # 通常実行
-        start_time = time.perf_counter()
-        current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        script_name = os.path.splitext(os.path.basename(__file__))[0]
-        output_directory_name = f"{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
-        current_directory = os.path.dirname(os.path.abspath(__file__))
-        output_directory = os.path.join(current_directory, output_directory_name)
-        if not os.path.exists(output_directory):
-            os.makedirs(output_directory)
-            subprocess.run(["git", "pull"], check=False)
-            subprocess.run(["git", "add", "."], check=False)
-            subprocess.run(["git", "commit", "-m", f"自動コミット（スタート）:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
-            subprocess.run(["git", "push"], check=False)
-        
+
         # 並列実行
         manager = multiprocessing.Manager()
         lock = manager.Lock()
         cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
         cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])    
         counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
+        
+        start_time = time.perf_counter()
+        current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        script_name = os.path.splitext(os.path.basename(__file__))[0]
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+        
+        def read_costlist_from_file(filepath):
+            with open(filepath, 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+                if len(lines) >= 36:
+                    return eval(lines[35].strip())
+            return None
+        
+        if restarting_output_directory == "":
+            output_directory_name = f"{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
+            output_directory = os.path.join(current_directory, output_directory_name)
+            if not os.path.exists(output_directory):
+                os.makedirs(output_directory)
+        
+        else:  # 中断入力時の再開
+            output_directory_name = restarting_output_directory
+            output_directory = os.path.join(current_directory, output_directory_name)
+            if not os.path.exists(output_directory):
+                print(f"指定された中断フォルダが存在しません。")
+                sys.exit(1)
+            # 既存のファイルから cost_2D と counter の状態を復元
+            for n_inc in range(N_INC_INITIAL, N_INC_MAX + 1):
+                for n_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1):
+                    filepath = os.path.join(output_directory, f"{waste_name}_{n_inc}&{n_trans}.txt")
+                    if os.path.exists(filepath):
+                        cost_list = read_costlist_from_file(filepath)
+                        if cost_list is not None:
+                                cost_2D[n_inc-N_INC_INITIAL][n_trans-N_TRANS_INITIAL] = cost_list
+                                print(cost_list)
+                                counter[n_inc] += 1
+                                print(counter[n_inc])
+
+        # フォルダ生成後すぐ自動git pull/push        
+        # subprocess.run(["git", "pull"], check=False)
+        # subprocess.run(["git", "add", "."], check=False)
+        # subprocess.run(["git", "commit", "-m", f"自動コミット(スタート):{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+        # subprocess.run(["git", "push"], check=False)
         
         # 初期表示
         group_size = 3  # 一行に表示する進捗表示の数
@@ -753,7 +790,26 @@ if __name__ == '__main__':
         sys.stdout.write(waste_name + "\n")
         sys.stdout.flush()
 
-        tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
+        
+        # 中断入力時の未完了のタスク確認
+        def check_completed_tasks(output_directory):
+            completed_tasks = set()
+            if os.path.exists(output_directory):
+                for filename in os.listdir(output_directory):
+                    if filename.endswith(".txt") and "_" in filename and "&" in filename:
+                        parts = filename.split("_")
+                        inc_trans_part = parts[-1].split("&")
+                        if len(inc_trans_part) == 2:
+                            try:
+                                inc, trans = map(int, inc_trans_part)
+                                completed_tasks.add((inc, trans))
+                            except ValueError:
+                                # ファイル名の形式が正しくない場合は無視する
+                                continue
+            return completed_tasks
+        
+        completed_tasks = check_completed_tasks(output_directory)  # 中断入力時は未完了のタスクのみを実行
+        tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1) if (count_inc, count_trans) not in completed_tasks]        
         pool = multiprocessing.Pool()
         results = pool.starmap(multi_task, [(task, output_directory, current_time, lock, cost_2D, counter) for task in tasks])
         
@@ -775,10 +831,10 @@ if __name__ == '__main__':
         os.rename(optimal_file_path, new_file_path)
 
         # 自動git pull/push
-        subprocess.run(["git", "pull"], check=True)
-        subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", f"自動コミット（終了）:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
-        subprocess.run(["git", "push"], check=True)
+        # subprocess.run(["git", "pull"], check=True)
+        # subprocess.run(["git", "add", "."], check=True)
+        # subprocess.run(["git", "commit", "-m", f"自動コミット（終了）:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+        # subprocess.run(["git", "push"], check=True)
         
         print("\n" * len(cost_2D))
         print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総コスト: {best_solutions[optimal_count_inc,optimal_count_trans]}")
@@ -797,3 +853,4 @@ if __name__ == '__main__':
     except Exception as e:
         error_message =  str(e)
         send_error_email(error_message)
+        traceback.print_exc()
