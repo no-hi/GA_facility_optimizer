@@ -685,6 +685,7 @@ def send_error_email(error_message):
     username = 'errorman15.3318@gmail.com' # SMTPサーバのユーザ名
     password = 'yurq vewc ezvo uarq' # SMTPサーバのパスワード
 
+    error_message = '\n'.join(error_message) if isinstance(error_message, list) else error_message
     msg = MIMEText(error_message)
     msg['Subject'] = 'エラーマンだよ'
     msg['From'] = from_email
@@ -727,6 +728,7 @@ if __name__ == '__main__':
         cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
         cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])    
         counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
+        best_solutions = {(n_inc, n_trans): None for n_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for n_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)}
         
         start_time = time.perf_counter()
         current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -746,7 +748,7 @@ if __name__ == '__main__':
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
             tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
-
+            
         
         else:  # 中断入力時の再開
             output_directory_name = restarting_output_directory
@@ -754,6 +756,11 @@ if __name__ == '__main__':
             if not os.path.exists(output_directory):
                 print(f"指定された中断フォルダが存在しません。")
                 sys.exit(1)
+            # _best.txtファイルの_bestを取り除く
+            for filename in os.listdir(output_directory):
+                if filename.endswith("_best.txt"):
+                    new_filename = filename.replace("_best.txt", ".txt")
+                    os.rename(os.path.join(output_directory, filename), os.path.join(output_directory, new_filename))
             # 既存のファイルから cost_2D と counter の状態を復元
             for n_inc in range(N_INC_INITIAL, N_INC_MAX + 1):
                 for n_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1):
@@ -763,6 +770,9 @@ if __name__ == '__main__':
                         if cost_list is not None:
                                 cost_2D[n_inc-N_INC_INITIAL][n_trans-N_TRANS_INITIAL] = cost_list
                                 counter[n_inc] += 1
+                                # 不足fitness補充
+                                best_solutions[(n_inc, n_trans)] = sum(cost_list)
+                                
             # 中断入力時の未完了のタスク確認
             def check_completed_tasks(output_directory):
                 completed_tasks = set()
@@ -815,7 +825,6 @@ if __name__ == '__main__':
         pool.join()
         
         # 結果格納
-        best_solutions = {}
         for count_inc, count_trans, fitness in results:
             best_solutions[(count_inc, count_trans)] = fitness
         #################################################################################
@@ -849,6 +858,8 @@ if __name__ == '__main__':
         send_end_email(end_message)
     
     except Exception as e:
-        error_message =  str(e)
+        error_message = [output_directory_name,
+                        str(e)
+                        ]
         send_error_email(error_message)
         traceback.print_exc()
