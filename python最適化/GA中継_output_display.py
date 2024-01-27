@@ -3,7 +3,6 @@ import sys
 import os
 import subprocess
 import time
-import GA中継_並列 as parallel
 import GA中継_input as input
 
 N_INC_INITIAL = input.N_INC_INITIAL
@@ -15,7 +14,7 @@ UNIT_TRANS = input. UNIT_TRANS
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 
 #情報表示###############################################################################################################
-def output_info(hokkaido, waste, N_INC, N_TRANS, N_IND, gen_info, sumgen, hof, start_time_count, waste_name, total_cost_info, get_top_cities):    
+def output_info(hokkaido, waste, N_INC, N_TRANS, N_IND, gen_info, sumgen, hof, start_time_count, waste_name, total_cost_info, get_top_cities, output_directory, current_time, lock, cost_2D, counter):    
     
     best_individual = hof[0]
     output_content = []
@@ -26,7 +25,7 @@ def output_info(hokkaido, waste, N_INC, N_TRANS, N_IND, gen_info, sumgen, hof, s
     cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
 
     def write_to_file(filename, content):
-            filepath = os.path.join(parallel.output_directory, filename)
+            filepath = os.path.join(output_directory, filename)
             with open(filepath, 'w', encoding="utf-8") as f:
                 f.write(content)
 
@@ -162,21 +161,21 @@ def output_info(hokkaido, waste, N_INC, N_TRANS, N_IND, gen_info, sumgen, hof, s
         else:
             return shared_list
     
-    with parallel.lock: # 共有化されたcost2Dやparallel.counterをいじるときはlockをかける
-        parallel.cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
-        parallel.counter[N_INC] += 1        
+    with lock: # 共有化されたcost2Dやparallel.counterをいじるときはlockをかける
+        cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
+        counter[N_INC] += 1        
         all_conditions_met = False
-        if parallel.counter[N_INC] == N_TRANS_MAX - N_TRANS_INITIAL + 1:
-            normal_cost_2D = extract_list(parallel.cost_2D)
+        if counter[N_INC] == N_TRANS_MAX - N_TRANS_INITIAL + 1:
+            normal_cost_2D = extract_list(cost_2D)
             # 時点N_INC以下のデータのみを抽出
             filtered_cost_2D = normal_cost_2D[:N_INC]
-            with open(os.path.join(parallel.output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){parallel.current_time}.txt"), 'w', encoding="utf-8") as file:
-                max_filled_N_INC = max(i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(parallel.counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1)))
+            with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+                max_filled_N_INC = max(i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1)))
                 file.write(f"inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
             # 自動git pull/push
-            all_conditions_met = all(parallel.counter[i] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for i in range(N_INC_INITIAL, N_INC + 1))
+            all_conditions_met = all(counter[i] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for i in range(N_INC_INITIAL, N_INC + 1))
             if all_conditions_met:
                 subprocess.run(["git", "pull"], check=False)
                 subprocess.run(["git", "add", "."], check=False)
@@ -186,12 +185,12 @@ def output_info(hokkaido, waste, N_INC, N_TRANS, N_IND, gen_info, sumgen, hof, s
         # 並列実行用の表示
         group_size = 3  # 一行に表示する進捗表示の数
         if not all_conditions_met:
-            sys.stdout.write("\033[F" * (len(parallel.cost_2D) // group_size + (len(parallel.cost_2D) % group_size > 0) + 1))
-        for i in range(0, len(parallel.cost_2D), group_size):
+            sys.stdout.write("\033[F" * (len(cost_2D) // group_size + (len(cost_2D) % group_size > 0) + 1))
+        for i in range(0, len(cost_2D), group_size):
             line_output = []
             for j in range(group_size):
-                if i + j < len(parallel.cost_2D):
-                    finish = parallel.cost_2D[i + j]
+                if i + j < len(cost_2D):
+                    finish = cost_2D[i + j]
                     display_inc = i + j + N_INC_INITIAL
                     all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
                     progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
