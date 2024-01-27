@@ -4,8 +4,8 @@ import numpy as np
 import time
 import collections
 import data
-import GA中継_input as input
-import GA中継_output_display as output_display
+import GA_function.GA_input as input
+import GA_function.GA_output_display as output_display
 
 
 waste_name = input.waste_name

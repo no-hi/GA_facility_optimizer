@@ -1,11 +1,12 @@
 import smtplib
 from email.mime.text import MIMEText
 
+smtp_host = 'smtp.gmail.com'             # SMTPサーバのホスト名
+smtp_port = 587                          # SMTPサーバのポート番号安全接続＝587
+to_email = 'hyo15.3318@gmail.com'        # 送信先のEmailアドレス
+
 def send_error_email(error_message,output_directory_name):
-    smtp_host = 'smtp.gmail.com'             # SMTPサーバのホスト名
-    smtp_port = 587                          # SMTPサーバのポート番号安全接続＝587
     from_email = 'errorman15.3318@gmail.com' # 送信元のEmailアドレス
-    to_email = 'hyo15.3318@gmail.com'        # 送信先のEmailアドレス
     username = 'errorman15.3318@gmail.com'   # SMTPサーバのユーザ名
     password = 'yurq vewc ezvo uarq'         # SMTPサーバのパスワード
 
@@ -21,10 +22,7 @@ def send_error_email(error_message,output_directory_name):
         server.send_message(msg)             # メールを送信
 
 def send_end_email(end_message,output_directory_name):
-    smtp_host = 'smtp.gmail.com'             # SMTPサーバのホスト名
-    smtp_port = 587                          # SMTPサーバのポート番号安全接続＝587
     from_email = 'enderman15.3318@gmail.com' # 送信元のEmailアドレス
-    to_email = 'hyo15.3318@gmail.com'        # 送信先のEmailアドレス
     username = 'enderman15.3318@gmail.com'   # SMTPサーバのユーザ名
     password = 'chdw cspd yjbj avmy'         # SMTPサーバのパスワード
 

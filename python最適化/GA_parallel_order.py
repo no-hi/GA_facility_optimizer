@@ -5,9 +5,9 @@ import multiprocessing
 import sys
 import subprocess
 import traceback
-import GA中継_input as input
-import GA中継_GA as GA
-import GA中継_mail as mail
+import GA_function.GA_input as input
+import GA_function.GA_optimization as GA
+import GA_function.GA_mail as mail
 
 add_name = input.add_name
 waste_name = input.waste_name
@@ -101,7 +101,7 @@ if __name__ == '__main__':
         
             completed_tasks = check_completed_tasks(output_directory)  # 中断入力時は未完了のタスクのみを実行
             tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1) if (count_inc, count_trans) not in completed_tasks]        
-
+            
 
         # フォルダ生成後すぐ自動git pull/push        
         subprocess.run(["git", "pull"], check=False)

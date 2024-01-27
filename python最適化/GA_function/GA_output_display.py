@@ -4,8 +4,7 @@ import os
 import subprocess
 import time
 import data
-import GA中継_input as input
-import GA中継_並列 as parallel
+import GA_function.GA_input as input
 
 waste_name = input.waste_name
 N_INC_INITIAL = input.N_INC_INITIAL
