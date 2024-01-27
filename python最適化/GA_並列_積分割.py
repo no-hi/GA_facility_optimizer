@@ -6,9 +6,9 @@ from itertools import product
 import sys
 import subprocess
 import traceback
-import GA中継_input as input
-import GA中継_GA as GA
-import GA中継_mail as mail
+import GA_function.GA_input as input
+import GA_function.GA_optimization as GA
+import GA_function.GA_mail as mail
 
 
 add_name = input.add_name
