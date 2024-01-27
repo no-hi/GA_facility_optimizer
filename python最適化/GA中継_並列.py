@@ -22,7 +22,7 @@ restarting_output_directory = input.restarting_output_directory
 # 並列実行########################################################################
 def multi_task(task, output_directory, current_time, lock, cost_2D, counter):
     count_inc, count_trans = task
-    best_individual = GA.GA_optimization(count_inc, count_trans, output_directory, current_time, lock, cost_2D, counter)
+    best_individual = GA.GA_optimization(count_inc, count_trans)
     return count_inc, count_trans, best_individual.fitness.values[0]
 
 
