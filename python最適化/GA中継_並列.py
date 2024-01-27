@@ -20,11 +20,10 @@ restarting_output_directory = input.restarting_output_directory
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 
 # 並列実行########################################################################
-def multi_task(task, output_directory, current_time, lock, cost_2D, counter):
+def multi_task(task, lock, cost_2D, counter):
     count_inc, count_trans = task
-    best_individual = GA.GA_optimization(count_inc, count_trans, output_directory, current_time, lock, cost_2D, counter)
+    best_individual = GA.GA_optimization(count_inc, count_trans, current_time, output_directory, lock, cost_2D, counter)
     return count_inc, count_trans, best_individual.fitness.values[0]
-
 
 if __name__ == '__main__':
     try:
@@ -130,7 +129,7 @@ if __name__ == '__main__':
         
         # 並列実行
         pool = multiprocessing.Pool()
-        results = pool.starmap(multi_task, [(task, output_directory, current_time, lock, cost_2D, counter) for task in tasks])
+        results = pool.starmap(multi_task, [(task, lock, cost_2D, counter) for task in tasks])
         
         pool.close()
         pool.join()

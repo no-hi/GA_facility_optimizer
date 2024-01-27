@@ -3,8 +3,11 @@ import sys
 import os
 import subprocess
 import time
+import data
 import GA中継_input as input
+import GA中継_並列 as parallel
 
+waste_name = input.waste_name
 N_INC_INITIAL = input.N_INC_INITIAL
 N_INC_MAX = input.N_INC_MAX
 N_TRANS_INITIAL = input.N_TRANS_INITIAL
@@ -13,8 +16,11 @@ N_GEN = input.N_GEN
 UNIT_TRANS = input. UNIT_TRANS
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 
+hokkaido = data.name
+waste = getattr(data, waste_name)
+
 #情報表示###############################################################################################################
-def output_info(hokkaido, waste, N_INC, N_TRANS, N_IND, gen_info, sumgen, hof, start_time_count, waste_name, total_cost_info, get_top_cities, output_directory, current_time, lock, cost_2D, counter):    
+def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info, sumgen, hof, start_time_count, current_time, output_directory, lock, cost_2D, counter):    
     
     best_individual = hof[0]
     output_content = []

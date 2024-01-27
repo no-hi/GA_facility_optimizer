@@ -38,7 +38,7 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin, inc_facility=None, trans_facility=None, unused_cities=None)
 
 # GA施設数ループ##################################################
-def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2D, counter):
+def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, cost_2D, counter):
     start_time_count = time.perf_counter()
     N_IND = N_IND_UNIT * (N_INC+N_TRANS)
 
@@ -472,7 +472,7 @@ def GA_optimization(N_INC, N_TRANS, output_directory, current_time, lock, cost_2
         if min_change_count >= 10*(N_INC+N_TRANS):
             break
     
-    output_display.output_info(hokkaido, waste, N_INC, N_TRANS, N_IND, gen_info, sumgen, hof, start_time_count, waste_name, total_cost_info, get_top_cities, output_directory, current_time, lock, cost_2D, counter)
+    output_display.output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info, sumgen, hof, start_time_count, current_time, output_directory, lock, cost_2D, counter)
 
     
     return hof[0]
