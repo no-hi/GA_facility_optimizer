@@ -6,7 +6,6 @@ import time
 import GA中継_並列 as parallel
 import GA中継_input as input
 
-
 N_INC_INITIAL = input.N_INC_INITIAL
 N_INC_MAX = input.N_INC_MAX
 N_TRANS_INITIAL = input.N_TRANS_INITIAL
@@ -32,7 +31,7 @@ def output_info(hokkaido, waste, N_INC, N_TRANS, N_IND, gen_info, sumgen, hof, s
                 f.write(content)
 
     # 実行時間の計算と出力
-    end_time_count = time.perf_parallel.counter()
+    end_time_count = time.perf_counter()
     elapsed_time_count = end_time_count - start_time_count
     output_content = []
     
