@@ -9,7 +9,7 @@ import multiprocessing
 import sys
 import python最適化.data as data
 import subprocess
-import python最適化.GA中継_input as input
+import python最適化.GA_function.GA_input as input
 import smtplib
 import traceback
 from email.mime.text import MIMEText
