@@ -156,6 +156,18 @@ if __name__ == '__main__':
         # 結果格納
         for count_inc, count_trans, fitness in results:
             best_solutions[(count_inc, count_trans)] = fitness
+        # 中断時の完成cost2D出力
+        if restarting_output_directory != "":
+            def extract_list(shared_list):  # 共有化されたcost_2Dを通常リストに変換
+                if isinstance(shared_list, multiprocessing.managers.ListProxy):
+                    return [extract_list(item) for item in shared_list]
+                else:
+                    return shared_list
+            normal_cost_2D = extract_list(cost_2D)
+            with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+                file.write(f"inc[{N_INC_INITIAL}~{N_INC_MAX}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
+                file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
+                file.write(f"cost = {str(normal_cost_2D)}\n")
         #################################################################################
 
         optimal_count_inc = min(best_solutions, key=lambda x: best_solutions[x])[0]
