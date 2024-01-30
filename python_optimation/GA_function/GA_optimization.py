@@ -3,6 +3,7 @@ import random
 import numpy as np
 import time
 import collections
+import math
 import data
 import GA_function.GA_input as input
 import GA_function.GA_output_display as output_display
@@ -234,7 +235,7 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, cost_2
                             OC_TRANS = 0
                         
                         else:
-                            CAR_trans = round(daily_trans_size / 10)
+                            CAR_trans = math.ceil(daily_trans_size / 10)
                             # CT＝建設費×現在の建築資材指数/式導出時指数、CB＝車両購入費
                             C_T= float(216468*daily_trans_size**(-0.643)*1000*daily_trans_size/25) * (153.2/92.3) /10000
                             C_B = float((1+0.4)*10**7 *CAR_trans /7) /10000
