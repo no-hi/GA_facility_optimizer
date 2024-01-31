@@ -155,7 +155,7 @@ if __name__ == '__main__':
         subprocess.run(["git", "push"], check=True)
         
         print("\n" * len(cost_2D))
-        print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総エネルギー: {best_solutions[optimal_count_inc,optimal_count_trans]}")
+        print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総エネルギー消費: {best_solutions[optimal_count_inc,optimal_count_trans]}")
 
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
@@ -163,7 +163,7 @@ if __name__ == '__main__':
         sys.stdout.write("\033[?25h")
 
         end_message  = [output_directory_name,
-                        f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総エネルギー: {best_solutions[optimal_count_inc,optimal_count_trans]}",
+                        f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総エネルギー消費: {best_solutions[optimal_count_inc,optimal_count_trans]}",
                         f"実行時間= {round(elapsed_time/3600,1)}h"
                         ]
         mail.send_end_email(end_message,output_directory_name)
