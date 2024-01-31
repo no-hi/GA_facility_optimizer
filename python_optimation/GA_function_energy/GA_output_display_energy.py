@@ -4,7 +4,7 @@ import os
 import subprocess
 import time
 import data
-import GA_function.GA_input as input
+import GA_function_energy.GA_input_energy as input
 
 waste_name = input.waste_name
 N_INC_INITIAL = input.N_INC_INITIAL

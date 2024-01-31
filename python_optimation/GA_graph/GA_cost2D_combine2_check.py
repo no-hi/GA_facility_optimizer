@@ -1,7 +1,7 @@
 import os
 import glob
 import re
-import GA_function.GA_input as input
+from ..GA_function_cost import GA_input_cost as input
 current_directory = os.path.dirname(os.path.abspath(__file__))
 restarting_output_directory = os.path.join(current_directory, input.restarting_output_directory)
 
