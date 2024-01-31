@@ -39,7 +39,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_in
     output_content = []
     
     # 諸情報
-    header = "----------------------  実行情報  ----------------------"# ヘッダー行の生成
+    header = "----------------------  実行情報  ----------------------"
     if localmark:
         header = "局" + header
     output_content += [header,

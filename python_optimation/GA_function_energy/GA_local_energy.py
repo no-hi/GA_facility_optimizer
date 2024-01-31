@@ -11,8 +11,11 @@ def local_optimization(best_individual, total_energy):
         new_best_found = False
         for i in range(len(current_best.inc_facility)):
             if i in fixed_inc_indices:
-                continue  # 既に最適と判断された遺伝子はスキップ
+                continue  # 変更された遺伝子位置はスキップ
             for new_inc in range(input.N_CITIES):
+                # new_incが他の遺伝子で使われていないかチェック
+                if new_inc in current_best.inc_facility[:i] + current_best.inc_facility[i+1:] or new_inc in current_best.trans_facility:
+                    continue
                 individual = deepcopy(current_best)
                 individual.inc_facility[i] = new_inc
                 score, *_ = total_energy(individual)
@@ -33,6 +36,9 @@ def local_optimization(best_individual, total_energy):
             if i in fixed_trans_indices:
                 continue  # 既に最適と判断された遺伝子はスキップ
             for new_trans in range(input.N_CITIES):
+                # 新しい遺伝子が他のtrans遺伝子やinc遺伝子で使われていないかチェック
+                if new_trans in current_best.trans_facility[:i] + current_best.trans_facility[i+1:] or new_trans in current_best.inc_facility:
+                    continue
                 individual = deepcopy(current_best)
                 individual.trans_facility[i] = new_trans
                 score, *_ = total_energy(individual)
