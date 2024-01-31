@@ -229,9 +229,6 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy
         total_ED_inc, total_ED_trans = ED(individual)
         
         total_energy_ = total_EL + total_ED_inc + total_ED_trans
-        print(total_EL)
-        print(total_ED_inc)
-        print(total_ED_trans)        
         return (total_energy_, yearly_inc_size, yearly_trans_size)
 
     def total_energy_info(best_individual):     
@@ -342,6 +339,9 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy
         total_ED_inc, total_ED_trans, ED_inc_values, ED_trans_values = ED(best_individual)
         
         total_energy_ = total_EL + total_ED_inc + total_ED_trans
+        print(total_EL)
+        print(total_ED_inc)
+        print(total_ED_trans)        
         return (total_energy_, total_EL_direct, total_EL_indirect, total_ED_inc, total_ED_trans, EL_direct_values, ED_inc_values, EL_indirect_values , ED_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc)
 
     def evaluate(individual):
