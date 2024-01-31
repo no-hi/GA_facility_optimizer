@@ -200,9 +200,9 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy
                         ED_INC_coef = 0
                     else:                        
                         if daily_inc_size >= 1800:
-                            ED_INC_coef = float(-218 * np.log(1800) + 606)
+                            ED_INC_coef = float(-218 * np.log10(1800) + 606)
                         else:
-                            ED_INC_coef = float(-218 * np.log(daily_inc_size) + 606)
+                            ED_INC_coef = float(-218 * np.log10(daily_inc_size) + 606)
 
                     ED_INC = ED_INC_coef * yearly_inc_size[i] /0.55 * 3.6/1000
                     total_ED_inc += ED_INC
@@ -307,9 +307,9 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy
                         ED_INC_coef = 0
                     else:                        
                         if daily_inc_size >= 1800:
-                            ED_INC_coef = float(-218 * np.log(1800) + 606)
+                            ED_INC_coef = float(-218 * np.log10(1800) + 606)
                         else:
-                            ED_INC_coef = float(-218 * np.log(daily_inc_size) + 606)
+                            ED_INC_coef = float(-218 * np.log10(daily_inc_size) + 606)
 
                     ED_INC = ED_INC_coef * yearly_inc_size[i] /0.55 * 3.6/1000
                     total_ED_inc += ED_INC
