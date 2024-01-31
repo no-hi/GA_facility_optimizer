@@ -1,9 +1,9 @@
 from copy import deepcopy
-import GA_function_energy.GA_input_energy as input
+import GA_function_cost.GA_input_cost as input
 
-def local_optimization(best_individual, total_energy):
+def local_optimization(best_individual, total_cost):
     current_best = best_individual
-    current_best_score, *_ = total_energy(best_individual)
+    current_best_score, *_ = total_cost(best_individual)
     print(f"current_best_score: {current_best_score}")
     
     # Inc遺伝子の全通り計算
@@ -19,7 +19,7 @@ def local_optimization(best_individual, total_energy):
                     continue
                 individual = deepcopy(current_best)
                 individual.inc_facility[i] = new_inc
-                score, *_ = total_energy(individual)
+                score, *_ = total_cost(individual)
                 if score < current_best_score:
                     current_best = individual
                     current_best_score = score
@@ -42,7 +42,7 @@ def local_optimization(best_individual, total_energy):
                     continue
                 individual = deepcopy(current_best)
                 individual.trans_facility[i] = new_trans
-                score, *_ = total_energy(individual)
+                score, *_ = total_cost(individual)
                 if score < current_best_score:
                     current_best = individual
                     current_best_score = score
