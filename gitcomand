@@ -24,7 +24,7 @@ git push -u origin master
 git push
 git pull
 git push --force                #無理やりpush
-git reset --hard origin/master  #無理やりpull
+git reset --hard origin/master or develop  #無理やりpull
 
 ; ブランチ移動、コピー
 git checkout master
