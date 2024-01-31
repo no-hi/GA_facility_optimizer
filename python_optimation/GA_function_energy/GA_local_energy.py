@@ -54,11 +54,12 @@ def local_optimization(best_individual, total_energy):
     
     
     # 最適個体の属性修正
-    best_individual.inc_facility = current_best.inc_facility
-    best_individual.trans_facility = current_best.trans_facility
-    best_individual.unused_cities = set(range(input.N_CITIES)) - set(best_individual.inc_facility) - set(best_individual.trans_facility)
-    best_individual.fitness.values = [current_best_score]
+    new_individual = deepcopy(best_individual)
+    new_individual.inc_facility = current_best.inc_facility
+    new_individual.trans_facility = current_best.trans_facility
+    new_individual.unused_cities = set(range(input.N_CITIES)) - set(new_individual.inc_facility) - set(new_individual.trans_facility)
+    new_individual.fitness.values = [current_best_score]
     
     print(f"after: {current_best_score}")
     
-    return best_individual
+    return new_individual
