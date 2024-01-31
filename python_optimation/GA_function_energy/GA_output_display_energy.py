@@ -19,9 +19,8 @@ hokkaido = data.name
 waste = getattr(data, waste_name)
 
 #情報表示###############################################################################################################
-def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_info, sumgen, hof, start_time_count, current_time, output_directory, lock, energy_2D, counter):    
+def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_info, sumgen, best_individual, start_time_count, current_time, output_directory, lock, energy_2D, counter, localmark):    
     
-    best_individual = hof[0]
     output_content = []
     output_file_path = f"{waste_name}_{len(best_individual.inc_facility)}&{len(best_individual.trans_facility)}.txt"
     
@@ -40,7 +39,10 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_in
     output_content = []
     
     # 諸情報
-    output_content += ["----------------------  実行情報  ----------------------",
+    header = "----------------------  実行情報  ----------------------"# ヘッダー行の生成
+    if localmark:
+        header = "局" + header
+    output_content += [header,
                     f"実行時間＝{round(elapsed_time_count)}秒",
                     f"個体数＝{str(N_IND)}",
                     f"合計世代数＝{str(sumgen)}",

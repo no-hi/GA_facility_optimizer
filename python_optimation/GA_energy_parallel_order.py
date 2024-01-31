@@ -21,9 +21,9 @@ restarting_output_directory = input.restarting_output_directory
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 
 # 並列実行########################################################################
-def multi_task(task, current_time, output_directory, lock, cost_2D, counter):
+def multi_task(task, current_time, output_directory, lock, energy_2D, counter):
     count_inc, count_trans = task
-    best_individual = GA.GA_optimization(count_inc, count_trans, current_time, output_directory, lock, cost_2D, counter)
+    best_individual = GA.GA_optimization(count_inc, count_trans, current_time, output_directory, lock, energy_2D, counter)
     return count_inc, count_trans, best_individual.fitness.values[0]
 
 if __name__ == '__main__':
@@ -36,8 +36,8 @@ if __name__ == '__main__':
         # 並列初期設定
         manager = multiprocessing.Manager()
         lock = manager.Lock()
-        cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
-        cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])    
+        energy_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
+        energy_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in energy_2D_origin])    
         counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
         best_solutions = {(n_inc, n_trans): None for n_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for n_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)}
         
@@ -72,14 +72,14 @@ if __name__ == '__main__':
                 if filename.endswith("_best.txt"):
                     new_filename = filename.replace("_best.txt", ".txt")
                     os.rename(os.path.join(output_directory, filename), os.path.join(output_directory, new_filename))
-            # 既存のファイルから cost_2D と counter の状態を復元
+            # 既存のファイルから energy_2D と counter の状態を復元
             for n_inc in range(N_INC_INITIAL, N_INC_MAX + 1):
                 for n_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1):
                     filepath = os.path.join(output_directory, f"{waste_name}_{n_inc}&{n_trans}.txt")
                     if os.path.exists(filepath):
                         cost_list = read_costlist_from_file(filepath)
                         if cost_list is not None:
-                                cost_2D[n_inc-N_INC_INITIAL][n_trans-N_TRANS_INITIAL] = cost_list
+                                energy_2D[n_inc-N_INC_INITIAL][n_trans-N_TRANS_INITIAL] = cost_list
                                 counter[n_inc] += 1
                                 # 不足fitness補充
                                 best_solutions[(n_inc, n_trans)] = sum(cost_list)
@@ -112,11 +112,11 @@ if __name__ == '__main__':
         
         # 初期表示
         group_size = 3  # 一行に表示する進捗表示の数        
-        for i in range(0, len(cost_2D), group_size):
+        for i in range(0, len(energy_2D), group_size):
             line_output = []
             for j in range(group_size):
-                if i + j < len(cost_2D):
-                    finish = cost_2D[i + j]
+                if i + j < len(energy_2D):
+                    finish = energy_2D[i + j]
                     display_inc = i + j + N_INC_INITIAL
                     all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
                     progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
@@ -130,7 +130,7 @@ if __name__ == '__main__':
         
         # 並列実行
         pool = multiprocessing.Pool()
-        results = pool.starmap(multi_task, [(task, current_time, output_directory, lock, cost_2D, counter) for task in tasks])
+        results = pool.starmap(multi_task, [(task, current_time, output_directory, lock, energy_2D, counter) for task in tasks])
         
         pool.close()
         pool.join()
@@ -154,7 +154,7 @@ if __name__ == '__main__':
         subprocess.run(["git", "commit", "-m", f"自動コミット（エネルギー終了）:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
         subprocess.run(["git", "push"], check=True)
         
-        print("\n" * len(cost_2D))
+        print("\n" * len(energy_2D))
         print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総エネルギー消費: {best_solutions[optimal_count_inc,optimal_count_trans]}")
 
         end_time = time.perf_counter()
