@@ -84,7 +84,8 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
     inc_facility = [hokkaido[best_individual.inc_facility[inc_index]] for inc_index in sorted_inc_indices]
     
     output_content += [f"--------------------  GAPlot_input  --------------------\n",
-                    f"waste ={waste_name}\n" ,
+                    f"waste ='{waste_name}'\n" ,
+                    f"unit ='t/year'\n" ,
                     f"inc_size= {str([round(yearly_inc_size[i]) for i in sorted_inc_indices])}\n" ,
                     f"inc_facility = {inc_facility}",
                     f"inc_blocks = {str(direct_cities_list)}\n"  
@@ -178,7 +179,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
             filtered_cost_2D = normal_cost_2D[:N_INC]
             with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
                 max_filled_N_INC = max(i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1)))
-                file.write(f"inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
+                file.write(f"#inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
             # 自動git pull/push
