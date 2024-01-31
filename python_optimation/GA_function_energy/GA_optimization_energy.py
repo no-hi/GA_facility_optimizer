@@ -5,8 +5,8 @@ import time
 import collections
 import math
 import data
-import GA_function_energy.GA_input as input
-import GA_function_energy.GA_output_display as output_display
+import GA_function_energy.GA_input_energy as input
+import GA_function_energy.GA_output_display_energy as output_display
 
 
 waste_name = input.waste_name

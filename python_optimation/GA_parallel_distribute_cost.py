@@ -6,8 +6,8 @@ from itertools import product
 import sys
 import subprocess
 import traceback
-import GA_function_cost.GA_input as input
-import GA_function_cost.GA_optimization as GA
+import GA_function_cost.GA_input_cost as input
+import GA_function_cost.GA_optimization_cost as GA
 import GA_function_cost.GA_mail as mail
 
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
         
         if restarting_output_directory == "":
             output_directory_name = f"{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
-            output_directory = os.path.join(current_directory, output_directory_name)
+            output_directory = os.path.join(current_directory, "output_cost", output_directory_name)
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
 
@@ -77,7 +77,7 @@ if __name__ == '__main__':
         
         else:  # 中断入力時の再開
             output_directory_name = restarting_output_directory
-            output_directory = os.path.join(current_directory, output_directory_name)
+            output_directory = os.path.join(current_directory, "output_cost", output_directory_name)
             if not os.path.exists(output_directory):
                 print(f"指定された中断フォルダが存在しません。")
                 sys.exit(1)

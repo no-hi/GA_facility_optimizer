@@ -5,8 +5,8 @@ import time
 import collections
 import math
 import data
-import GA_function_cost.GA_input as input
-import GA_function_cost.GA_output_display as output_display
+import GA_function_cost.GA_input_cost as input
+import GA_function_cost.GA_output_display_cost as output_display
 
 
 waste_name = input.waste_name
