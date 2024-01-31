@@ -184,7 +184,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
             if all_conditions_met:
                 subprocess.run(["git", "pull"], check=False)
                 subprocess.run(["git", "add", "."], check=False)
-                subprocess.run(["git", "commit", "-m", f"自動コミット（every_INC）:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+                subprocess.run(["git", "commit", "-m", f"自動コミット（コストevery_INC）:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
                 subprocess.run(["git", "push"], check=False)
         
         # 並列実行用の表示
@@ -204,5 +204,5 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
                     line_part = f"焼却{display_inc:2} → [{display}]{completion_status}"
                     line_output.append(line_part)
             sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
-        sys.stdout.write(waste_name + "\n")
+        sys.stdout.write(f"cost({waste_name})\n")
         sys.stdout.flush()
