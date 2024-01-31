@@ -5,9 +5,9 @@ import multiprocessing
 import sys
 import subprocess
 import traceback
-import GA_function.GA_input as input
-import GA_function.GA_optimization as GA
-import GA_function.GA_mail as mail
+import GA_function_energy.GA_input as input
+import GA_function_energy.GA_optimization as GA
+import GA_function_energy.GA_mail as mail
 
 
 add_name = input.add_name
