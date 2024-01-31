@@ -17,10 +17,6 @@ CX_PROB = 0.7              # 一様交叉
 MUT_PROB = 0.3             # 突然変異
 TOUR_SIZE = 4              # トーナメント
 ELITE_SIZE = 0.1           # エリートサイズ
-
-
-
-
 UNIT_TRANS = 4.8           # 2tパッカー車燃費（km/L）
 UNIT_TRANS2 = 2.5          # 10t大型車輸送燃費（km/L）
 
