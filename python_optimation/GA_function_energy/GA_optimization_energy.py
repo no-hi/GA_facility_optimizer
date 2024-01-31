@@ -411,7 +411,7 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy
     
     
     best_individual = hof[0]
-    best_individual_after = local.local_optimization(best_individual, total_energy, N_CITIES)
+    best_individual_after = local.local_optimization(best_individual, total_energy)
     localmark=False if hof[0].fitness.values[0] == best_individual_after.fitness.values[0] else True
     output_display.output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_info, sumgen, best_individual, start_time_count, current_time, output_directory, lock, energy_2D, counter, localmark)
 
