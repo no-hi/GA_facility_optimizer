@@ -2,13 +2,12 @@ import os
 import time
 import datetime
 import multiprocessing
-from itertools import product
 import sys
 import subprocess
 import traceback
-import GA_function.GA_input as input
-import GA_function.GA_optimization as GA
-import GA_function.GA_mail as mail
+import GA_function_energy.GA_input as input
+import GA_function_energy.GA_optimization as GA
+import GA_function_energy.GA_mail as mail
 
 
 add_name = input.add_name
@@ -54,26 +53,13 @@ if __name__ == '__main__':
                     return eval(lines[35].strip())
             return None
         
-        def distribute_tasks(tasks, num_processes):
-            # タスクの負荷（count_inc * count_trans）に基づいてソート（降順）
-            task_loads = sorted(tasks, key=lambda x: x[0] * x[1], reverse=True)
-            distributed_tasks = [[] for _ in range(num_processes)]
-            # 各タスクを最も負荷の少ないプロセスに割り当て
-            for task in task_loads:
-                least_loaded_process = min(distributed_tasks, key=lambda x: sum(t[0] * t[1] for t in x))
-                least_loaded_process.append(task)
-
-            return distributed_tasks
-        
         if restarting_output_directory == "":
             output_directory_name = f"{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
             output_directory = os.path.join(current_directory, output_directory_name)
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
-
-            tasks = list(product(range(N_INC_INITIAL, N_INC_MAX + 1), range(N_TRANS_INITIAL, N_TRANS_MAX + 1)))
-            num_processes = multiprocessing.cpu_count()
-            distributed_tasks = distribute_tasks(tasks, num_processes)
+            tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
+            
         
         else:  # 中断入力時の再開
             output_directory_name = restarting_output_directory
@@ -116,9 +102,7 @@ if __name__ == '__main__':
         
             completed_tasks = check_completed_tasks(output_directory)  # 中断入力時は未完了のタスクのみを実行
             tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1) if (count_inc, count_trans) not in completed_tasks]        
-            # 未完了のタスクを計算負荷に基づいて分配
-            num_processes = multiprocessing.cpu_count()
-            distributed_tasks = distribute_tasks(tasks, num_processes)
+            
 
         # フォルダ生成後すぐ自動git pull/push        
         subprocess.run(["git", "pull"], check=False)
@@ -146,28 +130,14 @@ if __name__ == '__main__':
         
         # 並列実行
         pool = multiprocessing.Pool()
-        with multiprocessing.Pool(processes=num_processes) as pool:
-            flat_tasks = [task for sublist in distributed_tasks for task in sublist]
-            results = pool.starmap(multi_task, [(task, current_time, output_directory, lock, cost_2D, counter) for task in flat_tasks])
-                
+        results = pool.starmap(multi_task, [(task, current_time, output_directory, lock, cost_2D, counter) for task in tasks])
+        
         pool.close()
         pool.join()
         
         # 結果格納
         for count_inc, count_trans, fitness in results:
             best_solutions[(count_inc, count_trans)] = fitness
-        # 中断時の完成cost2D出力
-        if restarting_output_directory != "":
-            def extract_list(shared_list):  # 共有化されたcost_2Dを通常リストに変換
-                if isinstance(shared_list, multiprocessing.managers.ListProxy):
-                    return [extract_list(item) for item in shared_list]
-                else:
-                    return shared_list
-            normal_cost_2D = extract_list(cost_2D)
-            with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-                file.write(f"inc[{N_INC_INITIAL}~{N_INC_MAX}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
-                file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
-                file.write(f"cost = {str(normal_cost_2D)}\n")
         #################################################################################
 
         optimal_count_inc = min(best_solutions, key=lambda x: best_solutions[x])[0]
