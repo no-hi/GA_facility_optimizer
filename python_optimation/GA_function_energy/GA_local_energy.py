@@ -4,7 +4,6 @@ import GA_function_energy.GA_input_energy as input
 def local_optimization(best_individual, total_energy):
     current_best = best_individual
     current_best_score, *_ = total_energy(best_individual)
-    print(f"current_best_score: {current_best_score}")
     
     # Inc遺伝子の全通り計算
     fixed_inc_indices = set()
@@ -60,6 +59,5 @@ def local_optimization(best_individual, total_energy):
     new_individual.unused_cities = set(range(input.N_CITIES)) - set(new_individual.inc_facility) - set(new_individual.trans_facility)
     new_individual.fitness.values = [current_best_score]
     
-    print(f"after: {current_best_score}")
     
     return new_individual

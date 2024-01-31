@@ -19,9 +19,8 @@ hokkaido = data.name
 waste = getattr(data, waste_name)
 
 #情報表示###############################################################################################################
-def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info, sumgen, hof, start_time_count, current_time, output_directory, lock, cost_2D, counter, localmark):    
+def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info, sumgen, best_individual, start_time_count, current_time, output_directory, lock, cost_2D, counter, localmark):    
     
-    best_individual = hof[0]
     output_content = []
     output_file_path = f"{waste_name}_{len(best_individual.inc_facility)}&{len(best_individual.trans_facility)}.txt"
     
