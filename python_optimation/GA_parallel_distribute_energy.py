@@ -77,7 +77,7 @@ if __name__ == '__main__':
         
         else:  # 中断入力時の再開
             output_directory_name = restarting_output_directory
-            output_directory = os.path.join(current_directory, "GA__output_cost", output_directory_name)
+            output_directory = os.path.join(current_directory, "GA__output_energy", output_directory_name)
             if not os.path.exists(output_directory):
                 print(f"指定された中断フォルダが存在しません。")
                 sys.exit(1)
