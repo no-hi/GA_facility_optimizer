@@ -50,8 +50,8 @@ if __name__ == '__main__':
         def read_costlist_from_file(filepath):
             with open(filepath, 'r', encoding='utf-8') as file:
                 lines = file.readlines()
-                if len(lines) >= 36:
-                    return eval(lines[35].strip())
+                if len(lines) >= 38:
+                    return eval(lines[37].strip())
             return None
         
         def distribute_tasks(tasks, num_processes):

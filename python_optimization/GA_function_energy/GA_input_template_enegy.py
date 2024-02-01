@@ -5,8 +5,10 @@ hokkaido = data.name
 add_name = ""
 waste_name = "kanen"
 # waste_name = "sanpai"
+
+
+restarting_output_directory = "4.8kanen1~15&0~15_20240201_010909"  # 再開したい中断フォルダ名
 N_CITIES = len(hokkaido)   # 市町村数
-restarting_output_directory = ""  # 再開したい中断フォルダ名
 N_INC_INITIAL = 10          # 焼却初期値
 N_INC_MAX = 12             # 焼却上限
 N_TRANS_INITIAL = 11        # 中継初期値
