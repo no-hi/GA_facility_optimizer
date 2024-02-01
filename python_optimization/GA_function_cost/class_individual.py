@@ -15,6 +15,3 @@ individual.inc_facility = [1, 2, 3]
 individual.trans_facility = [4, 5, 6]
 individual.unused_cities = [7, 8, 9]
 individual.fitness.values = [10, 11, 12]
-
-# individualの属性を表示
-(individual.inc_facility, individual.trans_facility, individual.unused_cities, individual.fitness.values)
