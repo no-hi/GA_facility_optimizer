@@ -9,10 +9,10 @@ current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 foldername = input.foldername
 cost = input.cost
 
-horizon = "trans"
+horizon = "inc"
 ######################
-# horizon = "inc"
-N_INC_THRESHOLD = 11  # 以上生成
+# horizon = "trans"
+N_INC_THRESHOLD = 12  # 以上生成
 N_TRANS_THRESHOLD = 0  # 以上生成
 ######################
 
