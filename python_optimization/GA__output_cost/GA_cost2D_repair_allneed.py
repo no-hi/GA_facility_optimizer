@@ -1,16 +1,16 @@
 import os
 import datetime
 
-N_INC_INITIAL=21
-N_INC_MAX=22
-N_TRANS_INITIAL=11
+N_INC_INITIAL=1
+N_INC_MAX=35
+N_TRANS_INITIAL=0
 N_TRANS_MAX=20
 UNIT_TRANS=877
 current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
-waste_name="kanen"
+waste_name="sanpai"
 
-restarting_output_directory = "877kanen21~22&11~20_20240130_145827"
+restarting_output_directory = "877sanpai1~35&0~20_20240130_150350"
 
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -48,6 +48,6 @@ for i in range(len(cost_2D)):
     
     
 with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-    file.write(f"inc[{N_INC_INITIAL}~{N_INC_MAX}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
+    file.write(f"#inc[{N_INC_INITIAL}~{N_INC_MAX}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
     file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
     file.write(f"cost = {str(cost_2D)}\n")
