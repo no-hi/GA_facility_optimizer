@@ -4,7 +4,7 @@ import os
 import subprocess
 import time
 import data
-import GA_function_cost.GA_input as input
+import GA_function_cost.GA_input_cost as input
 
 waste_name = input.waste_name
 N_INC_INITIAL = input.N_INC_INITIAL
@@ -19,9 +19,8 @@ hokkaido = data.name
 waste = getattr(data, waste_name)
 
 #情報表示###############################################################################################################
-def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info, sumgen, hof, start_time_count, current_time, output_directory, lock, cost_2D, counter):    
+def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info, sumgen, best_individual, start_time_count, current_time, output_directory, lock, cost_2D, counter, localmark):    
     
-    best_individual = hof[0]
     output_content = []
     output_file_path = f"{waste_name}_{len(best_individual.inc_facility)}&{len(best_individual.trans_facility)}.txt"
     
@@ -40,7 +39,10 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
     output_content = []
     
     # 諸情報
-    output_content += ["----------------------  実行情報  ----------------------",
+    header = "----------------------  実行情報  ----------------------"
+    if localmark:
+        header = "局" + header
+    output_content += [header,
                     f"実行時間＝{round(elapsed_time_count)}秒",
                     f"個体数＝{str(N_IND)}",
                     f"合計世代数＝{str(sumgen)}",
@@ -82,7 +84,8 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
     inc_facility = [hokkaido[best_individual.inc_facility[inc_index]] for inc_index in sorted_inc_indices]
     
     output_content += [f"--------------------  GAPlot_input  --------------------\n",
-                    f"waste ={waste_name}\n" ,
+                    f"waste ='{waste_name}'\n" ,
+                    f"unit ='t/year'\n" ,
                     f"inc_size= {str([round(yearly_inc_size[i]) for i in sorted_inc_indices])}\n" ,
                     f"inc_facility = {inc_facility}",
                     f"inc_blocks = {str(direct_cities_list)}\n"  
@@ -176,7 +179,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
             filtered_cost_2D = normal_cost_2D[:N_INC]
             with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
                 max_filled_N_INC = max(i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1)))
-                file.write(f"inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
+                file.write(f"#inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
             # 自動git pull/push
@@ -184,7 +187,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
             if all_conditions_met:
                 subprocess.run(["git", "pull"], check=False)
                 subprocess.run(["git", "add", "."], check=False)
-                subprocess.run(["git", "commit", "-m", f"自動コミット（every_INC）:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+                subprocess.run(["git", "commit", "-m", f"自動コミット（コストevery_INC）:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
                 subprocess.run(["git", "push"], check=False)
         
         # 並列実行用の表示
@@ -204,5 +207,5 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
                     line_part = f"焼却{display_inc:2} → [{display}]{completion_status}"
                     line_output.append(line_part)
             sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
-        sys.stdout.write(waste_name + "\n")
+        sys.stdout.write(f"cost({waste_name})\n")
         sys.stdout.flush()

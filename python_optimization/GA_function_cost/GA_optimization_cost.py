@@ -5,8 +5,10 @@ import time
 import collections
 import math
 import data
-import GA_function_cost.GA_input as input
-import GA_function_cost.GA_output_display as output_display
+import GA_function_cost.GA_input_cost as input
+import GA_function_cost.GA_output_display_cost as output_display
+import GA_function_cost.GA_local_cost as local
+
 
 
 waste_name = input.waste_name
@@ -473,9 +475,12 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, cost_2
         if min_change_count >= 10*(N_INC+N_TRANS):
             break
     
-    output_display.output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info, sumgen, hof, start_time_count, current_time, output_directory, lock, cost_2D, counter)
+    best_individual = hof[0]
+    best_individual_after = local.local_optimization(best_individual, total_cost)
+    localmark=False if best_individual.fitness.values[0] == best_individual_after.fitness.values[0] else True
+    output_display.output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, cost_2D, counter, localmark)
 
     
-    return hof[0]
+    return best_individual_after
 
 
