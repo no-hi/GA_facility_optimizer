@@ -37,13 +37,13 @@ def local_optimization(best_individual, total_energy):
                 break
             print("Fixed indices:", fixed_indices, file=file)  # fixed_indicesの状態を出力
     
-    # 最適個体の属性修正
-    new_individual = deepcopy(best_individual)
-    new_individual.inc_facility = current_best.inc_facility
-    new_individual.trans_facility = current_best.trans_facility
-    new_individual.unused_cities = set(range(input.N_CITIES)) - set(new_individual.inc_facility) - set(new_individual.trans_facility)
-    new_individual.fitness.values = [current_best_score]
-    
-    print("Final new_individual:", new_individual.inc_facility, new_individual.trans_facility, file=file)  # 最終的なnew_individualの状態を出力
-    
+        # 最適個体の属性修正
+        new_individual = deepcopy(best_individual)
+        new_individual.inc_facility = current_best.inc_facility
+        new_individual.trans_facility = current_best.trans_facility
+        new_individual.unused_cities = set(range(input.N_CITIES)) - set(new_individual.inc_facility) - set(new_individual.trans_facility)
+        new_individual.fitness.values = [current_best_score]
+        
+        print("Final new_individual:", new_individual.inc_facility, new_individual.trans_facility, file=file)  # 最終的なnew_individualの状態を出力
+        
     return new_individual
