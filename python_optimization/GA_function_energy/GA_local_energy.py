@@ -5,6 +5,8 @@ def local_optimization(best_individual, total_energy):
     current_best = best_individual
     current_best_score, *_ = total_energy(best_individual)
     
+    print(best_individual.inc_facility, best_individual.trans_facility )
+    
     # 遺伝子全通り計算
     fixed_indices = set()
     while True:
@@ -43,3 +45,5 @@ def local_optimization(best_individual, total_energy):
     
     
     return new_individual
+
+    
