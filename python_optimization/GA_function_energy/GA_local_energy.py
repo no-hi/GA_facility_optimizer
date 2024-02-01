@@ -16,6 +16,7 @@ def local_optimization(best_individual, total_energy):
             if i in fixed_indices:
                 continue  # 変更された遺伝子位置はスキップ
             for new_facility in range(input.N_CITIES):
+                print(facilities[:i] + facilities[i+1:])
                 if new_facility in facilities[:i] + facilities[i+1:]:
                     continue
                 individual = deepcopy(current_best)
