@@ -84,9 +84,9 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
     inc_facility = [hokkaido[best_individual.inc_facility[inc_index]] for inc_index in sorted_inc_indices]
     
     output_content += [f"--------------------  GAPlot_input  --------------------\n",
-                    f"waste ='{waste_name}'\n" ,
+                    f"waste ='{waste_name}'" ,
                     f"unit ='t/year'\n" ,
-                    f"inc_size= {str([round(yearly_inc_size[i]) for i in sorted_inc_indices])}\n" ,
+                    f"inc_size= {str([round(yearly_inc_size[i]) for i in sorted_inc_indices])}" ,
                     f"inc_facility = {inc_facility}",
                     f"inc_blocks = {str(direct_cities_list)}\n"  
                     ]
