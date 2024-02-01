@@ -18,6 +18,8 @@ def local_optimization(best_individual, total_energy):
                 for new_facility in range(input.N_CITIES):
                     if new_facility in facilities[:i] + facilities[i+1:]:
                         continue
+                    print("Current facilities:", facilities, file=file)
+                    print("new facility:", new_facility, file=file)
                     individual = deepcopy(current_best)
                     print("Before change:", individual.inc_facility, individual.trans_facility, file=file)  # 変更前のindividualの状態を出力
                     if i < len(current_best.inc_facility):
@@ -47,3 +49,5 @@ def local_optimization(best_individual, total_energy):
         print("Final new_individual:", new_individual.inc_facility, new_individual.trans_facility, file=file)  # 最終的なnew_individualの状態を出力
         
     return new_individual
+
+
