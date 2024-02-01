@@ -39,5 +39,7 @@ def local_optimization(best_individual, total_energy):
     new_individual.unused_cities = set(range(input.N_CITIES)) - set(new_individual.inc_facility) - set(new_individual.trans_facility)
     new_individual.fitness.values = [current_best_score]
     
+    print(new_individual.inc_facility, new_individual.trans_facility )
+    
     
     return new_individual
