@@ -13,6 +13,8 @@ energy = input.energy
 horizon = "inc"
 ######################
 # horizon = "trans"
+N_INC_THRESHOLD = 1  # 以上生成
+N_TRANS_THRESHOLD = 0  # 以上生成
 ######################
 
 def bar_chart(energy_per_, N_START, filename):
@@ -70,25 +72,30 @@ def bar_chart(energy_per_, N_START, filename):
     plt.savefig(filename)
     plt.close()  # グラフを閉じる
 
+
 if horizon == "inc":
-    save_folder = f"graphs__energy_{str(foldername)}_INC_{current_time}"
+    save_folder = f"graphs__{str(foldername)}_INC_{current_time}"
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     transposed_energy = np.transpose(energy, (1, 0, 2))
-    for N_INC in range(len(transposed_energy)):
-        energy_per_trans = np.array(transposed_energy[N_INC])
-        title_suffix = f'N_TRANS = {N_INC}'
+    for N_TRANS in range(len(transposed_energy)):
+        energy_per_trans = np.array(transposed_energy[N_TRANS])
+        # N_INC_THRESHOLD以上のデータのみを選択
+        energy_per_trans = energy_per_trans[N_INC_THRESHOLD-1:]
+        title_suffix = f'N_TRANS = {N_TRANS}'
         xlabel = 'N_INC'
-        filename = os.path.join(save_folder, f'TRANS{N_INC}.png')
-        bar_chart(energy_per_trans, 1, filename)
+        filename = os.path.join(save_folder, f'TRANS{N_TRANS}.png')
+        bar_chart(energy_per_trans, N_INC_THRESHOLD, filename)
 
 if horizon == "trans":
-    save_folder = f"graphs__energy_{str(foldername)}_TRANS_{current_time}"
+    save_folder = f"graphs__{str(foldername)}_TRANS_{current_time}"
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
-    for N_TRANS in range(len(energy)):
-        energy_per_inc = np.array(energy[N_TRANS])
-        title_suffix = f'N_INC = {N_TRANS+1}'
+    for N_INC in range(len(energy)):
+        energy_per_inc = np.array(energy[N_INC])
+        # N_TRANS_THRESHOLD以上のデータのみを選択
+        energy_per_inc = energy_per_inc[N_TRANS_THRESHOLD-1:]
+        title_suffix = f'N_INC = {N_INC+1}'
         xlabel = 'N_TRANS'
-        filename = os.path.join(save_folder, f'INC{N_TRANS+1}.png')
-        bar_chart(energy_per_inc, 0, filename)
+        filename = os.path.join(save_folder, f'INC{N_INC+1}.png')
+        bar_chart(energy_per_inc, N_TRANS_THRESHOLD, filename)

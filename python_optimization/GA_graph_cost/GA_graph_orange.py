@@ -51,7 +51,7 @@ def bar_chart(cost_per_, N_START, filename):
 
 
 if horizon == "inc":
-    save_folder = f"graphs__{str(foldername)}_INC_{current_time}"
+    save_folder = f"graphs__{N_INC_THRESHOLD}~{str(foldername)}_INC_{current_time}"
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     transposed_cost = np.transpose(cost, (1, 0, 2))
@@ -65,7 +65,7 @@ if horizon == "inc":
         bar_chart(cost_per_trans, N_INC_THRESHOLD, filename)
 
 if horizon == "trans":
-    save_folder = f"graphs__{str(foldername)}_TRANS_{current_time}"
+    save_folder = f"graphs__{N_TRANS_THRESHOLD}~{str(foldername)}_TRANS_{current_time}"
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     for N_INC in range(len(cost)):
