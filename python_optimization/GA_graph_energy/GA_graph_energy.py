@@ -74,7 +74,7 @@ def bar_chart(energy_per_, N_START, filename):
 
 
 if horizon == "inc":
-    save_folder = f"graphs__{str(foldername)}_INC_{current_time}"
+    save_folder = f"graphs__energy_{str(foldername)}_INC_{current_time}"
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     transposed_energy = np.transpose(energy, (1, 0, 2))
@@ -88,7 +88,7 @@ if horizon == "inc":
         bar_chart(energy_per_trans, N_INC_THRESHOLD, filename)
 
 if horizon == "trans":
-    save_folder = f"graphs__{str(foldername)}_TRANS_{current_time}"
+    save_folder = f"graphs__energy_{str(foldername)}_TRANS_{current_time}"
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     for N_INC in range(len(energy)):
