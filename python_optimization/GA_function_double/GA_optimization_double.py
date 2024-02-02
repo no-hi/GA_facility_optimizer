@@ -357,8 +357,8 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, double
 
         total_cost_, *_ = total_cost(individual)
         total_energy_, yearly_inc_size, yearly_trans_size = total_energy(individual)
-        manyen__GJ = 42.68 /(3.6e6 * 1e-9) /10000 #ほくでん規制料金(2023)？＝43.68円/kWh , kWh/GJ = 3.6e6 * 1e-9
-        total_double_ = total_cost_ + manyen__GJ*total_energy_
+        manyen_GJ = 42.68 /(3.6e6 * 1e-9) /10000 #ほくでん規制料金(2023)？＝43.68円/kWh , kWh/GJ = 3.6e6 * 1e-9
+        total_double_ = total_cost_ + manyen_GJ*total_energy_
     
         return total_double_, yearly_inc_size, yearly_trans_size
 
@@ -620,8 +620,8 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, double
             total_cost_ = total_TC + total_IC_inc + total_OC_inc + total_IC_trans + total_OC_trans
             return (total_cost_, total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values , IC_trans_values ,OC_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc)
         (total_cost_, total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values , IC_trans_values ,OC_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc) = total_cost_info(best_individual)
-        yen_TJ = 42.68 * 3.6e6 * 1e-12 #ほくでん規制料金(2023)？＝43.68円/kWh , kWh/TJ = 3.6e6 * 1e-12
-        total_double_ = total_cost_ + yen_TJ*total_energy_
+        manyen_GJ = 42.68 /(3.6e6 * 1e-9) /10000 #ほくでん規制料金(2023)？＝43.68円/kWh , kWh/GJ = 3.6e6 * 1e-9
+        total_double_ = total_cost_ + manyen_GJ*total_energy_
         
         return total_double_, total_energy_, total_EL_direct, total_EL_indirect, total_ED_inc, total_ED_trans, EL_direct_values, ED_inc_values, EL_indirect_values , ED_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc, total_cost_, total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values , IC_trans_values ,OC_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc
 
