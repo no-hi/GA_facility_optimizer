@@ -29,7 +29,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
     total_double_, total_energy_, total_EL_direct, total_EL_indirect, total_ED_inc, total_ED_trans, EL_direct_values, ED_inc_values, EL_indirect_values , ED_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc, total_cost_, total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values , IC_trans_values ,OC_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc = total_double_info(best_individual_after)
     energy_list = [total_EL_direct, total_EL_indirect, total_ED_inc, total_ED_trans]
     cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
-    double_list =[[energy_list, cost_list] for energy_list, cost_list in zip(energy_list, cost_list)]
+    double_list =[sum(energy_list), sum(cost_list)]
     def write_to_file(filename, content):
             filepath = os.path.join(output_directory, filename)
             with open(filepath, 'w', encoding="utf-8") as f:
