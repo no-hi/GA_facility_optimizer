@@ -2,15 +2,15 @@ import os
 import datetime
 
 N_INC_INITIAL=1
-N_INC_MAX=35
+N_INC_MAX=10
 N_TRANS_INITIAL=0
 N_TRANS_MAX=20
-UNIT_TRANS=877
+UNIT_TRANS=4.8
 current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
 waste_name="kanen"
 
-restarting_output_directory = "4.8sanpai1~35&0~20_20240130_150350"
+restarting_output_directory = "4.8kanen1~10&0~20_20240202_132304"
 
 
 current_directory = os.path.dirname(os.path.abspath(__file__))

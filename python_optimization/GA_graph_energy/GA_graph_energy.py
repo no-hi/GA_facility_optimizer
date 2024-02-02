@@ -1,7 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-import GA_graph__input as input
+import GA_graph___input as input
 import matplotlib
 matplotlib.rcParams['font.family'] = 'TakaoPGothic' # takao インストール後、matplotlibのフォルダ行ってキャッシュ削除
 import datetime
@@ -12,7 +12,7 @@ energy = input.energy
 
 horizon = "inc"
 ######################
-# horizon = "trans"
+horizon = "trans"
 N_INC_THRESHOLD = 1  # 以上生成
 N_TRANS_THRESHOLD = 0  # 以上生成
 ######################
@@ -74,7 +74,7 @@ def bar_chart(energy_per_, N_START, filename):
 
 
 if horizon == "inc":
-    save_folder = f"graphs__energy_{str(foldername)}_INC_{current_time}"
+    save_folder = f"graphs__energy_I{N_INC_THRESHOLD}~{str(foldername)}_{current_time}"
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     transposed_energy = np.transpose(energy, (1, 0, 2))
@@ -88,14 +88,18 @@ if horizon == "inc":
         bar_chart(energy_per_trans, N_INC_THRESHOLD, filename)
 
 if horizon == "trans":
-    save_folder = f"graphs__energy_{str(foldername)}_TRANS_{current_time}"
+    save_folder = f"graphs__energy_T{N_TRANS_THRESHOLD}~{str(foldername)}_{current_time}"
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     for N_INC in range(len(energy)):
         energy_per_inc = np.array(energy[N_INC])
         # N_TRANS_THRESHOLD以上のデータのみを選択
-        energy_per_inc = energy_per_inc[N_TRANS_THRESHOLD-1:]
+        energy_per_inc = energy_per_inc[(N_TRANS_THRESHOLD-1)+1:]
+        print(f"N_INC: {N_INC+1}, Selected data shape: {energy_per_inc.shape}")
+
         title_suffix = f'N_INC = {N_INC+1}'
         xlabel = 'N_TRANS'
         filename = os.path.join(save_folder, f'INC{N_INC+1}.png')
         bar_chart(energy_per_inc, N_TRANS_THRESHOLD, filename)
+        
+        

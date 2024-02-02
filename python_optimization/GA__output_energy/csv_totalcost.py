@@ -7,9 +7,9 @@ totalenergy = [[92686900.24654235, 65321025.26357268, 59882059.04680407, 5542675
 
 # CSVファイル名
 current_directory = os.path.dirname(os.path.abspath(__file__))
-filename = os.path.join(current_directory, 'total_cost_matrix.csv')
+filename = os.path.join(current_directory, 'total_energy_matrix.csv')
 
 # CSVファイルに書き込む
 with open(filename, 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerows(totalcost)
+    writer.writerows(totalenergy)
