@@ -22,9 +22,9 @@ restarting_output_directory = input.restarting_output_directory
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 
 # 並列実行########################################################################
-def multi_task(task, current_time, output_directory, lock, double_2D, counter):
+def multi_task(task, current_time, output_directory, lock, double_2D, counter,energy_2D,cost_2D):
     count_inc, count_trans = task
-    best_individual = GA.GA_optimization(count_inc, count_trans, current_time, output_directory, lock, double_2D, counter)
+    best_individual = GA.GA_optimization(count_inc, count_trans, current_time, output_directory, lock, double_2D, counter,energy_2D,cost_2D)
     return count_inc, count_trans, best_individual.fitness.values[0]
 
 if __name__ == '__main__':
@@ -38,7 +38,11 @@ if __name__ == '__main__':
         manager = multiprocessing.Manager()
         lock = manager.Lock()
         double_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
-        double_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in double_2D_origin])    
+        double_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in double_2D_origin]) 
+        cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
+        cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in double_2D_origin])
+        energy_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
+        energy_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in double_2D_origin])      
         counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
         best_solutions = {(n_inc, n_trans): None for n_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for n_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)}
         
@@ -135,7 +139,7 @@ if __name__ == '__main__':
         
         # 並列実行
         pool = multiprocessing.Pool()
-        results = pool.starmap(multi_task, [(task, current_time, output_directory, lock, double_2D, counter) for task in tasks])
+        results = pool.starmap(multi_task, [(task, current_time, output_directory, lock, double_2D, counter,energy_2D,cost_2D) for task in tasks])
         
         pool.close()
         pool.join()

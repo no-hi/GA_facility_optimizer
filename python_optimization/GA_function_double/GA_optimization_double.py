@@ -42,7 +42,7 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin, inc_facility=None, trans_facility=None, unused_cities=None)
 
 # GA施設数ループ##################################################
-def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, double_2D, counter):
+def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, double_2D, counter,energy_2D,cost_2D):
     start_time_count = time.perf_counter()
     N_IND = N_IND_UNIT * (N_INC+N_TRANS)
 
@@ -694,7 +694,7 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, double
     best_individual_after = local.local_optimization(best_individual, total_double)
     # best_individual_after = hof[0]
     localmark=False if best_individual.fitness.values[0] == best_individual_after.fitness.values[0] else True
-    output_display.output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, double_2D, counter, localmark)
+    output_display.output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, double_2D, counter, localmark,energy_2D,cost_2D)
 
     
     return best_individual_after

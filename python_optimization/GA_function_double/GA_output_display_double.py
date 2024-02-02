@@ -12,6 +12,7 @@ N_INC_MAX = input.N_INC_MAX
 N_TRANS_INITIAL = input.N_TRANS_INITIAL
 N_TRANS_MAX = input.N_TRANS_MAX
 N_GEN = input.N_GEN 
+UNIT_cost_TRANS = input. UNIT_cost_TRANS
 UNIT_energy_TRANS = input. UNIT_energy_TRANS
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 
@@ -19,7 +20,7 @@ hokkaido = data.name
 waste = getattr(data, waste_name)
 
 #情報表示###############################################################################################################
-def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, double_2D, counter, localmark):    
+def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, double_2D, counter, localmark,energy_2D,cost_2D):    
     
     output_content = []
     output_file_path = f"{waste_name}_{len(best_individual_after.inc_facility)}&{len(best_individual_after.trans_facility)}.txt"
@@ -132,11 +133,14 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
                     "OC_trans: " + str({hokkaido[key]: OC_trans_values[key] for key in sorted_trans_i if key in OC_trans_values}) + "\n"
                     ]
     output_content += ["\n---------------------  エネルギー情報  ---------------------",
-                    str(double_list)+ "\n",
+                    str(energy_list)+ "\n",
                     "EL_direct: " + str({hokkaido[key]: EL_direct_values[key] for key in sorted_inc_i if key in EL_direct_values}),
                     "ED_inc: " + str({hokkaido[key]: ED_inc_values[key] for key in sorted_inc_i if key in ED_inc_values}),
                     "\nEL_indirect: " + str({hokkaido[key]: EL_indirect_values[key] for key in sorted_trans_i if key in EL_indirect_values}),
-                    "ED_trans: " + str({hokkaido[key]: ED_trans_values[key] for key in sorted_trans_i if key in ED_trans_values}),
+                    "ED_trans: " + str({hokkaido[key]: ED_trans_values[key] for key in sorted_trans_i if key in ED_trans_values})+ "\n"
+                    ]
+    output_content += ["\n---------------------  ダブル情報  ---------------------",
+                    str(double_list)+ "\n"
                     ]
     
     # 輸送情報
@@ -185,11 +189,35 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
             normal_double_2D = extract_list(double_2D)
             # 時点N_INC以下のデータのみを抽出
             filtered_double_2D = normal_double_2D[:N_INC]
-            with open(os.path.join(output_directory, f"GA_Graph({UNIT_energy_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+            with open(os.path.join(output_directory, f"GA_Graph(double{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
                 max_filled_N_INC = max((i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))), default=0)
                 file.write(f"#inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_energy_TRANS)}"\n')
                 file.write(f"double = {str(filtered_double_2D)}\n")
+        
+        cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
+        all_conditions_met = False
+        if counter[N_INC] == N_TRANS_MAX - N_TRANS_INITIAL + 1:
+            normal_cost_2D = extract_list(cost_2D)
+            # 時点N_INC以下のデータのみを抽出
+            filtered_cost_2D = normal_cost_2D[:N_INC]
+            with open(os.path.join(output_directory, f"GA_Graph({UNIT_cost_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+                max_filled_N_INC = max((i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))), default=0)
+                file.write(f"#inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
+                file.write(f'foldername = "{str(waste_name)}{str(UNIT_cost_TRANS)}"\n')
+                file.write(f"cost = {str(filtered_cost_2D)}\n")
+        
+        energy_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = energy_list
+        all_conditions_met = False
+        if counter[N_INC] == N_TRANS_MAX - N_TRANS_INITIAL + 1:
+            normal_energy_2D = extract_list(energy_2D)
+            # 時点N_INC以下のデータのみを抽出
+            filtered_energy_2D = normal_energy_2D[:N_INC]
+            with open(os.path.join(output_directory, f"GA_Graph({UNIT_energy_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+                max_filled_N_INC = max((i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))), default=0)
+                file.write(f"#inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
+                file.write(f'foldername = "{str(waste_name)}{str(UNIT_energy_TRANS)}"\n')
+                file.write(f"energy = {str(filtered_energy_2D)}\n")
             # 自動git pull/push
             all_conditions_met = all(counter[i] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for i in range(N_INC_INITIAL, N_INC + 1))
             if all_conditions_met:
