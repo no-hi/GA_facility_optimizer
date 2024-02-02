@@ -166,7 +166,7 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy
                     near_trans_distance = distance[city_i][trans_faci[near_trans_faci_i]]
                     near_inc_from_trans_faci_i = min(range(len(inc_faci)), key=lambda x: distance[trans_faci[near_trans_faci_i]][inc_faci[x]])
                     near_inc_from_trans_distance = distance[trans_faci[near_trans_faci_i]][inc_faci[near_inc_from_trans_faci_i]]
-                    EL_indirect = (float(waste[city_i]/2) * (near_trans_distance*2) /UNIT_TRANS + float(waste[city_i]/10) * near_inc_from_trans_distance /UNIT_TRANS2) * 37.7/1000
+                    EL_indirect = (float(waste[city_i]/2) * (near_trans_distance*2) /UNIT_TRANS + float(waste[city_i]/10) * near_inc_from_trans_distance*2 /UNIT_TRANS2) * 37.7/1000
 
                     # 最もコストが低い輸送経路を選択
                     if EL_direct <= EL_indirect:
