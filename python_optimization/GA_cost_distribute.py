@@ -70,6 +70,11 @@ if __name__ == '__main__':
             output_directory = os.path.join(current_directory, "GA__output_cost", output_directory_name)
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
+            # フォルダ生成後すぐ自動git pull/push        
+            subprocess.run(["git", "pull"], check=False)
+            subprocess.run(["git", "add", "."], check=False)
+            subprocess.run(["git", "commit", "-m", f"自動コミット(コストスタート):{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+            subprocess.run(["git", "push"], check=False)
 
             tasks = list(product(range(N_INC_INITIAL, N_INC_MAX + 1), range(N_TRANS_INITIAL, N_TRANS_MAX + 1)))
             num_processes = multiprocessing.cpu_count()
@@ -81,6 +86,11 @@ if __name__ == '__main__':
             if not os.path.exists(output_directory):
                 print(f"指定された中断フォルダが存在しません。")
                 sys.exit(1)
+            # フォルダ生成後すぐ自動git pull/push        
+            subprocess.run(["git", "pull"], check=False)
+            subprocess.run(["git", "add", "."], check=False)
+            subprocess.run(["git", "commit", "-m", f"自動コミット(コストスタート):{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+            subprocess.run(["git", "push"], check=False)
             # _best.txtファイルの_bestを取り除く
             for filename in os.listdir(output_directory):
                 if filename.endswith("_best.txt"):
@@ -119,12 +129,6 @@ if __name__ == '__main__':
             # 未完了のタスクを計算負荷に基づいて分配
             num_processes = multiprocessing.cpu_count()
             distributed_tasks = distribute_tasks(tasks, num_processes)
-
-        # フォルダ生成後すぐ自動git pull/push        
-        subprocess.run(["git", "pull"], check=False)
-        subprocess.run(["git", "add", "."], check=False)
-        subprocess.run(["git", "commit", "-m", f"自動コミット(コストスタート):{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
-        subprocess.run(["git", "push"], check=False)
         
         # 初期表示
         group_size = 3  # 一行に表示する進捗表示の数        

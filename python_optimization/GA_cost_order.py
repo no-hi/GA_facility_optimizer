@@ -58,6 +58,11 @@ if __name__ == '__main__':
             output_directory = os.path.join(current_directory, "GA__output_cost", output_directory_name)
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
+            # フォルダ生成後すぐ自動git pull/push        
+            subprocess.run(["git", "pull"], check=False)
+            subprocess.run(["git", "add", "."], check=False)
+            subprocess.run(["git", "commit", "-m", f"自動コミット(コストスタート):{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+            subprocess.run(["git", "push"], check=False)
             tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)]
             
         
@@ -67,6 +72,11 @@ if __name__ == '__main__':
             if not os.path.exists(output_directory):
                 print(f"指定された中断フォルダが存在しません。")
                 sys.exit(1)
+            # フォルダ生成後すぐ自動git pull/push        
+            subprocess.run(["git", "pull"], check=False)
+            subprocess.run(["git", "add", "."], check=False)
+            subprocess.run(["git", "commit", "-m", f"自動コミット(コストスタート):{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+            subprocess.run(["git", "push"], check=False)
             # _best.txtファイルの_bestを取り除く
             for filename in os.listdir(output_directory):
                 if filename.endswith("_best.txt"):
@@ -103,12 +113,6 @@ if __name__ == '__main__':
             completed_tasks = check_completed_tasks(output_directory)  # 中断入力時は未完了のタスクのみを実行
             tasks = [(count_inc, count_trans) for count_inc in range(N_INC_INITIAL, N_INC_MAX + 1) for count_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1) if (count_inc, count_trans) not in completed_tasks]        
             
-
-        # フォルダ生成後すぐ自動git pull/push        
-        subprocess.run(["git", "pull"], check=False)
-        subprocess.run(["git", "add", "."], check=False)
-        subprocess.run(["git", "commit", "-m", f"自動コミット(コストスタート):{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
-        subprocess.run(["git", "push"], check=False)
         
         # 初期表示
         group_size = 3  # 一行に表示する進捗表示の数        
