@@ -2,15 +2,15 @@ import os
 import datetime
 
 N_INC_INITIAL=1
-N_INC_MAX=35
+N_INC_MAX=10
 N_TRANS_INITIAL=0
-N_TRANS_MAX=12
-UNIT_TRANS=877
+N_TRANS_MAX=20
+UNIT_TRANS=4.8
 current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
-waste_name="sanpai"
+waste_name="kanen"
 
-restarting_output_directory = ""
+restarting_output_directory = "4.8kanen1~10&0~20_20240202_013925"
 
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -29,7 +29,7 @@ def read_energylist_from_file(filepath):
     with open(filepath, 'r', encoding='utf-8') as file:
         lines = file.readlines()
         if len(lines) >= 36:
-            return eval(lines[35].strip())
+            return eval(lines[37].strip())
     return None
 
 energy_2D = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
