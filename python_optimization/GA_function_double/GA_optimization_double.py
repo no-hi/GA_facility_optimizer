@@ -357,8 +357,8 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, double
 
         total_cost_, *_ = total_cost(individual)
         total_energy_, yearly_inc_size, yearly_trans_size = total_energy(individual)
-        yen_TJ = 42.68 * 3.6e6 * 1e-12 #ほくでん規制料金(2023)？＝43.68円/kWh , kWh/TJ = 3.6e6 * 1e-12
-        total_double_ = total_cost_ + yen_TJ*total_energy_
+        manyen__TJ_10000 = 42.68 * 3.6e6 * 1e-12 *10000*10000 #ほくでん規制料金(2023)？＝43.68円/kWh , kWh/TJ = 3.6e6 * 1e-12
+        total_double_ = total_cost_ + manyen__TJ_10000*total_energy_
         
         return total_double_, yearly_inc_size, yearly_trans_size
 
