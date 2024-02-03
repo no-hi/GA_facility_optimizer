@@ -19,7 +19,7 @@ hokkaido = data.name
 waste = getattr(data, waste_name)
 
 #情報表示###############################################################################################################
-def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, energy_2D, counter, localmark):    
+def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, energy_2D, counter, localmark, lock2):    
     
     output_content = []
     output_file_path = f"{waste_name}_{len(best_individual_after.inc_facility)}&{len(best_individual_after.trans_facility)}.txt"
@@ -188,25 +188,26 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_in
                 subprocess.run(["git", "commit", "-m", f"自動コミット（エネルギーevery_INC）:{UNIT_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
                 subprocess.run(["git", "push"], check=False)
         
-        # 並列実行用の表示
-        if N_TRANS_MAX - N_TRANS_INITIAL +1 > 20:
-            group_size = 2  # 一行に表示する進捗表示の数
-        else:
-            group_size = 3  # 一行に表示する進捗表示の数   
-        if not all_conditions_met:
-            sys.stdout.write("\033[F" * (len(energy_2D) // group_size + (len(energy_2D) % group_size > 0) + 1))
-        for i in range(0, len(energy_2D), group_size):
-            line_output = []
-            for j in range(group_size):
-                if i + j < len(energy_2D):
-                    finish = energy_2D[i + j]
-                    display_inc = i + j + N_INC_INITIAL
-                    all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
-                    progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
-                    display = ",".join(progress)
-                    completion_status = "完" if all_done else "  "  # "完"またはスペースを選択
-                    line_part = f"焼却{display_inc:2} → [{display}]{completion_status}"
-                    line_output.append(line_part)
-            sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
-        sys.stdout.write(f"energy({waste_name})\n")
-        sys.stdout.flush()
+        with lock2:
+            # 並列実行用の表示
+            if N_TRANS_MAX - N_TRANS_INITIAL +1 > 20:
+                group_size = 2  # 一行に表示する進捗表示の数
+            else:
+                group_size = 3  # 一行に表示する進捗表示の数   
+            if not all_conditions_met:
+                sys.stdout.write("\033[F" * (len(energy_2D) // group_size + (len(energy_2D) % group_size > 0) + 1))
+            for i in range(0, len(energy_2D), group_size):
+                line_output = []
+                for j in range(group_size):
+                    if i + j < len(energy_2D):
+                        finish = energy_2D[i + j]
+                        display_inc = i + j + N_INC_INITIAL
+                        all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
+                        progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
+                        display = ",".join(progress)
+                        completion_status = "完" if all_done else "  "  # "完"またはスペースを選択
+                        line_part = f"焼却{display_inc:2} → [{display}]{completion_status}"
+                        line_output.append(line_part)
+                sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
+            sys.stdout.write(f"energy({waste_name})\n")
+            sys.stdout.flush()

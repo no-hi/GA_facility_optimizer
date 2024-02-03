@@ -3,7 +3,7 @@ import random
 import numpy as np
 import time
 import collections
-import math
+import sys
 import data
 import GA_function_energy.GA_input_energy as input
 import GA_function_energy.GA_output_display_energy as output_display
@@ -40,7 +40,7 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin, inc_facility=None, trans_facility=None, unused_cities=None)
 
 # GA施設数ループ##################################################
-def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy_2D, counter):
+def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy_2D, counter, lock2):
     start_time_count = time.perf_counter()
     N_IND = N_IND_UNIT * (N_INC+N_TRANS)
 
@@ -403,6 +403,11 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy
 
         gen_info.append(f"{gen}: neval={neval}{record} best={hof[0].fitness.values[0]}")
         
+        with lock2:
+            if sumgen % 10 == 0:
+                sys.stdout.write(f"{N_INC}&{N_TRANS}：世代{sumgen}\n")
+                sys.stdout.flush()
+        
         if min_change_count >= 10*(N_INC+N_TRANS):
             break
     
@@ -411,7 +416,7 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy
     best_individual_after = local.local_optimization(best_individual, total_energy)
     # best_individual_after = hof[0]
     localmark=False if best_individual.fitness.values[0] == best_individual_after.fitness.values[0] else True
-    output_display.output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, energy_2D, counter, localmark)
+    output_display.output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, energy_2D, counter, localmark, lock2)
 
     
     return best_individual_after
