@@ -115,7 +115,10 @@ if __name__ == '__main__':
             
         
         # 初期表示
-        group_size = 3  # 一行に表示する進捗表示の数        
+        if N_TRANS_MAX - N_TRANS_INITIAL +1 > 20:
+            group_size = 2  # 一行に表示する進捗表示の数
+        else:
+            group_size = 3  # 一行に表示する進捗表示の数           
         for i in range(0, len(energy_2D), group_size):
             line_output = []
             for j in range(group_size):
