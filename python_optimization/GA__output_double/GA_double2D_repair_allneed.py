@@ -4,8 +4,8 @@ import datetime
 N_INC_INITIAL=1
 N_INC_MAX=10
 N_TRANS_INITIAL=0
-N_TRANS_MAX=20
-UNIT_TRANS=4.8
+N_TRANS_MAX=10
+UNIT_double_TRANS=4.8
 current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
 waste_name="kanen"
@@ -47,7 +47,7 @@ for i in range(len(energy_2D)):
     print(f"trans[{i}]{N_TRANS_MAX-N_TRANS_INITIAL+1} = {len(energy_2D[i])-(energy_2D[i].count([]))}")
     
     
-with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+with open(os.path.join(output_directory, f"GA_Graph({UNIT_double_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
     file.write(f"#inc[{N_INC_INITIAL}~{N_INC_MAX}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
-    file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
+    file.write(f'foldername = "{str(waste_name)}{str(UNIT_double_TRANS)}"\n')
     file.write(f"energy = {str(energy_2D)}\n")
