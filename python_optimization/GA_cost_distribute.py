@@ -22,9 +22,9 @@ restarting_output_directory = input.restarting_output_directory
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 
 # 並列実行########################################################################
-def multi_task(task, current_time, output_directory, lock, cost_2D, counter):
+def multi_task(task, current_time, output_directory, lock, cost_2D, counter, lock2):
     count_inc, count_trans = task
-    best_individual = GA.GA_optimization(count_inc, count_trans, current_time, output_directory, lock, cost_2D, counter)
+    best_individual = GA.GA_optimization(count_inc, count_trans, current_time, output_directory, lock, cost_2D, counter, lock2)
     return count_inc, count_trans, best_individual.fitness.values[0]
 
 if __name__ == '__main__':
@@ -37,6 +37,7 @@ if __name__ == '__main__':
         # 並列初期設定
         manager = multiprocessing.Manager()
         lock = manager.Lock()
+        lock2 = manager.Lock()
         cost_2D_origin = [[[] for _ in range(N_TRANS_INITIAL, N_TRANS_MAX + 1)] for _ in range(N_INC_INITIAL, N_INC_MAX + 1)]
         cost_2D = manager.list([manager.list([manager.list(item) for item in sublist]) for sublist in cost_2D_origin])    
         counter = manager.dict({i: 0 for i in range(N_INC_INITIAL, N_INC_MAX + 1)})
@@ -153,7 +154,7 @@ if __name__ == '__main__':
         pool = multiprocessing.Pool()
         with multiprocessing.Pool(processes=num_processes) as pool:
             flat_tasks = [task for sublist in distributed_tasks for task in sublist]
-            results = pool.starmap(multi_task, [(task, current_time, output_directory, lock, cost_2D, counter) for task in flat_tasks])
+            results = pool.starmap(multi_task, [(task, current_time, output_directory, lock, cost_2D, counter, lock2) for task in flat_tasks])
                 
         pool.close()
         pool.join()

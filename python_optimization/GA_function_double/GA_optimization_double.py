@@ -688,10 +688,11 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, double
 
         gen_info.append(f"{gen}: neval={neval}{record} best={hof[0].fitness.values[0]}")
         
-        if sumgen % 10 == 0:
-            # カーソルを一行上げてからメッセージを出力
-            sys.stdout.write(f"\033[F{N_INC}&{N_TRANS}：世代{sumgen}\n")
-            sys.stdout.flush()
+        with lock2:
+            if sumgen % 10 == 0:
+                # カーソルを一行上げてからメッセージを出力
+                sys.stdout.write(f"\033[F{N_INC}&{N_TRANS}：世代{sumgen}\n")
+                sys.stdout.flush()
         
         if min_change_count >= 10*(N_INC+N_TRANS):
             break
