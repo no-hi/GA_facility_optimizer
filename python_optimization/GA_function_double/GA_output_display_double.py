@@ -184,7 +184,9 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
         else:
             return shared_list
     
-    with lock: # 共有化されたcost2Dやparallel.counterをいじるときはlockをかける        
+    with lock: # 共有化されたcost2Dやparallel.counterをいじるときはlockをかける 
+        counter[N_INC] += 1
+
         cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
         all_conditions_met = False
         if counter[N_INC] == N_TRANS_MAX - N_TRANS_INITIAL + 1:
@@ -210,7 +212,6 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
                 file.write(f"energy = {str(filtered_energy_2D)}\n")
                 
         double_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = double_list
-        counter[N_INC] += 1        
         all_conditions_met = False
         if counter[N_INC] == N_TRANS_MAX - N_TRANS_INITIAL + 1:
             normal_double_2D = extract_list(double_2D)
