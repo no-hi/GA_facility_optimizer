@@ -77,7 +77,7 @@ if __name__ == '__main__':
             # フォルダ生成後すぐ自動git pull/push        
             subprocess.run(["git", "pull"], check=False)
             subprocess.run(["git", "add", "."], check=False)
-            subprocess.run(["git", "commit", "-m", f"自動コミット(エネルギースタート):{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+            subprocess.run(["git", "commit", "-m", f"自動コミット(ダブルスタート):{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
             subprocess.run(["git", "push"], check=False)
 
             tasks = list(product(range(N_INC_INITIAL, N_INC_MAX + 1), range(N_TRANS_INITIAL, N_TRANS_MAX + 1)))
@@ -93,7 +93,7 @@ if __name__ == '__main__':
             # フォルダ再開前で自動git pull/push        
             subprocess.run(["git", "pull"], check=False)
             subprocess.run(["git", "add", "."], check=False)
-            subprocess.run(["git", "commit", "-m", f"自動コミット(エネルギースタート):{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+            subprocess.run(["git", "commit", "-m", f"自動コミット(ダブルスタート):{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
             subprocess.run(["git", "push"], check=False)
             # _best.txtファイルの_bestを取り除く
             for filename in os.listdir(output_directory):
@@ -193,11 +193,11 @@ if __name__ == '__main__':
         # 自動git pull/push
         subprocess.run(["git", "pull"], check=True)
         subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", f"自動コミット（エネルギー終了）:{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+        subprocess.run(["git", "commit", "-m", f"自動コミット（ダブル終了）:{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
         subprocess.run(["git", "push"], check=True)
         
         print("\n" * len(double_2D))
-        print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総エネルギー消費: {best_solutions[optimal_count_inc,optimal_count_trans]}")
+        print(f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総ダブル: {best_solutions[optimal_count_inc,optimal_count_trans]}")
 
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
@@ -205,13 +205,13 @@ if __name__ == '__main__':
         sys.stdout.write("\033[?25h")
 
         end_message  = [output_directory_name,
-                        f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総エネルギー消費: {best_solutions[optimal_count_inc,optimal_count_trans]}",
+                        f"最適な焼却＆中継施設数: {optimal_count_inc}&{optimal_count_trans} での総ダブル: {best_solutions[optimal_count_inc,optimal_count_trans]}",
                         f"実行時間= {round(elapsed_time/3600,1)}h"
                         ]
         mail.send_end_email(end_message,output_directory_name)
         
     except Exception as e:
-        output_directory_name=f"double{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"
+        output_directory_name=f"{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"
         error_message = [output_directory_name,
                         str(e)
                         ]

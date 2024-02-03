@@ -12,7 +12,10 @@ N_INC_MAX = input.N_INC_MAX
 N_TRANS_INITIAL = input.N_TRANS_INITIAL
 N_TRANS_MAX = input.N_TRANS_MAX
 N_GEN = input.N_GEN 
+UNIT_cost_TRANS = input. UNIT_cost_TRANS
+UNIT_energy_TRANS = input. UNIT_energy_TRANS
 UNIT_double_TRANS = input. UNIT_double_TRANS
+
 
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 
@@ -181,30 +184,17 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
         else:
             return shared_list
     
-    with lock: # 共有化されたcost2Dやparallel.counterをいじるときはlockをかける
-        double_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = double_list
-        counter[N_INC] += 1        
-        all_conditions_met = False
-        if counter[N_INC] == N_TRANS_MAX - N_TRANS_INITIAL + 1:
-            normal_double_2D = extract_list(double_2D)
-            # 時点N_INC以下のデータのみを抽出
-            filtered_double_2D = normal_double_2D[:N_INC]
-            with open(os.path.join(output_directory, f"GA_Graph(double{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-                max_filled_N_INC = max((i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))), default=0)
-                file.write(f"#inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
-                file.write(f'foldername = "{str(waste_name)}{str(UNIT_double_TRANS)}"\n')
-                file.write(f"double = {str(filtered_double_2D)}\n")
-        
+    with lock: # 共有化されたcost2Dやparallel.counterをいじるときはlockをかける        
         cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
         all_conditions_met = False
         if counter[N_INC] == N_TRANS_MAX - N_TRANS_INITIAL + 1:
             normal_cost_2D = extract_list(cost_2D)
             # 時点N_INC以下のデータのみを抽出
             filtered_cost_2D = normal_cost_2D[:N_INC]
-            with open(os.path.join(output_directory, f"GA_Graph({UNIT_double_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+            with open(os.path.join(output_directory, f"GA_Graph({UNIT_cost_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
                 max_filled_N_INC = max((i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))), default=0)
                 file.write(f"#inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
-                file.write(f'foldername = "{str(waste_name)}{str(UNIT_double_TRANS)}"\n')
+                file.write(f'foldername = "{str(waste_name)}{str(UNIT_cost_TRANS)}"\n')
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
         
         energy_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = energy_list
@@ -213,17 +203,30 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
             normal_energy_2D = extract_list(energy_2D)
             # 時点N_INC以下のデータのみを抽出
             filtered_energy_2D = normal_energy_2D[:N_INC]
+            with open(os.path.join(output_directory, f"GA_Graph({UNIT_energy_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+                max_filled_N_INC = max((i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))), default=0)
+                file.write(f"#inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
+                file.write(f'foldername = "{str(waste_name)}{str(UNIT_energy_TRANS)}"\n')
+                file.write(f"energy = {str(filtered_energy_2D)}\n")
+                
+        double_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = double_list
+        counter[N_INC] += 1        
+        all_conditions_met = False
+        if counter[N_INC] == N_TRANS_MAX - N_TRANS_INITIAL + 1:
+            normal_double_2D = extract_list(double_2D)
+            # 時点N_INC以下のデータのみを抽出
+            filtered_double_2D = normal_double_2D[:N_INC]
             with open(os.path.join(output_directory, f"GA_Graph({UNIT_double_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
                 max_filled_N_INC = max((i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))), default=0)
                 file.write(f"#inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_double_TRANS)}"\n')
-                file.write(f"energy = {str(filtered_energy_2D)}\n")
+                file.write(f"double = {str(filtered_double_2D)}\n")
             # 自動git pull/push
             all_conditions_met = all(counter[i] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for i in range(N_INC_INITIAL, N_INC + 1))
             if all_conditions_met:
                 subprocess.run(["git", "pull"], check=False)
                 subprocess.run(["git", "add", "."], check=False)
-                subprocess.run(["git", "commit", "-m", f"自動コミット（エネルギーevery_INC）:{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+                subprocess.run(["git", "commit", "-m", f"自動コミット（ダブルevery_INC）:{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
                 subprocess.run(["git", "push"], check=False)
         
         # 並列実行用の表示
