@@ -1,16 +1,27 @@
 import os
+import re
 import datetime
 
-N_INC_INITIAL=1
-N_INC_MAX=35
-N_TRANS_INITIAL=0
-N_TRANS_MAX=20
-UNIT_TRANS=877
+restarting_output_directory = "877kanen1~10&0~20_20240202_132304"
+
+# 正規表現を使用してフォルダ名から必要な情報を抽出
+match = re.match(r"(\d+\.\d+)([a-zA-Z]+)(\d+)~(\d+)&(\d+)~(\d+)_(\d{8}_\d{6})", restarting_output_directory)
+
+if match:
+    UNIT_TRANS = float(match.group(1))
+    waste_name = match.group(2)
+    N_INC_INITIAL = int(match.group(3))
+    N_INC_MAX = int(match.group(4))
+    N_TRANS_INITIAL = int(match.group(5))
+    N_TRANS_MAX = int(match.group(6))
+
+# waste_name="kanen"
+# N_INC_INITIAL=1
+# N_INC_MAX=10
+# N_TRANS_INITIAL=0
+# N_TRANS_MAX=20
+# UNIT_TRANS=877
 current_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-
-waste_name="sanpai"
-
-restarting_output_directory = "877sanpai1~35&0~20_20240130_150350"
 
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
