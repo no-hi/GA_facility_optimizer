@@ -475,8 +475,7 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, cost_2
         
         with lock2:
             if sumgen % 10 == 0:
-                # カーソルを一行上げてからメッセージを出力
-                sys.stdout.write(f"\033[F{N_INC}&{N_TRANS}：世代{sumgen}\n")
+                sys.stdout.write(f"{N_INC}&{N_TRANS}：世代{sumgen}\n")
                 sys.stdout.flush()
         
         if min_change_count >= 10*(N_INC+N_TRANS):
