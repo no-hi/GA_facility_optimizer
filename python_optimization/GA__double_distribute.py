@@ -17,7 +17,7 @@ N_INC_INITIAL = input.N_INC_INITIAL
 N_INC_MAX = input.N_INC_MAX
 N_TRANS_INITIAL = input.N_TRANS_INITIAL
 N_TRANS_MAX = input.N_TRANS_MAX
-UNIT_energy_TRANS = input. UNIT_energy_TRANS
+UNIT_double_TRANS = input. UNIT_double_TRANS
 restarting_output_directory = input.restarting_output_directory
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 
@@ -70,14 +70,14 @@ if __name__ == '__main__':
             return distributed_tasks
         
         if restarting_output_directory == "":
-            output_directory_name = f"{UNIT_energy_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
+            output_directory_name = f"{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}{add_name}_{current_time}"
             output_directory = os.path.join(current_directory, "GA__output_double", output_directory_name)
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
             # フォルダ生成後すぐ自動git pull/push        
             subprocess.run(["git", "pull"], check=False)
             subprocess.run(["git", "add", "."], check=False)
-            subprocess.run(["git", "commit", "-m", f"自動コミット(エネルギースタート):{UNIT_energy_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+            subprocess.run(["git", "commit", "-m", f"自動コミット(エネルギースタート):{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
             subprocess.run(["git", "push"], check=False)
 
             tasks = list(product(range(N_INC_INITIAL, N_INC_MAX + 1), range(N_TRANS_INITIAL, N_TRANS_MAX + 1)))
@@ -93,7 +93,7 @@ if __name__ == '__main__':
             # フォルダ再開前で自動git pull/push        
             subprocess.run(["git", "pull"], check=False)
             subprocess.run(["git", "add", "."], check=False)
-            subprocess.run(["git", "commit", "-m", f"自動コミット(エネルギースタート):{UNIT_energy_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
+            subprocess.run(["git", "commit", "-m", f"自動コミット(エネルギースタート):{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=False)
             subprocess.run(["git", "push"], check=False)
             # _best.txtファイルの_bestを取り除く
             for filename in os.listdir(output_directory):
@@ -176,9 +176,9 @@ if __name__ == '__main__':
                 else:
                     return shared_list
             normal_cost_2D = extract_list(double_2D)
-            with open(os.path.join(output_directory, f"GA_Graph({UNIT_energy_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
+            with open(os.path.join(output_directory, f"GA_Graph({UNIT_double_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
                 file.write(f"inc[{N_INC_INITIAL}~{N_INC_MAX}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
-                file.write(f'foldername = "{str(waste_name)}{str(UNIT_energy_TRANS)}"\n')
+                file.write(f'foldername = "{str(waste_name)}{str(UNIT_double_TRANS)}"\n')
                 file.write(f"cost = {str(normal_cost_2D)}\n")
         #################################################################################
 
@@ -193,7 +193,7 @@ if __name__ == '__main__':
         # 自動git pull/push
         subprocess.run(["git", "pull"], check=True)
         subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", f"自動コミット（エネルギー終了）:{UNIT_energy_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
+        subprocess.run(["git", "commit", "-m", f"自動コミット（エネルギー終了）:{UNIT_double_TRANS}{waste_name}{N_INC_INITIAL}~{N_INC_MAX}&{N_TRANS_INITIAL}~{N_TRANS_MAX}"], check=True)
         subprocess.run(["git", "push"], check=True)
         
         print("\n" * len(double_2D))
