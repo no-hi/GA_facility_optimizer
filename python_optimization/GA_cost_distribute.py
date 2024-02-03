@@ -131,7 +131,7 @@ if __name__ == '__main__':
             distributed_tasks = distribute_tasks(tasks, num_processes)
         
         # 初期表示
-        group_size = 3  # 一行に表示する進捗表示の数        
+        group_size = 2  # 一行に表示する進捗表示の数        
         for i in range(0, len(cost_2D), group_size):
             line_output = []
             for j in range(group_size):

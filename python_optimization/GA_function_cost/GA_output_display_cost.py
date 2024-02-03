@@ -191,7 +191,10 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
                 subprocess.run(["git", "push"], check=False)
         
         # 並列実行用の表示
-        group_size = 3  # 一行に表示する進捗表示の数
+        if N_TRANS_MAX - N_TRANS_INITIAL +1 > 20:
+            group_size = 2  # 一行に表示する進捗表示の数
+        else:
+            group_size = 3  # 一行に表示する進捗表示の数   
         if not all_conditions_met:
             sys.stdout.write("\033[F" * (len(cost_2D) // group_size + (len(cost_2D) % group_size > 0) + 1))
         for i in range(0, len(cost_2D), group_size):
