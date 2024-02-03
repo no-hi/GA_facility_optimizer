@@ -146,6 +146,7 @@ if __name__ == '__main__':
                     line_output.append(line_part)
             sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
         sys.stdout.write(f"cost({waste_name})\n")
+        sys.stdout.write(f"世代\n")
         sys.stdout.flush()
         
         # 並列実行
