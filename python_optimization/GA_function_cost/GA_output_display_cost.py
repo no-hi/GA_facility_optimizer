@@ -178,7 +178,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
             # 時点N_INC以下のデータのみを抽出
             filtered_cost_2D = normal_cost_2D[:N_INC]
             with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-                max_filled_N_INC = max(i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1)))
+                max_filled_N_INC = max((i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))), default=0)
                 file.write(f"#inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
@@ -211,5 +211,5 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
                         line_part = f"焼却{display_inc:2} → [{display}]{completion_status}"
                         line_output.append(line_part)
                 sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
-            sys.stdout.write(f"cost({waste_name})\n")
+            sys.stdout.write(f"cost({waste_name})              \n")
             sys.stdout.flush()
