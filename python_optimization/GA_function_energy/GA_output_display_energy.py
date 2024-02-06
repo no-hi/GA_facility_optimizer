@@ -176,7 +176,12 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_in
             # 時点N_INC以下のデータのみを抽出
             filtered_energy_2D = normal_energy_2D[:N_INC]
             with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-                max_filled_N_INC = max((i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))), default=0)
+                sequence = [i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))]
+                if sequence:
+                    max_filled_N_INC = max(sequence)
+                else:
+                    max_filled_N_INC = 0
+                # max_filled_N_INC = max((i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))), default=0)
                 file.write(f"#inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
                 file.write(f"energy = {str(filtered_energy_2D)}\n")
