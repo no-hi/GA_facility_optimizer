@@ -29,9 +29,8 @@ def replace_sira(name_list):
 
 ##############################################################################
 
-
 waste_name ='sanpai'
-unit ='t/year'
+unit ='t/day'
 
 inc_size= [2402133, 1650444, 1299768, 1107995, 750794, 657158]
 inc_facility = ['苫小牧市', '釧路市', '札幌市', '室蘭市', '伊達市', '音更町']
@@ -42,6 +41,11 @@ trans_facility = ['登別市', '東神楽町', '函館市', '小樽市', '北斗
 trans_blocks = [['夕張市', '岩見沢市', '美唄市', '三笠市', '由仁町', '長沼町', '栗山町', '月形町', '新篠津村'], ['芦別市', '赤平市', '滝川市', '砂川市', '歌志内市', '深川市', '奈井江町', '上砂川町', '浦臼町', '新十津川町', '妹背牛町', '秩父別町', '雨竜町', '北竜町', '沼田町', '留萌市', '増毛町', '小平町'], ['小樽市', '共和町', '岩内町', '泊村', '神恵内村', '積丹町', '古平町', '仁木町', '余市町', '赤井川村'], ['登別市'], ['富良野市', '上富良野町', '中富良野町'], ['新冠町', '浦河町', '様似町', 'えりも町', '新ひだか町'], ['函館市'], ['北斗市', '松前町', '福島町', '知内町', '木古内町', '七飯町', '鹿部町', '森町', '江差町', '上ノ国町', '厚沢部町', '乙部町'], ['島牧村', '寿都町', '黒松内町', '蘭越町', '八雲町', '長万部町', '今金町', 'せたな町'], ['士別市', '名寄市', '和寒町', '剣淵町', '下川町', '美深町', '幌加内町', '苫前町', '羽幌町', '初山別村', '西興部村'], ['旭川市', '鷹栖町', '東神楽町', '当麻町', '比布町', '愛別町', '上川町', '東川町', '美瑛町'], ['遠別町', '天塩町', '稚内市', '猿払村', '豊富町', '幌延町'], ['音威子府村', '中川町', '浜頓別町', '中頓別町', '枝幸町', '雄武町'], ['網走市', '美幌町', '津別町', '清里町', '斜里町', '小清水町', '大空町'], ['北見市', '訓子府町', '置戸町', '陸別町'], ['紋別市', '佐呂間町', '遠軽町', '湧別町', '滝上町', '興部町'], ['厚岸町', '浜中町'], ['標茶町', '弟子屈町'], ['根室市'], ['別海町', '中標津町', '標津町', '羅臼町']]
 
 arrows = [[['札幌市'], ['小樽市', '岩見沢市', '新十津川町', '稚内市', '士別市', '枝幸町']], [['室蘭市'], ['登別市']], [['苫小牧市'], ['新ひだか町']], [['伊達市'], ['長万部町', '函館市', '北斗市']], [['音更町'], ['遠軽町', '上富良野町', '東神楽町', '訓子府町']], [['釧路市'], ['厚岸町', '標茶町', '根室市', '中標津町', '大空町']]]
+
+# t/day
+if unit == "t/day":
+    inc_size = [x / 365 for x in inc_size]
+    trans_size = [x / 365 for x in trans_size]
 
 
 ##############################################################################
@@ -115,19 +119,18 @@ for block in trans_blocks:
             ax.plot(*line.xy, color="black")
 
 
+
+
 # 施設を選択された市町村に重ねて表示
 for _, row in fazility_municipalities.iterrows():
     representative_point = row["geometry"].representative_point()
-    # 囲み線の太さを調整するために `linewidth` パラメータを追加
-    ax.scatter(representative_point.x, representative_point.y, color="white", s=row["施設規模"]*symbolsize, edgecolor="black", linewidth=1.75, marker="o")  # 施設サイズのスケールを調整
+    if row["市町村"] in trans_facility:
+        # trans_facilityに該当する施設のマーカーを黒塗りの三角形に設定
+        ax.scatter(representative_point.x, representative_point.y, color="white", s=row["施設規模"]*symbolsize, edgecolor="black", linewidth=1, marker="^")
+    else:
+        # それ以外の施設は白塗りの円形で表示（以前の設定を維持）
+        ax.scatter(representative_point.x, representative_point.y, color="white", s=row["施設規模"]*symbolsize, edgecolor="black", linewidth=1.75, marker="o")
 
-# # 施設を選択された市町村に重ねて表示　(　規模数表示　)
-# for _, row in fazility_municipalities.iterrows():
-#     representative_point = row["geometry"].representative_point()
-#     ax.scatter(representative_point.x, representative_point.y, color="gray", s=row["施設規模"]*1, edgecolor="black", marker="o")
-#     ax.text(representative_point.x, representative_point.y, str(row["施設規模"]),
-#             fontsize=8, color='black', ha='center', va='center', fontweight='bold',
-#             bbox=dict(facecolor='white', alpha=0.6, edgecolor='none'))  # テキストの背景色を追加
 
 # 矢印を描画
 for pair in arrows:
@@ -147,13 +150,13 @@ if waste_name == "kanen":
     if unit == "t/year":
         legend_markers = [plt.scatter([], [], s=size*symbolsize, edgecolor="black", linewidth=1.75, color="white", marker="o") for size in [10000, 100000, 0,500000,0]]
     if unit == "t/day":
-        legend_markers = [plt.scatter([], [], s=size*symbolsize, edgecolor="black", linewidth=1.75, color="white", marker="o") for size in [10, 100, 0,1000,0]]
+        legend_markers = [plt.scatter([], [], s=size*symbolsize, edgecolor="black", linewidth=1.75, color="white", marker="o") for size in [10, 100, 1000,0]]
 
 if waste_name == "sanpai":
     if unit == "t/year":
         legend_markers = [plt.scatter([], [], s=size*symbolsize, edgecolor="black", linewidth=1.75, color="white", marker="o") for size in [10000, 100000,1000000]]
     if unit == "t/day":
-        legend_markers = [plt.scatter([], [], s=size*symbolsize, edgecolor="black", linewidth=1.75, color="white", marker="o") for size in [10, 100,1000]]
+        legend_markers = [plt.scatter([], [], s=size*symbolsize, edgecolor="black", linewidth=1.75, color="white", marker="o") for size in [10, 100,1000,0]]
 
 
 
@@ -162,15 +165,15 @@ if waste_name == "kanen":
     if unit == "t/year":
         legend_labels = ["1万", "10万","", "50万",""]
     if unit == "t/day":
-        legend_labels = ["10", "100","", "1000"]
+        legend_labels = ["10", "100", "1000",""]
 
 if waste_name == "sanpai":
     if unit == "t/year":
         legend_labels = ["1万", "10万", "100万"]
     if unit == "t/day":
-        legend_labels = ["10", "100", "1000"]
+        legend_labels = ["10", "100", "1000",""]
 
 # 凡例をプロットに追加
-plt.legend(legend_markers, legend_labels, scatterpoints=1, frameon=True, labelspacing=1, title= f'施設の規模{unit}')
+plt.legend(legend_markers, legend_labels, scatterpoints=1, frameon=True, labelspacing=1, title= f'施設規模{unit}')
 
 plt.show()
