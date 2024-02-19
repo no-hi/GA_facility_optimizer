@@ -66,9 +66,9 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy
     toolbox.register("individual", create_individual)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-
     def repair(individual):
         duplicates = set(individual.inc_facility) & set(individual.trans_facility)
+        # incとtransの重複があれば、trans該当部分のみ変更
         if duplicates:
             for facility in duplicates:
                 indices = [i for i, x in enumerate(individual.trans_facility) if x == facility]
@@ -137,7 +137,6 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy
     def mutSet(individual):
         for i in range(len(individual)):
             if random.random() < MUT_PROB:
-                new_value = random.choice(list(individual.unused_cities))
                 new_value = random.choice([city for city in list(individual.unused_cities) if city not in cities_zero])
                 individual.unused_cities.add(individual[i])
                 individual[i] = new_value
@@ -349,7 +348,7 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy
         return (total_energy_, total_EL_direct, total_EL_indirect, total_ED_inc, total_ED_trans, EL_direct_values, ED_inc_values, EL_indirect_values , ED_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc)
 
     def evaluate(individual):
-        if (len(set(individual.inc_facility)) + len(set(individual.trans_facility))) != N_INC + N_TRANS:
+        if set(individual.inc_facility) & set(individual.trans_facility) or (len(set(individual.inc_facility)) + len(set(individual.trans_facility))) != N_INC + N_TRANS:
             return float('inf'),
         else:
             total_energy_, *_ = total_energy(individual)            
