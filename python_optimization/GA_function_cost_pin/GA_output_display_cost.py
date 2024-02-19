@@ -214,7 +214,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
                 for j in range(group_size):
                     if i + j < len(cost_2D):
                         finish = cost_2D[i + j]
-                        display_inc = 10(i + j) + N_INC_INITIAL
+                        display_inc = float(10(i + j)) + N_INC_INITIAL
                         all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
                         progress = [str(10*float(k) + N_TRANS_INITIAL) if finish[k] else "@" for k in range((N_TRANS_MAX - N_TRANS_INITIAL + 1)//10)]
                         display = ",".join(progress)
