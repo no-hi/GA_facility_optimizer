@@ -1,5 +1,5 @@
 from copy import deepcopy
-import GA_function_cost.GA_input_cost as input
+import GA_function_cost_pin.GA_input_cost as input
 
 def local_optimization(best_individual, total_cost, cities_zero):
     current_best = best_individual

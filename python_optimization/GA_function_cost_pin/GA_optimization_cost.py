@@ -6,9 +6,9 @@ import sys
 import collections
 import math
 import data
-import GA_function_cost.GA_input_cost as input
-import GA_function_cost.GA_output_display_cost as output_display
-import GA_function_cost.GA_local_cost as local
+import GA_function_cost_pin.GA_input_cost as input
+import GA_function_cost_pin.GA_output_display_cost as output_display
+import GA_function_cost_pin.GA_local_cost as local
 
 
 

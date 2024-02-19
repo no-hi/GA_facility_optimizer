@@ -6,9 +6,9 @@ from itertools import product
 import sys
 import subprocess
 import traceback
-import GA_function_cost.GA_input_cost as input
-import GA_function_cost.GA_optimization_cost as GA
-import GA_function_cost.GA_mail as mail
+import GA_function_cost_pin.GA_input_cost as input
+import GA_function_cost_pin.GA_optimization_cost as GA
+import GA_function_cost_pin.GA_mail as mail
 
 
 add_name = input.add_name
@@ -140,7 +140,7 @@ if __name__ == '__main__':
                     finish = cost_2D[i + j]
                     display_inc = i + j + N_INC_INITIAL
                     all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
-                    progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
+                    progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(0,N_TRANS_MAX - N_TRANS_INITIAL + 1, 10)]
                     display = ",".join(progress)
                     completion_status = "完" if all_done else "  "  # "完"またはスペースを選択
                     line_part = f"焼却{display_inc:2} → [{display}]{completion_status}"
