@@ -23,13 +23,13 @@ hokkaido = data.name
 waste = getattr(data, waste_name)
 
 #情報表示###############################################################################################################
-def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, double_2D, counter, localmark,energy_2D,cost_2D,lock2):    
+def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_info, sumgen, best_individual, start_time_count, current_time, output_directory, lock, double_2D, counter, localmark,energy_2D,cost_2D,lock2):    
     
     output_content = []
-    output_file_path = f"{waste_name}_{len(best_individual_after.inc_facility)}&{len(best_individual_after.trans_facility)}.txt"
+    output_file_path = f"{waste_name}_{len(best_individual.inc_facility)}&{len(best_individual.trans_facility)}.txt"
     
     # total_costからの返り値を受け取る
-    total_double_, total_energy_, total_EL_direct, total_EL_indirect, total_ED_inc, total_ED_trans, EL_direct_values, ED_inc_values, EL_indirect_values , ED_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc, total_cost_, total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values , IC_trans_values ,OC_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc = total_double_info(best_individual_after)
+    total_double_, total_energy_, total_EL_direct, total_EL_indirect, total_ED_inc, total_ED_trans, EL_direct_values, ED_inc_values, EL_indirect_values , ED_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc, total_cost_, total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans, TC_direct_values, IC_inc_values, OC_inc_values, TC_indirect_values , IC_trans_values ,OC_trans_values , yearly_inc_size, yearly_trans_size , cities_to_inc , cities_to_trans , trans_to_inc = total_double_info(best_individual)
     energy_list = [total_EL_direct, total_EL_indirect, total_ED_inc, total_ED_trans]
     cost_list = [total_TC_direct, total_TC_indirect, total_IC_inc, total_OC_inc, total_IC_trans, total_OC_trans]
     double_list =[sum(energy_list), sum(cost_list)]
@@ -61,10 +61,10 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
     output_content += ["------------------------  前提  ------------------------\n",
                     f"waste={waste_name}\n",
                     # f"ごみ量{str(TOP_N_CITIES)}位以内：",
-                    f"ごみ量{str(len(best_individual_after)+10)}位以内：",                    
+                    f"ごみ量{str(len(best_individual)+10)}位以内：",                    
                     ", ".join(top_cities_info),
-                    f"\n焼却施設数: {str(len(best_individual_after.inc_facility))}",
-                    f"中継施設数: {str(len(best_individual_after.trans_facility))}\n",
+                    f"\n焼却施設数: {str(len(best_individual.inc_facility))}",
+                    f"中継施設数: {str(len(best_individual.trans_facility))}\n",
                     f"輸送単価＝ {str(UNIT_double_TRANS)} 円/t/km",
                     ]
     
@@ -86,7 +86,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
     
     sorted_inc_indices = sorted(range(len(yearly_inc_size)), key=lambda i: yearly_inc_size[i], reverse=True)
     sorted_trans_indices = sorted(range(len(yearly_trans_size)), key=lambda i: yearly_trans_size[i], reverse=True)
-    inc_facility = [hokkaido[best_individual_after.inc_facility[inc_index]] for inc_index in sorted_inc_indices]
+    inc_facility = [hokkaido[best_individual.inc_facility[inc_index]] for inc_index in sorted_inc_indices]
     
     output_content += [f"--------------------  GAPlot_input  --------------------\n",
                     f"waste_name ='{waste_name}'" ,
@@ -97,13 +97,13 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
                     ]
     
     if yearly_trans_size != []:
-        trans_facility = [hokkaido[best_individual_after.trans_facility[trans_index]] for trans_index in sorted_trans_indices]
+        trans_facility = [hokkaido[best_individual.trans_facility[trans_index]] for trans_index in sorted_trans_indices]
         output_content += [f"trans_size={str([round(yearly_trans_size[i]) for i in sorted_trans_indices])}",
                         f"trans_facility = {trans_facility}",
                         f"trans_blocks = {str(indirect_cities_list)}"
                         ]
         arrows = []
-        for inc_facility_index in best_individual_after.inc_facility:
+        for inc_facility_index in best_individual.inc_facility:
             trans_indices = trans_to_inc.get(inc_facility_index)
 
             if trans_indices:
@@ -122,9 +122,9 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
     
     # コスト情報
     sorted_inc_size = sorted(((i, inc_size) for i, inc_size in enumerate(yearly_inc_size)), key=lambda x: x[1], reverse=True)
-    sorted_inc_i = [best_individual_after.inc_facility[i] for i, _ in sorted_inc_size]
+    sorted_inc_i = [best_individual.inc_facility[i] for i, _ in sorted_inc_size]
     sorted_trans_size = sorted(((i, trans_size) for i, trans_size in enumerate(yearly_trans_size)), key=lambda x: x[1], reverse=True)
-    sorted_trans_i = [best_individual_after.trans_facility[i] for i, _ in sorted_trans_size]
+    sorted_trans_i = [best_individual.trans_facility[i] for i, _ in sorted_trans_size]
     
     output_content += ["\n---------------------  コスト情報  ---------------------",
                     str(cost_list)+ "\n",
@@ -148,23 +148,23 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
     
     # 輸送情報
     output_content += ["\n----------------------  輸送情報  ----------------------\n"]
-    def format_faci(facility_key, yearly_inc_size, yearly_trans_size, best_individual_after, cities_to_inc, trans_to_inc):
-        direct_size = yearly_inc_size - sum(yearly_trans_size[best_individual_after.trans_facility.index(trans)] for trans in trans_to_inc[facility_key])
+    def format_faci(facility_key, yearly_inc_size, yearly_trans_size, best_individual, cities_to_inc, trans_to_inc):
+        direct_size = yearly_inc_size - sum(yearly_trans_size[best_individual.trans_facility.index(trans)] for trans in trans_to_inc[facility_key])
         city_to_inc_names = ', '.join(hokkaido[city] for city in cities_to_inc[facility_key])
         formatted_output = [f"direct {hokkaido[facility_key]}({round(direct_size/365)}/{round(yearly_inc_size/365)}) t/day → receive from: {city_to_inc_names}"]
         
-        indirect_size = sum(yearly_trans_size[best_individual_after.trans_facility.index(trans)] for trans in trans_to_inc[facility_key])
+        indirect_size = sum(yearly_trans_size[best_individual.trans_facility.index(trans)] for trans in trans_to_inc[facility_key])
         if indirect_size > 0:
             trans_to_inc_details = []
             for trans in trans_to_inc[facility_key]:
                 cities_to_trans_names = ', '.join(hokkaido[city] for city in cities_to_trans[trans])
-                trans_to_inc_details.append(f"{hokkaido[trans]}({yearly_trans_size[best_individual_after.trans_facility.index(trans)]}) → receive from: {cities_to_trans_names}")
+                trans_to_inc_details.append(f"{hokkaido[trans]}({yearly_trans_size[best_individual.trans_facility.index(trans)]}) → receive from: {cities_to_trans_names}")
 
             trans_to_inc_details_str = '\n'.join(trans_to_inc_details)
             formatted_output.append(f"indirect {hokkaido[facility_key]}({round(indirect_size/365)}/{round(yearly_inc_size/365)}) t/day → receive from: 中継施設＝ {trans_to_inc_details_str}")
 
         return formatted_output
-    output_content.extend(item for sublist in (format_faci(best_individual_after.inc_facility[i], yearly_inc_size, yearly_trans_size, best_individual_after, cities_to_inc, trans_to_inc) for i, yearly_inc_size in sorted_inc_size) for item in sublist)
+    output_content.extend(item for sublist in (format_faci(best_individual.inc_facility[i], yearly_inc_size, yearly_trans_size, best_individual, cities_to_inc, trans_to_inc) for i, yearly_inc_size in sorted_inc_size) for item in sublist)
     
     # 遺伝情報    
     output_content +=["\n----------------------  遺伝情報  ----------------------\n",
@@ -172,6 +172,12 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
                     "世代数＝"+ str(N_GEN),
                     ]
     output_content += gen_info
+    output_content += ["\n\n----------------------  最適個体  ----------------------\n",
+                f"best_individual.inc_facility = {best_individual.inc_facility}",
+                f"best_individual.trans_facility = {best_individual.trans_facility}",
+                f"best_individual.unused_cities = {best_individual.unused_cities}",
+                f"best_individual.fitness.values = {best_individual.fitness.values}",
+                ]
     
     # ファイルに書き込む
     write_to_file(output_file_path, '\n'.join(output_content))

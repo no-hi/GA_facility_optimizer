@@ -157,7 +157,13 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
                     "世代数＝"+ str(N_GEN),
                     ]
     output_content += gen_info
-    
+    output_content += ["\n\n----------------------  最適個体  ----------------------\n",
+                    f"best_individual.inc_facility = {best_individual.inc_facility}",
+                    f"best_individual.trans_facility = {best_individual.trans_facility}",
+                    f"best_individual.unused_cities = {best_individual.unused_cities}",
+                    f"best_individual.fitness.values = {best_individual.fitness.values}",
+                    ]
+
     # ファイルに書き込む
     write_to_file(output_file_path, '\n'.join(output_content))
     
