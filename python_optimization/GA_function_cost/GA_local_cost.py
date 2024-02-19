@@ -1,7 +1,7 @@
 from copy import deepcopy
 import GA_function_cost.GA_input_cost as input
 
-def local_optimization(best_individual, total_cost):
+def local_optimization(best_individual, total_cost, cities_notzero):
     current_best = best_individual
     current_best_score, *_ = total_cost(best_individual)
         
@@ -13,7 +13,7 @@ def local_optimization(best_individual, total_cost):
         for i in range(len(facilities)):
             if i in fixed_indices:
                 continue  # 変更された遺伝子位置はスキップ
-            for new_facility in range(input.N_CITIES):
+            for new_facility in [city for city in list(current_best.unused_cities) if city not in cities_notzero] :
                 if new_facility in facilities[:i] + facilities[i+1:]:
                     continue
                 individual = deepcopy(current_best)
@@ -28,8 +28,11 @@ def local_optimization(best_individual, total_cost):
                     current_best_score = score
                     if i < len(current_best.inc_facility):
                         facilities[i] = new_facility
+                        current_best.inc_facility[i] = new_facility
                     else:
                         facilities[i - len(current_best.inc_facility)] = new_facility
+                        current_best.trans_facility[i - len(current_best.inc_facility)] = new_facility
+                    current_best.unused_cities = set(range(input.N_CITIES)) - set(current_best.inc_facility) - set(current_best.trans_facility)
                     new_best_found = True
                     fixed_indices.add(i)  # 新しい最適遺伝子を固定
         if not new_best_found:

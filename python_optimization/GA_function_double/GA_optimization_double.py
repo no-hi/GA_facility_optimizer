@@ -35,6 +35,9 @@ hokkaido = data.name
 distance = data.distance
 distance = np.array(distance).reshape(len(hokkaido), len(hokkaido)) #2次元距離リスト生成
 waste = getattr(data, waste_name)
+cities_notzero = [i for i in range(N_CITIES) if waste[i] != 0]
+
+
 toolbox = base.Toolbox()
 toolbox.register("select", tools.selTournament, tournsize=TOUR_SIZE)
 
@@ -73,7 +76,7 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, double
             for facility in duplicates:
                 indices = [i for i, x in enumerate(individual.trans_facility) if x == facility]
                 for i in indices:
-                    new_facility = random.choice(list(individual.unused_cities))
+                    new_facility = random.choice([city for city in list(individual.unused_cities) if city not in cities_notzero])
                     individual.unused_cities.remove(new_facility)
                     individual.trans_facility[i] = new_facility
 
@@ -85,7 +88,7 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, double
                 keep = random.choice(indices)
                 for idx in indices:
                     if idx != keep:
-                        new_facility = random.choice(list(individual.unused_cities))
+                        new_facility = random.choice([city for city in list(individual.unused_cities) if city not in cities_notzero])
                         individual.unused_cities.remove(new_facility)
                         combined[idx] = new_facility
 
@@ -130,14 +133,15 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, double
         ind1.unused_cities = set(range(N_CITIES)) - set(ind1)
         ind2.unused_cities = set(range(N_CITIES)) - set(ind2)
 
-        return ind1, ind2
+        return ind1, ind2    
     toolbox.register("mate", cxSet)
-
+    
     # 全topでやるならunused_citiesかつtopから選ぶ
     def mutSet(individual):
         for i in range(len(individual)):
             if random.random() < MUT_PROB:
                 new_value = random.choice(list(individual.unused_cities))
+                new_value = random.choice([city for city in list(individual.unused_cities) if city not in cities_notzero])
                 individual.unused_cities.add(individual[i])
                 individual[i] = new_value
                 individual.unused_cities.remove(new_value)
@@ -698,7 +702,7 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, double
     
     
     best_individual = hof[0]
-    best_individual_after = local.local_optimization(best_individual, total_double)
+    best_individual_after = local.local_optimization(best_individual, total_double, cities_notzero)
     # best_individual_after = hof[0]
     localmark=False if best_individual.fitness.values[0] == best_individual_after.fitness.values[0] else True
     output_display.output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, double_2D, counter, localmark,energy_2D,cost_2D, lock2)
