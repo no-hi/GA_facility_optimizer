@@ -101,6 +101,37 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, double
     
     # 全topでやるならunused_citiesかつtopから選ぶ
     def cxSet(ind1, ind2):
+        # 正しい個体の長さに修正するための呼び出し
+        def ensure_correct_length(individual, correct_length_inc, correct_length_trans):
+            combined = individual.inc_facility + individual.trans_facility
+            individual[:] = combined
+            # 焼却施設の長さ調整
+            if len(individual.inc_facility) > correct_length_inc:
+                print("不正なinc_facility長さを修正:", len(individual.inc_facility), "->", correct_length_inc)
+                individual.inc_facility = individual.inc_facility[:correct_length_inc]
+            elif len(individual.inc_facility) < correct_length_inc:
+                print("不正なinc_facility長さを修正:", len(individual.inc_facility), "->", correct_length_inc)
+                while len(individual.inc_facility) < correct_length_inc:
+                    new_value = random.choice([city for city in list(individual.unused_cities) if city not in cities_zero])
+                    individual.inc_facility.append(new_value)
+                    individual.unused_cities.remove(new_value)
+            # 中継施設の長さ調整
+            if len(individual.trans_facility) > correct_length_trans:
+                print("不正なtrans_facility長さを修正:", len(individual.trans_facility), "->", correct_length_trans)
+                individual.trans_facility = individual.trans_facility[:correct_length_trans]
+            elif len(individual.trans_facility) < correct_length_trans:
+                print("不正なtrans_facility長さを修正:", len(individual.trans_facility), "->", correct_length_trans)
+                while len(individual.trans_facility) < correct_length_trans:
+                    new_value = random.choice([city for city in list(individual.unused_cities) if city not in cities_zero])
+                    individual.trans_facility.append(new_value)
+                    individual.unused_cities.remove(new_value)
+            # 個体全体を再構築
+            individual[:] = individual.inc_facility + individual.trans_facility
+            individual.unused_cities = set(range(N_CITIES)) - set(individual)
+        ensure_correct_length(ind1, N_INC, N_TRANS)
+        ensure_correct_length(ind2, N_INC, N_TRANS)
+        
+        
         # 処理施設の遺伝子リストでの一様交叉
         common_inc = set(ind1.inc_facility) & set(ind2.inc_facility)
         unique_inc1 = [gene for gene in ind1.inc_facility if gene not in common_inc]
