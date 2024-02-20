@@ -151,7 +151,6 @@ if __name__ == '__main__':
         sys.stdout.flush()
         
         # 並列実行
-        pool = multiprocessing.Pool()
         with multiprocessing.Pool(processes=num_processes) as pool:
             flat_tasks = [task for sublist in distributed_tasks for task in sublist]
             results = pool.starmap(multi_task, [(task, current_time, output_directory, lock, cost_2D, counter, lock2) for task in flat_tasks])

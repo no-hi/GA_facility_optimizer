@@ -146,16 +146,18 @@ if __name__ == '__main__':
             for j in range(group_size):
                 if i + j < len(double_2D):
                     finish = double_2D[i + j]
-                    display_inc = i + j + N_INC_INITIAL
+                    display_inc = 10*(i + j) + N_INC_INITIAL
                     all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
-                    progress = [str(k + N_TRANS_INITIAL) if finish[k] else "@" for k in range(N_TRANS_MAX - N_TRANS_INITIAL + 1)]
+                    progress = [str(10*k + N_TRANS_INITIAL) if finish[k] else "@" for k in range((N_TRANS_MAX - N_TRANS_INITIAL + 1)//10)]
                     display = ",".join(progress)
                     completion_status = "完" if all_done else "  "  # "完"またはスペースを選択
                     line_part = f"焼却{display_inc:2} → [{display}]{completion_status}"
                     line_output.append(line_part)
             sys.stdout.write("  ".join(line_output) + "\n")  # スペースを1つに縮小
         sys.stdout.write(f"double({waste_name})\n")
+        sys.stdout.write(f"世代\n")
         sys.stdout.flush()
+        
         
         # 並列実行
         pool = multiprocessing.Pool()
