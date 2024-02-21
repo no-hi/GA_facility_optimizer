@@ -236,7 +236,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
                 else:
                     max_filled_N_INC = 0
                 # max_filled_N_INC = max((i for i in range(N_INC_INITIAL, N_INC_MAX + 1) if all(counter[j] == N_TRANS_MAX - N_TRANS_INITIAL + 1 for j in range(N_INC_INITIAL, i + 1))), default=0)
-                file.write(f"#inc[{N_INC_INITIAL}~{max_filled_N_INC}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
+                file.write(f"#inc[{N_INC_INITIAL}~{(max_filled_N_INC+N_INC_INITIAL//10)*10}]&trans[{N_TRANS_INITIAL}~{N_TRANS_MAX}]\n")
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_double_TRANS)}"\n')
                 file.write(f"double = {str(filtered_double_2D)}\n")
             # 自動git pull/push
