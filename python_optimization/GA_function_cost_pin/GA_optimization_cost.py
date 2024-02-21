@@ -26,7 +26,6 @@ TOUR_SIZE = input.TOUR_SIZE
 ELITE_SIZE = input.ELITE_SIZE
 UNIT_TRANS = input. UNIT_TRANS
 UNIT_TRANS2 = input.UNIT_TRANS2
-notlocal = input.notlocal
 restarting_output_directory = input.restarting_output_directory
 # TOP_N_CITIES = N_INC + N_TRANS +10          # ごみ量順位下限→ループ内で設定
 
@@ -518,10 +517,8 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, cost_2
             break
     
     best_individual = hof[0]
-    if notlocal == True:
-        best_individual_after = best_individual
-    if notlocal == False:
-        best_individual_after = local.local_optimization(best_individual, total_cost, cities_zero)
+    best_individual_after = local.local_optimization(best_individual, total_cost, cities_zero)
+    # best_individual_after = best_individual
     localmark=False if best_individual.fitness.values[0] == best_individual_after.fitness.values[0] else True
     output_display.output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, cost_2D, counter, localmark, lock2)
 
