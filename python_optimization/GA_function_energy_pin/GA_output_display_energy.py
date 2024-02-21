@@ -174,7 +174,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_in
             return shared_list
     
     with lock: # 共有化されたcost2Dやparallel.counterをいじるときはlockをかける
-        energy_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = energy_list
+        energy_2D[(N_INC-N_INC_INITIAL)//10][(N_TRANS-N_TRANS_INITIAL)//10] = energy_list
         counter[N_INC] += 1        
         all_conditions_met = False
         if counter[N_INC] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1:
@@ -182,7 +182,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_in
             # 時点N_INC以下のデータのみを抽出
             filtered_energy_2D = normal_energy_2D[:N_INC]
             with open(os.path.join(output_directory, f"GA_Graph({UNIT_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-                sequence = [i for i in range((N_INC_INITIAL, N_INC_MAX + 1)//10 + 1) if all(counter[j] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1 for j in range((N_INC_INITIAL, i + 1)//10 + 1))]
+                sequence = [i for i in range((N_INC_MAX - N_INC_INITIAL + 1)//10 + 1) if all(counter[j] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1 for j in range((i + 1 - N_INC_INITIAL)//10 + 1))]
                 if sequence:
                     max_filled_N_INC = max(sequence)
                 else:
@@ -192,7 +192,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_in
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
                 file.write(f"energy = {str(filtered_energy_2D)}\n")
             # 自動git pull/push
-            all_conditions_met = all(counter[i] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1 for i in range((N_INC + 1 - N_INC_INITIAL)//10 + 1))
+            all_conditions_met = all(counter[i] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1 for i in range(N_INC_INITIAL, N_INC_MAX + 1, 10))
             if all_conditions_met:
                 subprocess.run(["git", "pull"], check=False)
                 subprocess.run(["git", "add", "."], check=False)
