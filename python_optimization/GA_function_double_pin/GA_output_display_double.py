@@ -195,12 +195,12 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
 
         cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
         all_conditions_met = False
-        if counter[N_INC] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10:
+        if counter[N_INC] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1:
             normal_cost_2D = extract_list(cost_2D)
             # 時点N_INC以下のデータのみを抽出
             filtered_cost_2D = normal_cost_2D[:N_INC]
             with open(os.path.join(output_directory, f"GA_Graph({UNIT_cost_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-                sequence = [i for i in range((N_INC_INITIAL, N_INC_MAX + 1)//10) if all(counter[j] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 for j in range((N_INC_INITIAL, i + 1)//10))]
+                sequence = [i for i in range((N_INC_INITIAL, N_INC_MAX + 1)//10 + 1) if all(counter[j] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1 for j in range((N_INC_INITIAL, i + 1)//10 + 1))]
                 if sequence:
                     max_filled_N_INC = max(sequence)
                 else:
@@ -211,12 +211,12 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
         
         energy_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = energy_list
         all_conditions_met = False
-        if counter[N_INC] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10:
+        if counter[N_INC] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1:
             normal_energy_2D = extract_list(energy_2D)
             # 時点N_INC以下のデータのみを抽出
             filtered_energy_2D = normal_energy_2D[:N_INC]
             with open(os.path.join(output_directory, f"GA_Graph({UNIT_energy_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-                sequence = [i for i in range((N_INC_INITIAL, N_INC_MAX + 1)//10) if all(counter[j] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 for j in range((N_INC_INITIAL, i + 1)//10))]
+                sequence = [i for i in range((N_INC_INITIAL, N_INC_MAX + 1)//10 + 1) if all(counter[j] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1 for j in range((N_INC_INITIAL, i + 1)//10 + 1))]
                 if sequence:
                     max_filled_N_INC = max(sequence)
                 else:
@@ -232,7 +232,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
             # 時点N_INC以下のデータのみを抽出
             filtered_double_2D = normal_double_2D[:N_INC]
             with open(os.path.join(output_directory, f"GA_Graph({UNIT_double_TRANS}{waste_name}){current_time}.txt"), 'w', encoding="utf-8") as file:
-                sequence = [i for i in range((N_INC_INITIAL, N_INC_MAX + 1)//10) if all(counter[j] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 for j in range((N_INC_INITIAL, i + 1)//10))]
+                sequence = [i for i in range((N_INC_INITIAL, N_INC_MAX + 1)//10 + 1) if all(counter[j] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1 for j in range((N_INC_INITIAL, i + 1)//10 + 1))]
                 if sequence:
                     max_filled_N_INC = max(sequence)
                 else:
@@ -242,7 +242,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_double_TRANS)}"\n')
                 file.write(f"double = {str(filtered_double_2D)}\n")
             # 自動git pull/push
-            all_conditions_met = all(counter[i] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 for i in range((N_INC + 1 - N_INC_INITIAL)//10))
+            all_conditions_met = all(counter[i] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1 for i in range((N_INC + 1 - N_INC_INITIAL)//10 + 1))
             if all_conditions_met:
                 subprocess.run(["git", "pull"], check=False)
                 subprocess.run(["git", "add", "."], check=False)
@@ -264,7 +264,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
                         finish = double_2D[i + j]
                         display_inc = 10*(i + j) + N_INC_INITIAL
                         all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
-                        progress = [str(10*k + N_TRANS_INITIAL) if finish[k] else "@" for k in range((N_TRANS_MAX - N_TRANS_INITIAL + 1)//10)]
+                        progress = [str(10*k + N_TRANS_INITIAL) if finish[k] else "@" for k in range((N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1)]
                         display = ",".join(progress)
                         completion_status = "完" if all_done else "  "  # "完"またはスペースを選択
                         line_part = f"焼却{display_inc:2} → [{display}]{completion_status}"
