@@ -194,7 +194,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_TRANS)}"\n')
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
             # 自動git pull/push
-            all_conditions_met = all(counter[i] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1 for i in range((N_INC - N_INC_INITIAL + 1)//10 + 1))
+            all_conditions_met = all(counter[i] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1 for i in range(N_INC_INITIAL, N_INC_MAX + 1, 10))
             if all_conditions_met:
                 subprocess.run(["git", "pull"], check=False)
                 subprocess.run(["git", "add", "."], check=False)

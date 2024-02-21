@@ -194,7 +194,6 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
         counter[N_INC] += 1
 
         cost_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = cost_list
-        all_conditions_met = False
         if counter[N_INC] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1:
             normal_cost_2D = extract_list(cost_2D)
             # 時点N_INC以下のデータのみを抽出
@@ -210,7 +209,6 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
                 file.write(f"cost = {str(filtered_cost_2D)}\n")
         
         energy_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = energy_list
-        all_conditions_met = False
         if counter[N_INC] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1:
             normal_energy_2D = extract_list(energy_2D)
             # 時点N_INC以下のデータのみを抽出
@@ -242,7 +240,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_double_info, gen_in
                 file.write(f'foldername = "{str(waste_name)}{str(UNIT_double_TRANS)}"\n')
                 file.write(f"double = {str(filtered_double_2D)}\n")
             # 自動git pull/push
-            all_conditions_met = all(counter[i] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1 for i in range((N_INC + 1 - N_INC_INITIAL)//10 + 1))
+            all_conditions_met = all(counter[i] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1 for i in range(N_INC_INITIAL, N_INC_MAX + 1, 10))
             if all_conditions_met:
                 subprocess.run(["git", "pull"], check=False)
                 subprocess.run(["git", "add", "."], check=False)
