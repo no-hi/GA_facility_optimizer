@@ -174,7 +174,7 @@ def output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_energy_info, gen_in
             return shared_list
     
     with lock: # 共有化されたcost2Dやparallel.counterをいじるときはlockをかける
-        energy_2D[N_INC-N_INC_INITIAL][N_TRANS-N_TRANS_INITIAL] = energy_list
+        energy_2D[(N_INC-N_INC_INITIAL)//10][(N_TRANS-N_TRANS_INITIAL)//10] = energy_list
         counter[N_INC] += 1        
         all_conditions_met = False
         if counter[N_INC] == (N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1:
