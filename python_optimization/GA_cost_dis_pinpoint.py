@@ -104,8 +104,8 @@ if __name__ == '__main__':
                     if os.path.exists(filepath):
                         cost_list = read_costlist_from_file(filepath)
                         if cost_list is not None:
-                                cost_2D[n_inc-N_INC_INITIAL][n_trans-N_TRANS_INITIAL] = cost_list
-                                counter[n_inc] += 1
+                                cost_2D[(n_inc-N_INC_INITIAL)//10][(n_trans-N_TRANS_INITIAL)//10] = cost_list
+                                counter[10*n_inc] += 1
                                 # 不足fitness補充
                                 best_solutions[(n_inc, n_trans)] = sum(cost_list)
                                 

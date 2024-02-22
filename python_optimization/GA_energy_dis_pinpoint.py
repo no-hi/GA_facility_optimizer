@@ -6,9 +6,9 @@ from itertools import product
 import sys
 import subprocess
 import traceback
-import GA_function_energy.GA_input_energy as input
-import GA_function_energy.GA_optimization_energy as GA
-import GA_function_energy.GA_mail as mail
+import GA_function_energy_pin.GA_input_energy as input
+import GA_function_energy_pin.GA_optimization_energy as GA
+import GA_function_energy_pin.GA_mail as mail
 
 
 add_name = input.add_name
@@ -102,12 +102,12 @@ if __name__ == '__main__':
                 for n_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1, 10):
                     filepath = os.path.join(output_directory, f"{waste_name}_{n_inc}&{n_trans}.txt")
                     if os.path.exists(filepath):
-                        cost_list = read_costlist_from_file(filepath)
-                        if cost_list is not None:
-                                energy_2D[n_inc-N_INC_INITIAL][n_trans-N_TRANS_INITIAL] = cost_list
-                                counter[n_inc] += 1
+                        energy_list = read_costlist_from_file(filepath)
+                        if energy_list is not None:
+                                energy_2D[(n_inc-N_INC_INITIAL)//10][(n_trans-N_TRANS_INITIAL)//10] = energy_list
+                                counter[10*n_inc] += 1
                                 # 不足fitness補充
-                                best_solutions[(n_inc, n_trans)] = sum(cost_list)
+                                best_solutions[(n_inc, n_trans)] = sum(energy_list)
                                 
             # 中断入力時の未完了のタスク確認
             def check_completed_tasks(output_directory):
@@ -144,7 +144,7 @@ if __name__ == '__main__':
                     finish = energy_2D[i + j]
                     display_inc = 10*(i + j) + N_INC_INITIAL
                     all_done = all(finish)  # すべてのトランザクションが完了しているかチェック
-                    progress = [str(10*k + N_TRANS_INITIAL) if finish[k] else "@" for k in range((N_TRANS_MAX - N_TRANS_INITIAL + 1)//10 + 1)]
+                    progress = [str(10*k + N_TRANS_INITIAL) if finish[k] else "@" for k in range((N_TRANS_MAX + 1 - N_TRANS_INITIAL)//10 + 1)]
                     display = ",".join(progress)
                     completion_status = "完" if all_done else "  "  # "完"またはスペースを選択
                     line_part = f"焼却{display_inc:2} → [{display}]{completion_status}"

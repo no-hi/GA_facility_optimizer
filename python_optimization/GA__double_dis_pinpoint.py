@@ -6,9 +6,9 @@ from itertools import product
 import sys
 import subprocess
 import traceback
-import GA_function_double.GA_input_double as input
-import GA_function_double.GA_optimization_double as GA
-import GA_function_double.GA_mail as mail
+import GA_function_double_pin.GA_input_double as input
+import GA_function_double_pin.GA_optimization_double as GA
+import GA_function_double_pin.GA_mail as mail
 
 
 add_name = input.add_name
@@ -106,12 +106,12 @@ if __name__ == '__main__':
                 for n_trans in range(N_TRANS_INITIAL, N_TRANS_MAX + 1, 10):
                     filepath = os.path.join(output_directory, f"{waste_name}_{n_inc}&{n_trans}.txt")
                     if os.path.exists(filepath):
-                        cost_list = read_costlist_from_file(filepath)
-                        if cost_list is not None:
-                                double_2D[n_inc-N_INC_INITIAL][n_trans-N_TRANS_INITIAL] = cost_list
-                                counter[n_inc] += 1
+                        double_list = read_costlist_from_file(filepath)
+                        if double_list is not None:
+                                double_2D[(n_inc-N_INC_INITIAL)//10][(n_trans-N_TRANS_INITIAL)//10] = double_list
+                                counter[10*n_inc] += 1
                                 # 不足fitness補充
-                                best_solutions[(n_inc, n_trans)] = sum(cost_list)
+                                best_solutions[(n_inc, n_trans)] = sum(double_list)
                                 
             # 中断入力時の未完了のタスク確認
             def check_completed_tasks(output_directory):
