@@ -2,7 +2,7 @@ import os
 import re
 import datetime
 
-restarting_output_directory = "4.8sanpai1~10&0~20_20240202_132504"
+restarting_output_directory = "4.8kanen1~20&0~20_20240220_071752"
 
 # 正規表現を使用してフォルダ名から必要な情報を抽出
 match = re.match(r"(\d+\.\d+)([a-zA-Z]+)(\d+)~(\d+)&(\d+)~(\d+)_(\d{8}_\d{6})", restarting_output_directory)

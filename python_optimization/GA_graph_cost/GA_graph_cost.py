@@ -12,7 +12,7 @@ cost = input.cost
 
 horizon = "inc"
 ######################
-horizon = "trans"
+# horizon = "trans"
 N_INC_THRESHOLD = 1  # 以上生成
 N_TRANS_THRESHOLD = 0  # 以上生成
 ######################
