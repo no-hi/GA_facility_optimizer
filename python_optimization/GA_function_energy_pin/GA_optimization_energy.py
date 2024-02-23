@@ -96,7 +96,7 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, energy
     toolbox.register("repair", repair)
     
     # 全topでやるならunused_citiesかつtopから選ぶ
-    def cxSet(ind1, ind2, CX_PROB, N_CITIES):
+    def cxSet(ind1, ind2):
         # 焼却施設の一様交叉
         common_inc = set(ind1.inc_facility) & set(ind2.inc_facility)
         unique_inc1 = [gene for gene in ind1.inc_facility if gene not in common_inc]
