@@ -98,71 +98,49 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, cost_2
     toolbox.register("repair", repair)
     
     # 全topでやるならunused_citiesかつtopから選ぶ
-    def cxSet(ind1, ind2):
-        # 正しい個体の長さに修正するための呼び出し
-        def ensure_correct_length(individual, correct_length_inc, correct_length_trans):
-            combined = individual.inc_facility + individual.trans_facility
-            individual[:] = combined
-            # 焼却施設の長さ調整
-            if len(individual.inc_facility) > correct_length_inc:
-                print("不正なinc_facility長さを修正:", len(individual.inc_facility), "->", correct_length_inc)
-                individual.inc_facility = individual.inc_facility[:correct_length_inc]
-            elif len(individual.inc_facility) < correct_length_inc:
-                print("不正なinc_facility長さを修正:", len(individual.inc_facility), "->", correct_length_inc)
-                while len(individual.inc_facility) < correct_length_inc:
-                    new_value = random.choice([city for city in list(individual.unused_cities) if city not in cities_zero])
-                    individual.inc_facility.append(new_value)
-                    individual.unused_cities.remove(new_value)
-            # 中継施設の長さ調整
-            if len(individual.trans_facility) > correct_length_trans:
-                print("不正なtrans_facility長さを修正:", len(individual.trans_facility), "->", correct_length_trans)
-                individual.trans_facility = individual.trans_facility[:correct_length_trans]
-            elif len(individual.trans_facility) < correct_length_trans:
-                print("不正なtrans_facility長さを修正:", len(individual.trans_facility), "->", correct_length_trans)
-                while len(individual.trans_facility) < correct_length_trans:
-                    new_value = random.choice([city for city in list(individual.unused_cities) if city not in cities_zero])
-                    individual.trans_facility.append(new_value)
-                    individual.unused_cities.remove(new_value)
-            # 個体全体を再構築
-            individual[:] = individual.inc_facility + individual.trans_facility
-            individual.unused_cities = set(range(N_CITIES)) - set(individual)
-        ensure_correct_length(ind1, N_INC, N_TRANS)
-        ensure_correct_length(ind2, N_INC, N_TRANS)
-
-                
-        # 処理施設の遺伝子リストでの一様交叉
+    def cxSet(ind1, ind2, CX_PROB, N_CITIES):
+        # 焼却施設の一様交叉
         common_inc = set(ind1.inc_facility) & set(ind2.inc_facility)
         unique_inc1 = [gene for gene in ind1.inc_facility if gene not in common_inc]
         unique_inc2 = [gene for gene in ind2.inc_facility if gene not in common_inc]
         random.shuffle(unique_inc1)
         random.shuffle(unique_inc2)
-
-        for i in range(len(unique_inc1)):
+        # 交叉ポイントを決定
+        crossover_point = min(len(unique_inc1), len(unique_inc2))
+        # 交叉を実施
+        for i in range(crossover_point):
             if random.random() < CX_PROB:
                 unique_inc1[i], unique_inc2[i] = unique_inc2[i], unique_inc1[i]
-
-        ind1.inc_facility = sorted(list(common_inc) + unique_inc1)
-        ind2.inc_facility = sorted(list(common_inc) + unique_inc2)
-
-        # 中継施設の遺伝子リストでの一様交叉
+        # はみ出し部分の処理
+        extra_inc = unique_inc1[crossover_point:] + unique_inc2[crossover_point:]
+        # 最終的なリストの更新
+        ind1.inc_facility = sorted(list(common_inc) + unique_inc1[:crossover_point] + extra_inc)
+        ind2.inc_facility = sorted(list(common_inc) + unique_inc2[:crossover_point] + extra_inc)
+        
+        # 中継施設の一様交叉（焼却施設と同じ手順で処理）
         common_trans = set(ind1.trans_facility) & set(ind2.trans_facility)
         unique_trans1 = [gene for gene in ind1.trans_facility if gene not in common_trans]
         unique_trans2 = [gene for gene in ind2.trans_facility if gene not in common_trans]
         random.shuffle(unique_trans1)
         random.shuffle(unique_trans2)
-
-        for i in range(len(unique_trans1)):
+        # 交叉ポイントを決定
+        crossover_point_trans = min(len(unique_trans1), len(unique_trans2))
+        # 交叉を実施
+        for i in range(crossover_point_trans):
             if random.random() < CX_PROB:
                 unique_trans1[i], unique_trans2[i] = unique_trans2[i], unique_trans1[i]
-
-        ind1.trans_facility = sorted(list(common_trans) + unique_trans1)
-        ind2.trans_facility = sorted(list(common_trans) + unique_trans2)
-
+        # はみ出し部分の処理
+        extra_trans = unique_trans1[crossover_point_trans:] + unique_trans2[crossover_point_trans:]
+        # 最終的なリストの更新
+        ind1.trans_facility = sorted(list(common_trans) + unique_trans1[:crossover_point_trans] + extra_trans)
+        ind2.trans_facility = sorted(list(common_trans) + unique_trans2[:crossover_point_trans] + extra_trans)
+        
+        # 個体全体の更新と未使用都市の更新
         ind1[:] = ind1.inc_facility + ind1.trans_facility
         ind2[:] = ind2.inc_facility + ind2.trans_facility
         ind1.unused_cities = set(range(N_CITIES)) - set(ind1)
         ind2.unused_cities = set(range(N_CITIES)) - set(ind2)
-
+        
         return ind1, ind2
     toolbox.register("mate", cxSet)
 
@@ -517,8 +495,8 @@ def GA_optimization(N_INC, N_TRANS, current_time, output_directory, lock, cost_2
             break
     
     best_individual = hof[0]
-    best_individual_after = local.local_optimization(best_individual, total_cost, cities_zero)
-    # best_individual_after = best_individual
+    # best_individual_after = local.local_optimization(best_individual, total_cost, cities_zero)
+    best_individual_after = best_individual
     localmark=False if best_individual.fitness.values[0] == best_individual_after.fitness.values[0] else True
     output_display.output_info(N_INC, N_TRANS, N_IND, get_top_cities, total_cost_info, gen_info, sumgen, best_individual_after, start_time_count, current_time, output_directory, lock, cost_2D, counter, localmark, lock2)
 
